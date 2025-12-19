@@ -17,12 +17,12 @@
           <h3 class="footer-title">快速链接</h3>
           <ul class="footer-link-list">
             <li><router-link to="/" class="footer-link">首页</router-link></li>
-            <li><router-link to="/about" class="footer-link">关于我们</router-link></li>
-            <li><router-link to="/research" class="footer-link">项目进展</router-link></li>
-            <li><router-link to="/platform" class="footer-link">动态公告</router-link></li>
-            <li><router-link to="/news" class="footer-link">创新竞赛</router-link></li>
-            <li><router-link to="/education" class="footer-link">学习资料</router-link></li>
-            <li><router-link to="/join" class="footer-link">加入我们</router-link></li>
+            <li><router-link to="/info/about" class="footer-link">关于我们</router-link></li>
+            <li><router-link to="/info/research" class="footer-link">项目进展</router-link></li>
+            <li><router-link to="/info/news" class="footer-link">动态公告</router-link></li>
+            <li><router-link to="/info/platform" class="footer-link">创新竞赛</router-link></li>
+            <li><router-link to="/info/education" class="footer-link">学习资料</router-link></li>
+            <li><router-link to="/info/join" class="footer-link">加入我们</router-link></li>
           </ul>
         </div>
 

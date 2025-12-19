@@ -181,4 +181,124 @@ export const handlers = [
     })
   }),
 
+  // 5.创新竞赛接口
+  http.get('/api/platform/forum', ({ request }) => {
+    const url = new URL(request.url)
+    const limit = Number(url.searchParams.get('limit') || 10)
+
+    const role = url.searchParams.get('role')         // 如：建模 / 前端 / PPT/路演
+    const type = url.searchParams.get('type')         // wechat / qq / email / link
+    const deadlineBefore = url.searchParams.get('deadline_before') // YYYY-MM-DD
+    const q = (url.searchParams.get('q') || '').trim() // 搜索关键词：title/summary/roles/members
+
+    const all = [
+      {
+        id: "f-001",
+        title: "挑战杯校赛组队｜缺建模 / PPT / 路演",
+        summary: "题目偏“AI+教育”方向，计划本周内定题与分工，目标冲省赛。",
+        recruitRoles: ["建模", "PPT/路演"],
+        currentSize: 3,
+        targetSize: 5,
+        membersPreview: ["A", "B", "C"],
+        type: "wechat",
+        value: "bdis_teamup_01（备注：挑战杯）",
+        deadline: "2026-01-05",
+        link: "/forum/f-001",
+        coverUrl: "/static/news/news1.jpg",
+        order: 1
+      },
+      {
+        id: "f-002",
+        title: "互联网+ 项目组队｜缺前端（Vue）/ 后端（SpringBoot）",
+        summary: "已有产品方向与需求文档，想快速搭出可演示原型，欢迎能落地的同学。",
+        recruitRoles: ["前端", "后端"],
+        currentSize: 2,
+        targetSize: 4,
+        membersPreview: ["A", "B"],
+        type: "qq",
+        value: "789123456（进群备注：互联网+）",
+        deadline: "2026-01-12",
+        link: "/forum/f-002",
+        coverUrl: "/static/news/news2.jpg",
+        order: 2
+      },
+      {
+        id: "f-003",
+        title: "数学建模校赛｜缺写作 / 数据清洗",
+        summary: "希望有人负责论文写作与图表排版，数据部分已有人员负责，目标是拿校一冲省赛。",
+        recruitRoles: ["写作", "数据清洗"],
+        currentSize: 2,
+        targetSize: 3,
+        membersPreview: ["A", "B"],
+        type: "email",
+        value: "teamup@bdis.example.edu（主题写：建模组队）",
+        deadline: "2026-01-03",
+        link: "/forum/f-003",
+        coverUrl: "/static/news/news3.jpg",
+        order: 3
+      },
+      {
+        id: "f-004",
+        title: "蓝桥杯｜缺算法基础扎实同学（C/C++/Java）",
+        summary: "每周两次刷题复盘，主要冲省一，欢迎一起坚持训练。",
+        recruitRoles: ["算法"],
+        currentSize: 1,
+        targetSize: 2,
+        membersPreview: ["A"],
+        type: "wechat",
+        value: "bdis_algo_02（备注：蓝桥）",
+        deadline: "2026-02-20",
+        link: "/forum/f-004",
+        coverUrl: "/static/news/news4.jpg",
+        order: 4
+      },
+      {
+        id: "f-005",
+        title: "大创申报｜缺调研 / 材料撰写 / PPT",
+        summary: "方向是校园数据应用，想找认真靠谱同学一起把申报书写扎实。",
+        recruitRoles: ["调研", "材料撰写", "PPT/路演"],
+        currentSize: 2,
+        targetSize: 5,
+        membersPreview: ["A", "B"],
+        type: "link",
+        value: "https://example.com/join-team（填写表单后拉群）",
+        deadline: "2026-01-18",
+        link: "/forum/f-005",
+        coverUrl: "/static/news/news5.jpg",
+        order: 5
+      }
+    ]
+    // --- 过滤 ---
+    let filtered = [...all]
+
+    if (role) {
+      filtered = filtered.filter(p => (p.recruitRoles || []).some(r => String(r).includes(role)))
+    }
+
+    if (type) {
+      filtered = filtered.filter(p => p.type === type)
+    }
+
+    if (deadlineBefore) {
+      filtered = filtered.filter(p => (p.deadline || '') <= deadlineBefore)
+    }
+
+    if (q) {
+      filtered = filtered.filter(p => {
+        const text = `${p.title || ''} ${p.summary || ''} ${(p.recruitRoles || []).join(' ')} ${(p.membersPreview || []).join(' ')}`
+        return text.includes(q)
+      })
+    }
+
+
+    // 排序
+    const sorted = filtered.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+    return HttpResponse.json({
+      code: 0,
+      message: "ok",
+      data: sorted.slice(0, limit)
+    })
+  }),
+
 ];

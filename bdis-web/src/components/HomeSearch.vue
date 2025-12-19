@@ -29,6 +29,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Search, TopRight } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
 
 const input = ref('')
 // 热门搜索部分
@@ -44,7 +45,9 @@ const hotSearch = [
 ]
 
 // 搜索逻辑
+const router = useRouter()
 const SearchClick = () => {
+  router.push('/wip')
   console.log('search:', input.value)
 }
 

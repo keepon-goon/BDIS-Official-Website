@@ -69,7 +69,7 @@ const goDetail = id => router.push('/wip')//V2版本再做细节页面的增加
 
 </script>
 
-<style>
+<style scoped>
 .research {
   display: flex;
   flex-direction: column;
@@ -180,6 +180,12 @@ const goDetail = id => router.push('/wip')//V2版本再做细节页面的增加
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.5s ease;
+  transform-origin: center center;
+}
+
+.item-box:hover img {
+  transform: scale(1.06);
 }
 
 .more {

@@ -1,7 +1,7 @@
 <template>
   <div class="homeNews">
     <div class="homeNews-list">
-      <div class="homeNews-item" v-for="item in newsList" :key="item.order">
+      <div class="homeNews-item" v-for="item in newsList" :key="item.order" @click="goDetail(item.id)">
         <div class="homeNews-item-box">
           <div class="homeNews-item-box-left">
             <div class="homeNews-item-box-left-top">
@@ -38,7 +38,7 @@
         </div>
       </div>
     </div>
-    <div class="homeNews-item-more">
+    <div class="homeNews-item-more" @click="goMore">
       查看全部
     </div>
   </div>
@@ -48,8 +48,10 @@
 import axios from 'axios'
 import { onMounted, ref } from 'vue'
 import { Calendar, Collection } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
 
 const newsList = ref([])
+const router = useRouter()
 
 const categoryText = (cat) => {
   const map = {
@@ -70,6 +72,9 @@ onMounted(async () => {
     console.log('newsList接口请求失败', err)
   }
 })
+
+const goDetail = (id) => router.push('/wip')//V2版本再做细节页面
+const goMore = () => router.push('/wip')//V2版本再做细节页面
 </script>
 
 <style scoped>
@@ -93,6 +98,13 @@ onMounted(async () => {
   height: 140px;
   width: 100%;
   display: flex;
+  cursor: pointer;
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+
+.homeNews-item:hover {
+  box-shadow: 0 15px 15px 0 rgba(0, 0, 0, 0.08);
+  background-color: #FFFFFFDE;
 }
 
 .homeNews-item-box {
@@ -100,6 +112,7 @@ onMounted(async () => {
   box-sizing: border-box;
   width: 100%;
   padding: 8px 12px;
+
 }
 
 .homeNews-item-more {
@@ -110,6 +123,13 @@ onMounted(async () => {
   border-top: 1px solid #eee;
   background-color: #0C3D70;
   color: #FFFFFF;
+  cursor: pointer;
+  transition: background-color 0.5s ease color 0.5s ease;
+}
+
+.homeNews-item-more:hover {
+  background-color: rgb(236, 245, 255);
+  color: rgb(64, 158, 255);
 }
 
 .homeNews-item-box-left {
@@ -201,5 +221,11 @@ onMounted(async () => {
   height: 100%;
   display: block;
   object-fit: cover;
+  transition: transform 0.5s ease;
+  transform-origin: center center;
+}
+
+.homeNews-item:hover .homeNews-item-img {
+  transform: scale(1.06);
 }
 </style>
