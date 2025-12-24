@@ -300,5 +300,49 @@ export const handlers = [
       data: sorted.slice(0, limit)
     })
   }),
+// 6. 实验室团队成员接口
+  http.get('/api/lab/team', () => {
+    return HttpResponse.json({
+      code: 0,
+      message: "ok",
+      data: [
+        {
+          id: 1,
+          name: "丁祎",
+          role: "核心成员",
+          description: "介绍",
+          avatarUrl: ""
+        },
+        {
+          id: 2,
+          name: "郭墩权",
+          role: "核心成员",
+          description: "介绍",
+          avatarUrl: ""
+        },
+        {
+          id: 3,
+          name: "杨思琦",
+          role: "核心成员",
+          description: "介绍",
+          avatarUrl: ""
+        },
+        {
+          id: 4,
+          name: "朱玉洁",
+          role: "核心成员",
+          description: "介绍",
+          avatarUrl: ""
+        },
+        {
+          id: 5,
+          name: "李林芝",
+          role: "核心成员",
+          description: "介绍",
+          avatarUrl: ""
+        }
+      ]
+    });
+  }),
 
 ];
