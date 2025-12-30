@@ -345,4 +345,169 @@ export const handlers = [
       ]
     });
   }),
+  // 7. 学习资料接口
+   http.get('/api/resources', ({ request }) => {
+    const url = new URL(request.url)
+    const page = Number(url.searchParams.get('page') || 1)
+    const limit = Number(url.searchParams.get('limit') || 12)
+    const category = url.searchParams.get('category') || 'all'
+    const keyword = (url.searchParams.get('keyword') || '').trim().toLowerCase()
+
+    const allResources = [
+      {
+        id: 1,
+        title: 'Vue 3 官方文档中文版',
+        description: 'Vue 3 框架的完整中文文档，包含基础语法、组件、路由、状态管理等内容',
+        category: 'frontend',
+        link: 'https://cn.vuejs.org'
+      },
+      {
+        id: 2,
+        title: 'React 18 新特性详解',
+        description: '深入解析 React 18 的新特性，包括并发渲染、Suspense 等核心概念',
+        category: 'frontend',
+        link: 'https://react.dev'
+      },
+      {
+        id: 3,
+        title: 'Spring Boot 实战教程',
+        description: '从零开始学习 Spring Boot，包含项目搭建、配置、数据库集成等实战内容',
+        category: 'backend',
+        link: 'https://www.bilibili.com/video/BV1Lq4y1J77x/?spm_id_from=333.337.search-card.all.click'
+      },
+      {
+        id: 4,
+        title: 'MySQL 数据库从入门到精通',
+        description: 'SQL基础、事务、索引、SQL优化、锁、InnoDB存储引擎、日志、主从复制、分库分表、读写分离',
+        category: 'database',
+        link: 'https://www.bilibili.com/video/BV1Kr4y1i7ru/'
+      },
+      {
+        id: 5,
+        title: 'Python 机器学习入门视频',
+        description: '使用 Python 进行机器学习入门，包含数据处理、模型训练、评估等',
+        category: 'ai',
+        link: 'https://www.bilibili.com/video/BV17W42197Nm/?spm_id_from=333.337.search-card.all.click'
+      },
+      {
+        id: 6,
+        title: 'Git 入门教程',
+        description: 'Git 入门教程',
+        category: 'tools',
+        link: 'https://www.runoob.com/git/git-tutorial.html'
+      },
+      {
+        id: 7,
+        title: 'TypeScript 进阶指南',
+        description: 'TypeScript 高级类型、泛型、装饰器等进阶知识',
+        category: 'frontend',
+        link: 'https://www.typescriptlang.org'
+      },
+      {
+        id: 8,
+        title: 'Node.js 后端开发实战',
+        description: '使用 Node.js 开发 RESTful API，包含 Express、中间件、认证等内容',
+        category: 'backend',
+        link: 'https://www.bilibili.com/video/BV1a34y167AZ/?spm_id_from=333.337.search-card.all.click'
+      },
+      {
+        id: 9,
+        title: 'MongoDB 快速入门',
+        description: 'NoSQL 数据库 MongoDB 的基础操作、数据建模和查询优化',
+        category: 'database',
+        link: 'https://www.bilibili.com/video/BV1bJ411x7mq/?spm_id_from=333.337.search-card.all.click'
+      },
+
+      {
+        id: 10,
+        title: 'Docker 容器化部署指南',
+        description: 'Docker 容器技术、镜像构建、容器编排等 DevOps 实践',
+        category: 'tools',
+        link: 'https://www.docker.com'
+      },
+      {
+        id: 11,
+        title: 'Webpack 5 配置详解',
+        description: 'Webpack 5 模块打包、代码分割、优化配置等前端工程化内容',
+        category: 'frontend',
+        link: 'https://www.bilibili.com/video/BV14T4y1z7sw/?spm_id_from=333.337.search-card.all.click'
+      },
+      {
+        id: 12,
+        title: 'Redis 数据库实战',
+        description: 'Redis 数据结构、持久化、集群、缓存策略等高性能缓存实践',
+        category: 'database',
+        link: 'https://www.bilibili.com/video/BV1cr4y1671t/'
+      },
+      {
+        id: 13,
+        title: 'PyTorch 神经网络编程',
+        description: '使用 PyTorch 进行神经网络编程，从基础到高级应用',
+        category: 'ai',
+        link: 'https://www.bilibili.com/video/BV1c5yrBcEEX/?spm_id_from=333.337.search-card.all.click'
+      },
+      {
+        id: 14,
+        title: 'Postman API 测试工具使用',
+        description: 'Postman 工具的使用方法，包含 API 测试、Mock 服务、自动化测试',
+        category: 'tools',
+        link: 'https://www.postman.com'
+      },
+
+      {
+        id: 15,
+        title: 'CSS Grid 布局完全指南',
+        description: '现代 CSS Grid 布局系统，包含网格创建、对齐、响应式设计',
+        category: 'frontend',
+        link: 'https://www.cnblogs.com/abc-x/p/10258695.html'
+      },
+
+      {
+        id: 16,
+        title: '自然语言处理入门',
+        description: 'NLP 基础概念、文本预处理、词向量、文本分类等',
+        category: 'ai',
+        link: 'https://www.bilibili.com/video/BV1GByoBfE73/?spm_id_from=333.337.search-card.all.click'
+      },
+      {
+        id: 17,
+        title: 'VS Code 开发效率提升技巧',
+        description: 'VS Code 快捷键、插件推荐、调试技巧等提升开发效率的方法',
+        category: 'tools',
+        link: 'https://code.visualstudio.com'
+      }
+    ]
+
+    // 过滤分类
+    let filtered = category === 'all'
+      ? allResources
+      : allResources.filter(r => r.category === category)
+
+    // 搜索关键词
+    if (keyword) {
+      filtered = filtered.filter(r =>
+        r.title.toLowerCase().includes(keyword) ||
+        r.description.toLowerCase().includes(keyword)
+      )
+    }
+
+    // 排序（按 id 倒序）
+    const sorted = filtered.sort((a, b) => b.id - a.id)
+
+    // 分页
+    const start = (page - 1) * limit
+    const end = start + limit
+    const paginatedData = sorted.slice(start, end)
+
+    return HttpResponse.json({
+      code: 0,
+      message: "ok",
+      data: {
+        list: paginatedData,
+        total: sorted.length,
+        page: page,
+        limit: limit
+      }
+    })
+  }),
 ];
