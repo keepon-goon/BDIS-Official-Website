@@ -74,7 +74,8 @@ onMounted(async () => {
 })
 
 const goDetail = (id) => router.push('/wip')//V2版本再做细节页面
-const goMore = () => router.push('/wip')//V2版本再做细节页面
+//const goMore = () => router.push('/wip')//V2版本再做细节页面
+const goMore = () => router.push('/info/news')
 </script>
 
 <style scoped>

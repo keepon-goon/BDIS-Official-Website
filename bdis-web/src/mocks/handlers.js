@@ -510,4 +510,189 @@ export const handlers = [
       }
     })
   }),
+// 8. 公告通知接口
+ http.get('/api/announcements', ({ request }) => {
+    const url = new URL(request.url)
+    const page = Number(url.searchParams.get('page') || 1)
+    const limit = Number(url.searchParams.get('limit') || 10)
+    const category = url.searchParams.get('category') || 'all'
+
+    const allAnnouncements = [
+      {
+        id: 1,
+        title: "2026春季成员招新说明",
+        category: "recruit",
+        summary: "面向两江校区同学，欢迎关注大数据智能工作室。",
+        publishDate: "2026-02-20",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news1.jpg",
+        order: 1
+      },
+      {
+        id: 2,
+        title: "2月组会：大模型应用与官网开发实践分享",
+        category: "activity",
+        summary: "分享近期大模型应用与官网开发的实践体会。",
+        publishDate: "2026-02-15",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news2.jpg",
+        order: 2
+      },
+      {
+        id: 3,
+        title: "实验室官网测试版上线说明",
+        category: "notice",
+        summary: "官网处于测试阶段，部分页面与功能仍在建设与优化。",
+        publishDate: "2026-02-25",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news3.jpg",
+        order: 3
+      },
+      {
+        id: 4,
+        title: "创新竞赛与组队板块上线公告",
+        category: "contest",
+        summary: "集中展示赛事信息，支持发布和查询组队。",
+        publishDate: "2026-03-01",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news4.jpg",
+        order: 4
+      },
+      {
+        id: 5,
+        title: "企业合作数据标注项目招募成员",
+        category: "project_recruit",
+        summary: "企业数据标注项目报名中，提供实践证明与补贴。",
+        publishDate: "2026-03-05",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news5.jpg",
+        order: 5
+      },
+      {
+        id: 6,
+        title: "工作室技术分享会：Vue 3 实战经验",
+        category: "activity",
+        summary: "邀请资深开发者分享 Vue 3 在实际项目中的应用经验和最佳实践。",
+        publishDate: "2026-03-10",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news2.jpg",
+        order: 6
+      },
+      {
+        id: 7,
+        title: "2026年度创新创业大赛报名通知",
+        category: "contest",
+        summary: "工作室组织参加2026年度创新创业大赛，欢迎有想法有技术的同学报名。",
+        publishDate: "2026-03-12",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news4.jpg",
+        order: 7
+      },
+      {
+        id: 8,
+        title: "春季学期新成员欢迎会",
+        category: "recruit",
+        summary: "欢迎新加入工作室的成员，介绍工作室文化和未来发展方向。",
+        publishDate: "2026-03-15",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news1.jpg",
+        order: 8
+      },
+      {
+        id: 9,
+        title: "大数据技术前沿讲座通知",
+        category: "activity",
+        summary: "邀请行业专家进行大数据技术前沿讲座，探讨最新技术趋势。",
+        publishDate: "2026-03-18",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news2.jpg",
+        order: 9
+      },
+      {
+        id: 10,
+        title: "AI模型训练项目招募",
+        category: "project_recruit",
+        summary: "大语言模型训练项目需要更多成员参与，欢迎对AI感兴趣的同学加入。",
+        publishDate: "2026-03-20",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news5.jpg",
+        order: 10
+      },
+      {
+        id: 11,
+        title: "工作室月度总结会议",
+        category: "activity",
+        summary: "回顾本月工作成果，规划下月发展计划，加强团队协作。",
+        publishDate: "2026-03-22",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news2.jpg",
+        order: 11
+      },
+      {
+        id: 12,
+        title: "开源项目贡献者招募",
+        category: "project_recruit",
+        summary: "工作室开源项目需要更多贡献者，共同推动项目发展。",
+        publishDate: "2026-03-25",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news5.jpg",
+        order: 12
+      },
+      {
+        id: 13,
+        title: "技术博客写作活动",
+        category: "activity",
+        summary: "鼓励成员撰写技术博客，分享学习心得和项目经验。",
+        publishDate: "2026-03-28",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news2.jpg",
+        order: 13
+      },
+      {
+        id: 14,
+        title: "算法竞赛集训通知",
+        category: "contest",
+        summary: "为参加算法竞赛的同学组织集训，提升算法能力。",
+        publishDate: "2026-04-01",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news4.jpg",
+        order: 14
+      },
+      {
+        id: 15,
+        title: "工作室年度发展规划",
+        category: "notice",
+        summary: "公布工作室年度发展规划和目标，明确发展方向。",
+        publishDate: "2026-04-05",
+        link: "/info/news",
+        coverThumbUrl: "/static/news/news3.jpg",
+        order: 15
+      }
+    ]
+
+    // 过滤分类
+    let filtered = category === 'all' 
+      ? allAnnouncements 
+      : allAnnouncements.filter(a => a.category === category)
+
+    // 排序（按 order 倒序，即最新的在前）
+    const sorted = filtered.sort((a, b) => (b.order || 0) - (a.order || 0))
+
+    // 分页
+    const start = (page - 1) * limit
+    const end = start + limit
+    const paginatedData = sorted.slice(start, end)
+
+    return HttpResponse.json({
+      code: 0,
+      message: "ok",
+      data: {
+        list: paginatedData,
+        total: sorted.length,
+        page: page,
+        limit: limit
+      }
+    })
+  }),
+  
 ];
