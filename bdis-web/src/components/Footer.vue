@@ -76,7 +76,7 @@
       <div class="footer-bottom">
         <div class="footer-copyright">
           <p>© {{ currentYear }} 大数据智能工作室 (BDIS) 版权所有</p>
-          <p class="footer-beian">渝ICP备XXXXXXXX号-1</p>
+          <a class="footer-beian btn" href="https://beian.miit.gov.cn/#/Integrated/index">苏ICP备2026001180号-1</a>
         </div>
       </div>
     </div>

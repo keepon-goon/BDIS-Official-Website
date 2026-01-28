@@ -17,14 +17,14 @@
             <el-icon class="icon">
               <Position />
             </el-icon>
-            <span class="icon-word">招募角色：{{ (item.recruitRoles || []).join('、') || '—' }}
+            <span class="icon-word">招募角色：{{ (item.recruitRolesArray || []).join('、') || '—' }}
             </span>
           </div>
           <div class="item-row">
             <el-icon class="icon">
               <User />
             </el-icon>
-            <span class="icon-word">参与人员：{{ (item.members || []).join('、') || '—' }}
+            <span class="icon-word">参与人员：{{ (item.membersArray || []).join('、') || '—' }}
             </span>
           </div>
           <div class="item-progress">

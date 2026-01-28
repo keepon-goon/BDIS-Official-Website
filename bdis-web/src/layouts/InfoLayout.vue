@@ -66,5 +66,6 @@ const route = useRoute()
   color: #0C3D70;
   font-family: 'MiSans';
   font-weight: 600;
+  padding-right: 85px;
 }
 </style>

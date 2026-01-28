@@ -5,14 +5,19 @@
     <div class="news-container">
       <!-- 筛选标签 -->
       <div class="filter-section">
-        <el-radio-group v-model="selectedCategory" @change="handleCategoryChange" size="large">
-          <el-radio-button label="all">全部</el-radio-button>
-          <el-radio-button label="recruit">招新通告</el-radio-button>
-          <el-radio-button label="activity">活动组会</el-radio-button>
-          <el-radio-button label="notice">综合新闻</el-radio-button>
-          <el-radio-button label="contest">创新竞赛</el-radio-button>
-          <el-radio-button label="project_recruit">项目招募</el-radio-button>
-        </el-radio-group>
+        <div class="filter-group">
+          <button
+            v-for="category in categories"
+            :key="category.value"
+            type="button"
+            class="filter-button"
+            :class="{ active: selectedCategory === category.value }"
+            :aria-pressed="selectedCategory === category.value"
+            @click="handleCategoryChange(category.value)"
+          >
+            {{ category.label }}
+          </button>
+        </div>
       </div>
 
       <!-- 公告列表 - 卡片式布局 -->
@@ -91,6 +96,15 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
+const categories = [
+  { value: 'all', label: '全部' },
+  { value: 'recruit', label: '招新通告' },
+  { value: 'activity', label: '活动组会' },
+  { value: 'notice', label: '综合新闻' },
+  { value: 'contest', label: '创新竞赛' },
+  { value: 'project_recruit', label: '项目招募' }
+]
+
 // 分类文本映射
 const getCategoryText = (category) => {
   const map = {
@@ -142,7 +156,9 @@ const fetchAnnouncements = async () => {
 }
 
 // 分类改变
-const handleCategoryChange = () => {
+const handleCategoryChange = (category) => {
+  if (selectedCategory.value === category) return
+  selectedCategory.value = category
   currentPage.value = 1
   fetchAnnouncements()
 }
@@ -204,19 +220,36 @@ onMounted(() => {
   justify-content: center;
 }
 
-:deep(.el-radio-group) {
+.filter-group {
+  display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
+  justify-content: center;
 }
 
-:deep(.el-radio-button__inner) {
-  border-radius: 4px;
-  border-color: #dcdfe6;
+.filter-button {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid #d6dbe5;
+  background: #fff;
+  color: #0c3d70;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-:deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
-  background-color: #0c3d70;
+.filter-button:hover {
   border-color: #0c3d70;
+  box-shadow: 0 6px 14px rgba(12, 61, 112, 0.12);
+  transform: translateY(-1px);
+}
+
+.filter-button.active {
+  background: #0c3d70;
+  color: #fff;
+  border-color: #0c3d70;
+  box-shadow: 0 8px 16px rgba(12, 61, 112, 0.2);
 }
 
 .news-list {
@@ -401,9 +434,8 @@ onMounted(() => {
     margin-bottom: 24px;
   }
 
-  :deep(.el-radio-group) {
+  .filter-group {
     width: 100%;
-    justify-content: center;
   }
 }
 </style>
