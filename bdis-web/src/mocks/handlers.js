@@ -20,6 +20,11 @@ export const handlers = [
     });
   }),
 
+    // 招新简历上传（在线提交简历，发送至邮箱）
+  http.post('/api/join/resume', async () => {
+    return HttpResponse.json({ code: 0, message: 'ok' });
+  }),
+
   // 2. 首页轮播Banner接口
   http.get('/api/banner', () => {
     console.log('%c[MSW] 命中 /api/home/banners handler', 'color: red; font-weight: bold;')
