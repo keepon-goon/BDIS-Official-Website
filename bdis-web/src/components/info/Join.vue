@@ -88,7 +88,7 @@
           <h2 class="section-title">联系我们</h2>
           <div class="section-divider"></div>
         </div>
-        <div class="cta-card">
+        <div class="cta-card" id="registration">
           <div class="cta-text">
             <p class="cta-title">准备好了就出发</p>
             <p class="cta-desc">添加招新群或发送邮件，带上你想做的方向和作品链接。</p>
