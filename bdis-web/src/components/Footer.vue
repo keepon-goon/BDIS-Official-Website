@@ -45,7 +45,7 @@
             <el-icon class="contact-icon">
               <ChatDotRound />
             </el-icon>
-            <span class="contact-text">QQ群：935982021</span>
+            <span class="contact-text">QQ群：964412397</span>
           </div>
         </div>
 

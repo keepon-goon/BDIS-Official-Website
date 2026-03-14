@@ -101,7 +101,7 @@
             </div>
             <div class="cta-item">
               <span class="cta-label">QQ群号</span>
-              <span class="cta-value">935982021</span>
+              <span class="cta-value">964412397</span>
             </div>
             <div class="cta-item">
               <span class="cta-label">地点</span>
