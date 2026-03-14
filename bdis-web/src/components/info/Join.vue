@@ -81,6 +81,7 @@
             <p class="process-desc">{{ step.desc }}</p>
           </div>
         </div>
+        <p class="process-tip">建议提前了解感兴趣的方向、学一些基础；若不清楚如何准备，可加下方招新群或学长学姐 QQ 咨询。</p>        
       </div>
 
       <div class="join-section">
@@ -88,10 +89,10 @@
           <h2 class="section-title">联系我们</h2>
           <div class="section-divider"></div>
         </div>
-        <div class="cta-card">
+        <div class="cta-card" id="registration">
           <div class="cta-text">
             <p class="cta-title">准备好了就出发</p>
-            <p class="cta-desc">添加招新群或发送邮件，带上你想做的方向和作品链接。</p>
+            <p class="cta-desc">只需投递简历即可报名；如有疑问可加招新群或学长学姐 QQ 咨询。</p>
           </div>
           <div class="cta-info">
             <div class="cta-item">
@@ -100,23 +101,125 @@
             </div>
             <div class="cta-item">
               <span class="cta-label">QQ群号</span>
-              <span class="cta-value">935982021</span>
+              <span class="cta-value">964412397</span>
             </div>
             <div class="cta-item">
               <span class="cta-label">地点</span>
               <span class="cta-value">重庆理工大学 博园4号楼305</span>
             </div>
           </div>
-          <a class="cta-button" href="/工作室招新报名表.docx" download="工作室招新报名表.docx">
-            获取报名表
-          </a>
+          <div class="cta-buttons">
+            <a class="cta-button" href="/工作室招新报名表.docx" download="工作室招新报名表.docx">
+              获取报名表
+            </a>
+            <button type="button" class="cta-button cta-button-resume" @click="showResumeDialog = true">
+              在线提交简历
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- 在线提交简历弹窗 -->
+    <el-dialog
+      v-model="showResumeDialog"
+      title="在线提交简历"
+      width="420px"
+      :close-on-click-modal="false"
+      @close="resetResumeForm"
+    >
+      <p class="resume-dialog-desc">上传 Word 简历（.doc / .docx），提交后将发送至招新邮箱。</p>
+      <el-form label-width="80px" label-position="top">
+        <el-form-item label="简历文件" required>
+          <el-upload
+            ref="uploadRef"
+            :auto-upload="false"
+            :limit="1"
+            accept=".doc,.docx"
+            :on-change="onResumeFileChange"
+            :on-exceed="onResumeExceed"
+            :file-list="resumeFileList"
+          >
+            <template #trigger>
+              <el-button type="primary" plain>选择 Word 文件</el-button>
+            </template>
+          </el-upload>
+          <div v-if="resumeFile" class="resume-file-name">{{ resumeFile.name }}</div>
+        </el-form-item>
+        <el-form-item label="姓名（选填）">
+          <el-input v-model="resumeForm.name" placeholder="您的姓名" clearable />
+        </el-form-item>
+        <el-form-item label="邮箱（选填）">
+          <el-input v-model="resumeForm.email" placeholder="用于接收回复" clearable />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showResumeDialog = false">取消</el-button>
+        <el-button type="primary" :loading="resumeSubmitting" @click="submitResume">
+          提交并发送至邮箱
+        </el-button>
+      </template>
+    </el-dialog>
   </section>
 </template>
 
 <script setup>
+import { ref, reactive } from 'vue'
+import { ElMessage } from 'element-plus'
+import axios from 'axios'
+
+const showResumeDialog = ref(false)
+const resumeFileList = ref([])
+const resumeFile = ref(null)
+const resumeSubmitting = ref(false)
+const uploadRef = ref(null)
+const resumeForm = reactive({ name: '', email: '' })
+
+function onResumeFileChange(file) {
+  resumeFile.value = file.raw
+  resumeFileList.value = [file]
+}
+
+function onResumeExceed() {
+  ElMessage.warning('仅支持上传 1 个文件，请先移除当前文件再选择。')
+}
+
+function resetResumeForm() {
+  resumeFile.value = null
+  resumeFileList.value = []
+  resumeForm.name = ''
+  resumeForm.email = ''
+  uploadRef.value?.clearFiles()
+}
+
+async function submitResume() {
+  if (!resumeFile.value) {
+    ElMessage.warning('请先选择要上传的 Word 简历。')
+    return
+  }
+  const formData = new FormData()
+  formData.append('file', resumeFile.value)
+  if (resumeForm.name) formData.append('name', resumeForm.name)
+  if (resumeForm.email) formData.append('email', resumeForm.email)
+  resumeSubmitting.value = true
+  try {
+    const { data } = await axios.post('/api/join/resume', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    if (data?.code === 0) {
+      ElMessage.success('简历已提交，将发送至招新邮箱。')
+      showResumeDialog.value = false
+      resetResumeForm()
+    } else {
+      ElMessage.error(data?.message || '提交失败，请稍后重试。')
+    }
+  } catch (err) {
+    ElMessage.error(err?.response?.data?.message || '提交失败，请检查网络或联系管理员。')
+  } finally {
+    resumeSubmitting.value = false
+  }
+}
+
 const roles = [
   { icon: '🧩', title: '前端开发', desc: '官网与业务可视化页面搭建，提升交互与表达。', tags: ['Vue3', 'ECharts', 'UI'] },
   { icon: '⚙️', title: '后端开发', desc: '服务与接口设计，保障稳定性与可扩展。', tags: ['SpringBoot', 'API', '数据库'] },
@@ -126,46 +229,16 @@ const roles = [
   { icon: '🛠️', title: '工程保障', desc: '测试、部署、监控与发布流程，保证交付稳定。', tags: ['测试', 'CI/CD', '运维'] }
 ]
 
-
 const benefits = [
-  {
-    number: '01',
-    title: '真实项目体验',
-    desc: '从需求到上线，全流程参与，作品可展示。'
-  },
-  {
-    number: '02',
-    title: '稳定的成长节奏',
-    desc: '定期分享与复盘，导师/学长姐带你提速。'
-  },
-  {
-    number: '03',
-    title: '团队协作氛围',
-    desc: '明确分工+协作工具，像小型创业团队。'
-  }
+  { number: '01', title: '真实项目体验', desc: '从需求到上线，全流程参与，作品可展示。' },
+  { number: '02', title: '稳定的成长节奏', desc: '定期分享与复盘，导师/学长姐带你提速。' },
+  { number: '03', title: '团队协作氛围', desc: '明确分工+协作工具，像小型创业团队。' }
 ]
 
 const steps = [
-  {
-    step: '01',
-    title: '填写报名表',
-    desc: '基本信息 + 方向意向 + 作品链接。'
-  },
-  {
-    step: '02',
-    title: '简单沟通',
-    desc: '了解你的兴趣点与学习计划。'
-  },
-  {
-    step: '03',
-    title: '试做任务',
-    desc: '一个小任务，用来了解你的节奏。'
-  },
-  {
-    step: '04',
-    title: '正式加入',
-    desc: '进入项目组，开始一起做事。'
-  }
+  { step: '01', title: '投递简历', desc: '将简历投递至招新邮箱或通过本页在线提交即可，无其他硬性要求。' },
+  { step: '02', title: '简单沟通', desc: '了解你的兴趣点与学习计划。' },
+  { step: '03', title: '正式加入', desc: '进入项目组，开始一起做事。' }
 ]
 </script>
 
@@ -421,6 +494,15 @@ const steps = [
   line-height: 1.6;
 }
 
+.process-tip {
+  margin: 24px auto 0;
+  max-width: 640px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
 .cta-card {
   background: #fff;
   padding: 36px;
@@ -473,8 +555,14 @@ const steps = [
   font-size: 14px;
 }
 
+.cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
 .cta-button {
-  justify-self: center;
   padding: 12px 28px;
   border: none;
   border-radius: 999px;
@@ -483,12 +571,34 @@ const steps = [
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .cta-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(12, 61, 112, 0.25);
+}
+
+.cta-button-resume {
+  background: #1a5a8e;
+}
+
+.cta-button-resume:hover {
+  box-shadow: 0 8px 16px rgba(26, 90, 142, 0.3);
+}
+
+.resume-dialog-desc {
+  margin: 0 0 20px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.resume-file-name {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #0c3d70;
 }
 
 @media (max-width: 768px) {

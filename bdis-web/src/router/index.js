@@ -31,6 +31,22 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    // 如果有锚点，滚动到锚点位置
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth',
+        top: 100 // 距离顶部100px，避免被导航栏遮挡
+      }
+    }
+    // 如果有保存的位置（浏览器前进/后退），使用保存的位置
+    if (savedPosition) {
+      return savedPosition
+    }
+    // 否则滚动到顶部
+    return { top: 0 }
+  }
 })
 
 

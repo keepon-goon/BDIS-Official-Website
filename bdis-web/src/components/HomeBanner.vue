@@ -2,7 +2,12 @@
   <div class="home-banner">
     <el-carousel height="525px" :interval="10000" arrow="hover" indicator-position="outside">
       <el-carousel-item v-for="item in activeItems" :key="item.id">
-        <div class="banner-slide" :style="slideStyle(item.imageUrl)"></div>
+        <div 
+          class="banner-slide" 
+          :style="slideStyle(item.imageUrl)"
+          @click="handleBannerClick(item)"
+          :class="{ 'banner-clickable': isRecruitBanner(item) }"
+        ></div>
       </el-carousel-item>
     </el-carousel>
   </div>
@@ -11,6 +16,8 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // 接受父组件传入的数组
 const props = defineProps({
@@ -26,6 +33,21 @@ const activeItems = computed(() => {
   return lastItems
 })
 
+// 判断是否为招新图片
+const isRecruitBanner = (item) => {
+  return item.title && item.title.includes('招新')
+}
+
+// 处理轮播图点击
+const handleBannerClick = (item) => {
+  if (isRecruitBanner(item)) {
+    // 招新图片：跳转到加入我们页面的报名表模块
+    router.push('/info/join#registration')
+  } else {
+    // 其他图片：跳转到正在建设中页面
+    router.push('/wip')
+  }
+}
 
 //渲染图片
 const slideStyle = (url) => ({

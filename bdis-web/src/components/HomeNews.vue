@@ -73,7 +73,17 @@ onMounted(async () => {
   }
 })
 
-const goDetail = (id) => router.push('/wip')//V2版本再做细节页面
+const goDetail = (id) => {
+  // 找到对应的新闻项
+  const newsItem = newsList.value.find(item => item.id === id)
+  // 如果是招新通告，跳转到加入我们页面的报名表模块
+  if (newsItem && newsItem.category === 'recruit') {
+    router.push('/info/join#registration')
+  } else {
+    // 其他新闻：跳转到正在建设中页面
+    router.push('/wip')
+  }
+}
 //const goMore = () => router.push('/wip')//V2版本再做细节页面
 const goMore = () => router.push('/info/news')
 </script>

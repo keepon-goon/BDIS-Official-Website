@@ -116,7 +116,7 @@ const labInfo = ref({
     '近年来，成员在各类学科竞赛、科研项目及企业合作中取得了多项成果。',
   address: '重庆理工大学 博园4号楼305',
   email: '18862028557@163.com',
-  qqGroup: '93598021'
+  qqGroup: '964412397'
 })
 
 const teamMembers = ref([])
