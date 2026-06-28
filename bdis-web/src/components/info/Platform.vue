@@ -23,7 +23,7 @@
             <el-icon class="icon">
               <Position />
             </el-icon>
-            <span class="icon-word">招募角色：{{ (item.recruitRoles || []).join('、') || '—' }}
+            <span class="icon-word">招募角色：{{ (item.recruitRolesArray || []).join('、') || '—' }}
             </span>
           </div>
           <div class="item-row">
@@ -43,7 +43,7 @@
         <div class="item-box-middle">
         </div>
         <div class="item-box-right">
-          <img :src="item.coverUrl" :alt="item.name" />
+          <img :src="normalizeImageUrl(item.coverUrl)" :alt="item.name" loading="lazy" decoding="async" />
         </div>
       </div>
     </div>
@@ -56,6 +56,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { Calendar, Position, User } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import { normalizeImageUrl } from '@/utils/imageUrl'
 
 const source = ref([])
 
@@ -71,7 +72,7 @@ onMounted(async () => {
 })
 
 const router = useRouter()
-const goDetail = id => router.push('/wip')//V2版本再做细节页面的增加
+const goDetail = id => router.push('/info/forum/' + id)
 
 const post = () => router.push('/wip')//V2版本再做细节页面的增加
 
@@ -104,7 +105,7 @@ const post = () => router.push('/wip')//V2版本再做细节页面的增加
   background-color: #0C3D70;
   border-radius: 0px;
   font-family: "MiSans";
-  transition: background-color 0.5s ease color 0.5s ease;
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 .post:hover {

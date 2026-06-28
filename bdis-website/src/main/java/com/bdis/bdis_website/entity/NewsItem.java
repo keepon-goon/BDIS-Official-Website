@@ -1,6 +1,7 @@
 package com.bdis.bdis_website.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -13,8 +14,10 @@ public class NewsItem {
     private String title;
     private String category;
     private String summary;
+    private String content;
     private String publishDate;
     private String link;
     private String coverThumbUrl;
+    @TableField("`order`")
     private Integer order;
 }

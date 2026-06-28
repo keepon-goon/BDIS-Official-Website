@@ -11,7 +11,7 @@
             </div>
           </div>
           <div class="homeNews-item-box-right">
-            <img class="homeNews-item-img" :src="item.coverThumbUrl" :alt="item.title"></img>
+            <img class="homeNews-item-img" :src="normalizeImageUrl(item.coverThumbUrl)" :alt="item.title"></img>
           </div>
         </div>
       </div>
@@ -25,6 +25,7 @@
 <script setup>
 import axios from 'axios'
 import { onMounted, ref } from 'vue'
+import { normalizeImageUrl } from '@/utils/imageUrl'
 
 const newsList = ref([])
 

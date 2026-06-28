@@ -1,8 +1,15 @@
 <template>
   <div class="home-banner">
-    <el-carousel height="525px" :interval="10000" arrow="hover" indicator-position="outside">
-      <el-carousel-item v-for="item in activeItems" :key="item.id">
-        <div class="banner-slide" :style="slideStyle(item.imageUrl)"></div>
+    <el-carousel height="100%" :interval="10000" arrow="hover" indicator-position="outside">
+      <el-carousel-item v-for="(item, index) in activeItems" :key="item.id">
+        <img
+          class="banner-slide-img"
+          :src="normalizeImageUrl(item.imageUrl)"
+          :alt="item.title || 'BDIS banner'"
+          :loading="index === 0 ? 'eager' : 'lazy'"
+          :fetchpriority="index === 0 ? 'high' : 'low'"
+          decoding="async"
+        />
       </el-carousel-item>
     </el-carousel>
   </div>
@@ -10,7 +17,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { useRouter } from 'vue-router'
+import { normalizeImageUrl } from '@/utils/imageUrl'
 
 // 接受父组件传入的数组
 const props = defineProps({
@@ -20,18 +27,10 @@ const props = defineProps({
   }
 })
 
-// 对父组件传入的数组过滤
+// 对父组件传入的数组过�?
 const activeItems = computed(() => {
   const lastItems = props.items.filter(item => item.active !== false).sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
   return lastItems
-})
-
-
-//渲染图片
-const slideStyle = (url) => ({
-  backgroundImage: url ? `url(${url})` : 'none',
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
 })
 
 
@@ -43,9 +42,17 @@ const slideStyle = (url) => ({
   height: 100%;
 }
 
-.banner-slide {
+:deep(.el-carousel),
+:deep(.el-carousel__container) {
+  height: 100%;
+}
+
+.banner-slide-img {
   width: 100%;
   height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
   background-color: black;
 }
 

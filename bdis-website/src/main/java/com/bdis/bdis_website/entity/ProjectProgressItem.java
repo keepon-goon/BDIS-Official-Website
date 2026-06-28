@@ -1,6 +1,8 @@
 package com.bdis.bdis_website.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -11,7 +13,8 @@ import lombok.Data;
 @Data
 @TableName("projects")
 public class ProjectProgressItem {
-    private String id; // 项目主键ID，自增
+    @TableId(type = IdType.ASSIGN_ID)
+    private String id;
     private String name; // 项目名称（UI主标题）
     private String tagline; // 一句话副标题
     private String status; // 项目状态：recruiting/ongoing/paused/done

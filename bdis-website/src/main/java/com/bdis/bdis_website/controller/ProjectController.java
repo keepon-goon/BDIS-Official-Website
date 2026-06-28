@@ -5,6 +5,7 @@ import com.bdis.bdis_website.entity.ProjectProgressItem;
 import com.bdis.bdis_website.service.ProjectProgressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,5 +34,17 @@ public class ProjectController {
     ) {
         List<ProjectProgressItem> progressList = projectProgressService.getProjectProgressList(limit);
         return Result.success(progressList);
+    }
+
+    @GetMapping("/{id}")
+    public Result<ProjectProgressItem> getProjectDetail(@PathVariable String id) {
+        ProjectProgressItem item = projectProgressService.getById(id);
+        if (item != null) {
+            String roles = item.getRecruitRoles();
+            item.setRecruitRolesArray(roles != null && !roles.isEmpty() ? roles.split(",") : new String[0]);
+            String members = item.getMembers();
+            item.setMembersArray(members != null && !members.isEmpty() ? members.split(",") : new String[0]);
+        }
+        return Result.success(item);
     }
 }

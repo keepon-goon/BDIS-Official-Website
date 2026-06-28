@@ -47,7 +47,9 @@ const hotSearch = [
 // 搜索逻辑
 const router = useRouter()
 const SearchClick = () => {
-  router.push('/wip')
+  if (input.value.trim()) {
+    router.push({ path: '/search', query: { q: input.value.trim() } })
+  }
   console.log('search:', input.value)
 }
 
@@ -59,17 +61,19 @@ const hotWordClick = (label) => {
 
 <style scoped>
 .search-main {
-  height: 186px;
+  height: 100%;
+  min-height: 186px;
   width: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .search-input {
   display: flex;
-  height: 85px;
+  flex: 0 0 clamp(78px, 38%, 88px);
   padding: 12px;
-  margin: 0 0 0 30px;
+  margin: 0 0 0 clamp(18px, 2.4vw, 30px);
   box-sizing: border-box;
 }
 
@@ -93,7 +97,7 @@ const hotWordClick = (label) => {
   color: #FFFF;
   font-size: 16px;
   height: 65px;
-  width: 140px;
+  width: clamp(118px, 11vw, 140px);
   padding: 0 !important;
   margin: 0 !important;
   border-radius: 0px;
@@ -106,13 +110,17 @@ const hotWordClick = (label) => {
 
 /* 热门搜索部分 */
 .search-hot {
-  height: 101px;
-  width: 1014px;
+  flex: 1 1 auto;
+  width: 100%;
   display: flex;
+  min-height: 96px;
+  box-sizing: border-box;
+  padding-right: clamp(18px, 2.4vw, 30px);
 }
 
 .search-hot-left {
-  margin-left: 28px;
+  flex: 0 0 126px;
+  margin-left: clamp(18px, 2.4vw, 28px);
 }
 
 .search-hot-left h5 {
@@ -123,17 +131,19 @@ const hotWordClick = (label) => {
 
 
 .search-hot-right-list {
-  display: flex;
-  flex-wrap: wrap;
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(96px, 1fr));
+  align-content: start;
+  min-width: 0;
 }
 
 .search-hot-right-item {
-  width: 156px;
-  height: 18px;
+  min-width: 0;
+  height: 24px;
   font-size: 14px;
   font-weight: 400;
   margin-top: 11px;
-  margin-left: 0px;
   color: #554a4a76;
   display: flex;
   align-items: center;
@@ -150,5 +160,36 @@ const hotWordClick = (label) => {
   align-items: center;
   color: #0C3D70;
   font-weight: 800;
+}
+
+@media (max-width: 1180px) {
+  .search-hot-right-list {
+    grid-template-columns: repeat(4, minmax(96px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .search-main {
+    justify-content: flex-start;
+  }
+
+  .search-input {
+    margin-left: 0;
+  }
+
+  .search-hot {
+    flex-direction: column;
+    padding: 0 12px 14px;
+  }
+
+  .search-hot-left {
+    flex: none;
+    margin-left: 0;
+  }
+
+  .search-hot-right-list {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    row-gap: 4px;
+  }
 }
 </style>

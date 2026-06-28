@@ -37,7 +37,7 @@
         <div class="item-box-middle">
         </div>
         <div class="item-box-right">
-          <img :src="item.coverUrl" :alt="item.name" />
+          <img :src="normalizeImageUrl(item.coverUrl)" :alt="item.name" loading="lazy" decoding="async" />
         </div>
       </div>
     </div>
@@ -50,6 +50,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { Calendar, Position, User } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import { normalizeImageUrl } from '@/utils/imageUrl'
 
 const source = ref([])
 
@@ -65,7 +66,7 @@ onMounted(async () => {
 })
 
 const router = useRouter()
-const goDetail = id => router.push('/wip')//V2版本再做细节页面的增加
+const goDetail = id => router.push('/info/project/' + id)
 
 </script>
 

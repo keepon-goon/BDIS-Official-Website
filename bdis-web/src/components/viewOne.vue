@@ -43,9 +43,13 @@ onMounted(async () => {
 
 <style scoped>
 .home-one {
+  --home-search-height: clamp(186px, 11.2vw, 230px);
+
   display: grid;
-  grid-template-columns: 9.5fr 6.5fr;
-  height: 750px;
+  grid-template-columns: minmax(0, 9.5fr) minmax(420px, 6.5fr);
+  height: clamp(680px, 36.8vw, 755px);
+  width: 100%;
+  overflow: hidden;
 }
 
 .home-one-left,
@@ -53,13 +57,52 @@ onMounted(async () => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .home-one-left .banner {
-  flex: 0 0 450px;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .home-one-left .search {
-  flex: 1 1 auto;
+  flex: 0 0 var(--home-search-height);
+  min-height: 186px;
+}
+
+@media (max-width: 1180px) {
+  .home-one {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+
+  .home-one-left {
+    height: auto;
+  }
+
+  .home-one-right {
+    height: clamp(560px, 78vw, 720px);
+  }
+
+  .home-one-left .banner {
+    height: clamp(320px, 52vw, 560px);
+    flex: none;
+  }
+
+  .home-one-left .search {
+    flex: none;
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-one-left .banner {
+    height: clamp(240px, 58vw, 360px);
+  }
+
+  .home-one-right {
+    height: auto;
+  }
 }
 </style>

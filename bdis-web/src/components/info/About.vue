@@ -51,7 +51,9 @@
         </div>
         <div class="research-grid">
           <div class="research-card" v-for="direction in researchDirections" :key="direction.id">
-            <div class="research-icon">{{ direction.icon }}</div>
+            <el-icon class="research-icon">
+              <component :is="direction.icon" />
+            </el-icon>
             <h3 class="research-title">{{ direction.title }}</h3>
             <p class="research-desc">{{ direction.description }}</p>
           </div>
@@ -68,7 +70,7 @@
         <div class="team-grid" v-if="teamMembers.length > 0">
           <div class="team-card" v-for="member in teamMembers" :key="member.id">
             <div class="team-avatar">
-              <el-avatar :size="80" :src="member.avatarUrl">
+              <el-avatar :size="80" :src="normalizeImageUrl(member.avatarUrl)">
                 {{ member.name?.charAt(0) }}
               </el-avatar>
             </div>
@@ -104,9 +106,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, markRaw } from 'vue'
 import axios from 'axios'
-import { Location, Message, ChatDotRound } from '@element-plus/icons-vue'
+import {
+  Location,
+  Message,
+  ChatDotRound,
+  DataAnalysis,
+  Cpu,
+  Monitor,
+  Promotion
+} from '@element-plus/icons-vue'
+import { normalizeImageUrl } from '@/utils/imageUrl'
 
 
 const labInfo = ref({
@@ -125,25 +136,25 @@ const teamMembers = ref([])
 const researchDirections = ref([
   {
     id: 1,
-    icon: '📊',
+    icon: markRaw(DataAnalysis),
     title: '大数据管理与应用',
     description: '聚焦大数据采集、存储、处理与分析，构建智能数据管理平台'
   },
   {
     id: 2,
-    icon: '🤖',
+    icon: markRaw(Cpu),
     title: '大模型训练与应用',
     description: '探索大语言模型、多模态模型训练与应用实践'
   },
   {
     id: 3,
-    icon: '💻',
+    icon: markRaw(Monitor),
     title: '系统开发',
     description: '全栈开发实践，涵盖前端、后端、移动端开发'
   },
   {
     id: 4,
-    icon: '🚀',
+    icon: markRaw(Promotion),
     title: '创新创业',
     description: '以赛促学，参与各类创新创业竞赛与项目实践'
   }
@@ -321,7 +332,8 @@ onMounted(async () => {
 }
 
 .research-icon {
-  font-size: 48px;
+  font-size: 42px;
+  color: #0c3d70;
   margin-bottom: 16px;
 }
 

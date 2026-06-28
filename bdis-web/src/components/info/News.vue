@@ -30,7 +30,13 @@
         >
           <div class="card-left">
             <div class="card-image">
-              <img :src="item.coverThumbUrl" :alt="item.title" v-if="item.coverThumbUrl" />
+              <img
+                :src="normalizeImageUrl(item.coverThumbUrl)"
+                :alt="item.title"
+                v-if="item.coverThumbUrl"
+                loading="lazy"
+                decoding="async"
+              />
               <div class="image-placeholder" v-else>
                 <el-icon><Document /></el-icon>
               </div>
@@ -86,6 +92,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { Calendar, Document, ArrowRight } from '@element-plus/icons-vue'
+import { normalizeImageUrl } from '@/utils/imageUrl'
 
 const router = useRouter()
 
@@ -129,25 +136,26 @@ const getTagType = (category) => {
   return map[category] || ''
 }
 
-// 获取公告列表
+// 获取新闻列表
 const fetchAnnouncements = async () => {
   loading.value = true
   try {
     const params = {
-      page: currentPage.value,
-      limit: pageSize.value,
+      limit: 0,
     }
     if (selectedCategory.value !== 'all') {
       params.category = selectedCategory.value
     }
 
-    const res = await axios.get('/api/announcements', { params })
+    const res = await axios.get('/api/news', { params })
     if (res.data?.code === 0) {
-      announcements.value = res.data.data?.list || []
-      total.value = res.data.data?.total || 0
+      const allData = res.data.data || []
+      total.value = allData.length
+      const start = (currentPage.value - 1) * pageSize.value
+      announcements.value = allData.slice(start, start + pageSize.value)
     }
   } catch (err) {
-    console.error('获取公告列表失败', err)
+    console.error('获取新闻列表失败', err)
     announcements.value = []
     total.value = 0
   } finally {
@@ -193,8 +201,7 @@ const handlePageChange = () => {
 // }
 
 const handleItemClick = (item) => {
-  // 统一跳转到页面建设中
-  router.push({ name: 'wip' })
+  router.push('/info/news/' + item.id)
 }
 
 onMounted(() => {

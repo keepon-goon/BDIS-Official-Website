@@ -6,10 +6,7 @@ import com.bdis.bdis_website.entity.NewsItem;
 import com.bdis.bdis_website.service.NewsItemService;
 import com.bdis.bdis_website.common.Result;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -70,5 +67,10 @@ public class NewsController {
 
         // 返回成功结果
         return Result.success(newsList);
+    }
+
+    @GetMapping("/{id}")
+    public Result<NewsItem> getNewsDetail(@PathVariable Long id) {
+        return Result.success(newsItemService.getById(id));
     }
 }

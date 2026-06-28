@@ -1,5 +1,8 @@
 package com.bdis.bdis_website.config;
 
+import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler;
+import org.apache.ibatis.type.EnumTypeHandler;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,13 +11,8 @@ import org.springframework.context.annotation.Configuration;
 public class MyBatisEnumConfig {
     @Bean
     public ConfigurationCustomizer configurationCustomizer() {
-        return new ConfigurationCustomizer() {
-            @Override
-            public void customize(org.apache.ibatis.session.Configuration configuration) {
-                configuration.setDefaultEnumTypeHandler(
-                        org.apache.ibatis.type.EnumTypeHandler.class
-                );
-            }
+        return configuration -> {
+            configuration.setDefaultEnumTypeHandler(MybatisEnumTypeHandler.class);
         };
     }
 }

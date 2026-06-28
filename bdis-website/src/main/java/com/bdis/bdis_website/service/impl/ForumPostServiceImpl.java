@@ -15,13 +15,16 @@ public class ForumPostServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost
 
     @Override
     public List<ForumPost> getForumPosts(Integer limit) {
-        // 1. 设置默认limit（文档4.2：前端当前传5）
         limit = limit == null ? 5 : limit;
 
-        // 2. 查询条件：按排序升序，限制条数
         QueryWrapper<ForumPost> wrapper = new QueryWrapper<>();
-        wrapper.orderByAsc("sort_order").last("limit " + limit); // 限制返回条数
+        wrapper.orderByAsc("sort_order").last("limit " + limit);
 
-        return baseMapper.selectList(wrapper);
+        List<ForumPost> list = baseMapper.selectList(wrapper);
+        for (ForumPost post : list) {
+            String roles = post.getRecruitRoles();
+            post.setRecruitRolesArray(roles != null && !roles.isEmpty() ? roles.split(",") : new String[0]);
+        }
+        return list;
     }
 }

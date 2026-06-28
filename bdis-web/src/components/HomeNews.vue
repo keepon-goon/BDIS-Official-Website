@@ -1,7 +1,7 @@
 <template>
   <div class="homeNews">
     <div class="homeNews-list">
-      <div class="homeNews-item" v-for="item in newsList" :key="item.order" @click="goDetail(item.id)">
+      <div class="homeNews-item" v-for="item in newsList" :key="item.id" @click="goDetail(item.id)">
         <div class="homeNews-item-box">
           <div class="homeNews-item-box-left">
             <div class="homeNews-item-box-left-top">
@@ -33,7 +33,14 @@
             </div>
           </div>
           <div class="homeNews-item-box-right">
-            <img class="homeNews-item-img" :src="item.coverThumbUrl" :alt="item.title"></img>
+            <img
+              class="homeNews-item-img"
+              :src="normalizeImageUrl(item.coverThumbUrl)"
+              :alt="item.title"
+              loading="lazy"
+              fetchpriority="low"
+              decoding="async"
+            />
           </div>
         </div>
       </div>
@@ -49,6 +56,7 @@ import axios from 'axios'
 import { onMounted, ref } from 'vue'
 import { Calendar, Collection } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import { normalizeImageUrl } from '@/utils/imageUrl'
 
 const newsList = ref([])
 const router = useRouter()
@@ -73,7 +81,7 @@ onMounted(async () => {
   }
 })
 
-const goDetail = (id) => router.push('/wip')//V2版本再做细节页面
+const goDetail = (id) => router.push('/info/news/' + id)
 //const goMore = () => router.push('/wip')//V2版本再做细节页面
 const goMore = () => router.push('/info/news')
 </script>
@@ -87,16 +95,16 @@ const goMore = () => router.push('/info/news')
 }
 
 .homeNews-list {
-  /* height: calc(100% - 55px); */
-  height: 700px;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background-color: rgb(249, 249, 250);
 }
 
 .homeNews-item {
-  /* height: calc((100% - 0px) / 5); */
-  height: 140px;
+  flex: 1 1 0;
+  min-height: 0;
   width: 100%;
   display: flex;
   cursor: pointer;
@@ -117,7 +125,7 @@ const goMore = () => router.push('/info/news')
 }
 
 .homeNews-item-more {
-  height: 55px;
+  flex: 0 0 55px;
   line-height: 55px;
   width: 100%;
   text-align: center;
@@ -125,7 +133,7 @@ const goMore = () => router.push('/info/news')
   background-color: #0C3D70;
   color: #FFFFFF;
   cursor: pointer;
-  transition: background-color 0.5s ease color 0.5s ease;
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 .homeNews-item-more:hover {
@@ -155,7 +163,7 @@ const goMore = () => router.push('/info/news')
 }
 
 .homeNews-item-box-left-top {
-  height: 45px;
+  min-height: 45px;
   width: 100%;
   margin: 10px 0px 10px 0px;
   box-sizing: border-box;
@@ -163,6 +171,11 @@ const goMore = () => router.push('/info/news')
   font-size: 17px;
   font-weight: 500;
   font-family: "MiSans";
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .homeNews-item-box-left-foot {
@@ -228,5 +241,24 @@ const goMore = () => router.push('/info/news')
 
 .homeNews-item:hover .homeNews-item-img {
   transform: scale(1.06);
+}
+
+@media (max-width: 768px) {
+  .homeNews-list {
+    height: auto;
+  }
+
+  .homeNews-item {
+    flex: none;
+    min-height: 132px;
+  }
+
+  .homeNews-item-box-left {
+    padding: 0 14px 0 16px;
+  }
+
+  .homeNews-item-box-right {
+    width: 34%;
+  }
 }
 </style>

@@ -1,11 +1,19 @@
-<!-- src/App.vue -->
-<script setup>
-import { RouterView } from 'vue-router'
-import BaseLayout from './layouts/BaseLayout.vue'
-</script>
-
 <template>
-  <BaseLayout>
+  <template v-if="isAdminRoute">
     <RouterView />
-  </BaseLayout>
+  </template>
+  <template v-else>
+    <BaseLayout>
+      <RouterView />
+    </BaseLayout>
+  </template>
 </template>
+
+<script setup>
+import { computed } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
+import BaseLayout from './layouts/BaseLayout.vue'
+
+const route = useRoute()
+const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+</script>

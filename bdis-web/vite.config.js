@@ -13,8 +13,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8081', // 后端地址+端口（和你直接访问的一致）
-        changeOrigin: true, // 开启跨域代理（必加）
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+      },
+      '/uploads': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
       }
     }
   }

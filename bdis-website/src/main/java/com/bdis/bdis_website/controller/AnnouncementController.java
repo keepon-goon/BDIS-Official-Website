@@ -6,6 +6,7 @@ import com.bdis.bdis_website.entity.AnnouncementItem;
 import com.bdis.bdis_website.service.AnnouncementItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,6 +39,11 @@ public class AnnouncementController {
         resultData.put("limit", announcementPage.getSize()); // 每页条数
 
         return Result.success(resultData);
+    }
+
+    @GetMapping("/announcements/{id}")
+    public Result<AnnouncementItem> getAnnouncementDetail(@PathVariable Long id) {
+        return Result.success(announcementService.getById(id));
     }
 }
 

@@ -12,11 +12,12 @@
     <!-- 右：主菜单 + 搜索按钮 -->
     <div class="nav-right">
       <div class="nav-right-top">
-        <button><a href="https://www.cqut.edu.cn/">Unversity</a></button>
+        <button><a href="https://www.cqut.edu.cn/">University</a></button>
         <button><a href="https://cs.cqut.edu.cn/">School</a></button>
         <button><a href="https://www.tipdm.com/">Partners</a></button>
         <button><a href="/wip">Members</a></button>
-        <button><a href="/wip">EN</a></button>
+        <button class="lang-btn"><a href="/wip">EN</a></button>
+        <button class="admin-btn" @click="$router.push('/admin/login')"><a>Admin</a></button>
       </div>
       <div class="nav-right-foot">
         <el-menu mode="horizontal" :default-active="activeMain" class="nav-menu-right" :ellipsis="false"
@@ -25,7 +26,7 @@
             {{ item.label }}
           </el-menu-item>
         </el-menu>
-        <el-button circle class="nav-search-btn">
+        <el-button circle class="nav-search-btn" @click="handleSearch">
           <el-icon>
             <Search />
           </el-icon>
@@ -37,14 +38,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import logoImg from '../assets/logo.jpg'
-import router from '../router'
+import { useRouter, useRoute } from 'vue-router'
 
-const activeMain = ref('home')
+const router = useRouter()
+const route = useRoute()
 
-// 右侧菜单配置
 const mainMenus = [
   { index: 'home', label: '首页', path: "/" },
   { index: 'about', label: '关于我们', path: "/info/about" },
@@ -55,16 +56,20 @@ const mainMenus = [
   { index: 'join', label: '加入我们', path: "/info/join" },
 ]
 
-// 菜单点击
+const activeMain = computed(() => {
+  const path = route.path
+  if (path === '/') return 'home'
+  const matched = mainMenus.find(m => path.startsWith(m.path) && m.path !== '/')
+  return matched ? matched.index : 'home'
+})
+
 const handleMainSelect = (key) => {
-  activeMain.value = key
-  console.log('主菜单点击：', key)
-  const target = mainMenus.find(item => {
-    return item.index === key
-  })
-  if (target) {
-    router.push(target.path)
-  }
+  const target = mainMenus.find(item => item.index === key)
+  if (target) router.push(target.path)
+}
+
+const handleSearch = () => {
+  router.push('/search')
 }
 </script>
 
@@ -126,12 +131,20 @@ const handleMainSelect = (key) => {
   color: #23415A;
 }
 
-.nav-right-top button:last-child {
+.nav-right-top .lang-btn {
   background-color: #0C3D70;
 }
 
-.nav-right-top button:last-child a {
+.nav-right-top .lang-btn a {
   color: white;
+}
+
+.nav-right-top .admin-btn {
+  background-color: rgba(12, 61, 112, 0.2);
+}
+
+.nav-right-top .admin-btn a {
+  color: #0C3D70;
 }
 
 :deep(.el-button.is-circle) {

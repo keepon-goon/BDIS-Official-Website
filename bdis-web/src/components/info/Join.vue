@@ -43,7 +43,9 @@
         </div>
         <div class="role-grid">
           <div class="role-card" v-for="role in roles" :key="role.title">
-            <div class="role-icon">{{ role.icon }}</div>
+            <el-icon class="role-icon">
+              <component :is="role.icon" />
+            </el-icon>
             <h3 class="role-title">{{ role.title }}</h3>
             <p class="role-desc">{{ role.desc }}</p>
             <div class="role-tags">
@@ -91,7 +93,7 @@
         <div class="cta-card">
           <div class="cta-text">
             <p class="cta-title">准备好了就出发</p>
-            <p class="cta-desc">添加招新群或发送邮件，带上你想做的方向和作品链接。</p>
+            <p class="cta-desc">添加招新群或发送邮件，带上你想做的方向。</p>
           </div>
           <div class="cta-info">
             <div class="cta-item">
@@ -117,13 +119,23 @@
 </template>
 
 <script setup>
+import { markRaw } from 'vue'
+import {
+  Monitor,
+  Connection,
+  Operation,
+  TrendCharts,
+  Cpu,
+  Tools
+} from '@element-plus/icons-vue'
+
 const roles = [
-  { icon: '🧩', title: '前端开发', desc: '官网与业务可视化页面搭建，提升交互与表达。', tags: ['Vue3', 'ECharts', 'UI'] },
-  { icon: '⚙️', title: '后端开发', desc: '服务与接口设计，保障稳定性与可扩展。', tags: ['SpringBoot', 'API', '数据库'] },
-  { icon: '🧱', title: '数据工程', desc: '采集-清洗-入库链路与数据质量治理。', tags: ['ETL', 'Kafka', '质量'] },
-  { icon: '📈', title: '数据分析', desc: '指标体系与分析报告，把数据变成决策依据。', tags: ['统计', '可视化', '洞察'] },
-  { icon: '🧠', title: 'AI建模', desc: '机器学习/深度学习建模与评估，推进落地。', tags: ['Sklearn', 'PyTorch', '评估'] },
-  { icon: '🛠️', title: '工程保障', desc: '测试、部署、监控与发布流程，保证交付稳定。', tags: ['测试', 'CI/CD', '运维'] }
+  { icon: markRaw(Monitor), title: '前端开发', desc: '官网与业务可视化页面搭建，提升交互与表达。', tags: ['Vue3', 'ECharts', 'UI'] },
+  { icon: markRaw(Connection), title: '后端开发', desc: '服务与接口设计，保障稳定性与可扩展。', tags: ['SpringBoot', 'API', '数据库'] },
+  { icon: markRaw(Operation), title: '数据工程', desc: '采集-清洗-入库链路与数据质量治理。', tags: ['ETL', 'Kafka', '质量'] },
+  { icon: markRaw(TrendCharts), title: '数据分析', desc: '指标体系与分析报告，把数据变成决策依据。', tags: ['统计', '可视化', '洞察'] },
+  { icon: markRaw(Cpu), title: 'AI建模', desc: '机器学习/深度学习建模与评估，推进落地。', tags: ['Sklearn', 'PyTorch', '评估'] },
+  { icon: markRaw(Tools), title: '工程保障', desc: '测试、部署、监控与发布流程，保证交付稳定。', tags: ['测试', 'CI/CD', '运维'] }
 ]
 
 
@@ -149,7 +161,7 @@ const steps = [
   {
     step: '01',
     title: '填写报名表',
-    desc: '基本信息 + 方向意向 + 作品链接。'
+    desc: '基本信息 + 方向意向。'
   },
   {
     step: '02',
@@ -309,7 +321,8 @@ const steps = [
 }
 
 .role-icon {
-  font-size: 40px;
+  font-size: 42px;
+  color: #0c3d70;
   margin-bottom: 16px;
 }
 

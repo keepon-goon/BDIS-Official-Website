@@ -5,6 +5,7 @@ import com.bdis.bdis_website.entity.ForumPost;
 import com.bdis.bdis_website.service.ForumPostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,5 +26,15 @@ public class PlatformController {
     ) {
         List<ForumPost> posts = forumPostService.getForumPosts(limit);
         return Result.success(posts); // data直接返回数组，符合文档要求
+    }
+
+    @GetMapping("/forum/{id}")
+    public Result<ForumPost> getForumDetail(@PathVariable String id) {
+        ForumPost post = forumPostService.getById(id);
+        if (post != null) {
+            String roles = post.getRecruitRoles();
+            post.setRecruitRolesArray(roles != null && !roles.isEmpty() ? roles.split(",") : new String[0]);
+        }
+        return Result.success(post);
     }
 }
