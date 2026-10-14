@@ -2,7 +2,10 @@
   <div class="page-container">
     <div class="page-header">
       <h2>论坛帖子管理</h2>
-      <el-button type="primary" @click="handleAdd">新增帖子</el-button>
+      <div class="page-header-actions">
+        <el-button @click="openSortManager">整理排序</el-button>
+        <el-button type="primary" @click="handleAdd">新增帖子</el-button>
+      </div>
     </div>
 
     <el-card shadow="never">
@@ -34,8 +37,9 @@
           </template>
         </el-table-column>
         <el-table-column prop="sortOrder" label="排序" width="70" align="center" />
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
+            <el-button size="small" type="primary" plain @click="handleMoveToTop(row)">置顶</el-button>
             <el-button size="small" @click="handleEdit(row)">编辑</el-button>
             <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
@@ -125,14 +129,24 @@
           <el-input v-model="form.link" placeholder="请输入链接" />
         </el-form-item>
         <el-form-item label="排序">
-          <el-input-number v-model="form.sortOrder" :min="0" />
+          <el-input-number v-model="form.sortOrder" :min="0" :step="1" :precision="0" />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="submitLoading">确定</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="sortSubmitLoading">确定</el-button>
       </template>
     </el-dialog>
+
+    <SortOrderConflictDialog
+      v-model="sortConflictVisible"
+      :items="sortConflictItems"
+      :title="sortDialogTitle"
+      :description="sortDialogDescription"
+      :loading="sortSubmitLoading"
+      @confirm="confirmSortConflict"
+      @cancel="cancelSortConflict"
+    />
   </div>
 </template>
 
@@ -141,6 +155,8 @@ import { ref, reactive, onMounted } from 'vue'
 import axios from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import SortOrderConflictDialog from '@/components/admin/SortOrderConflictDialog.vue'
+import { useSortOrder } from '@/composables/useSortOrder'
 import { getUploadUrl, normalizeImageUrl } from '@/utils/imageUrl'
 
 const token = localStorage.getItem('adminToken')
@@ -155,7 +171,6 @@ const contactTypeMap = {
 }
 
 const loading = ref(false)
-const submitLoading = ref(false)
 const uploadLoading = ref(false)
 const tableData = ref([])
 const dialogVisible = ref(false)
@@ -177,6 +192,34 @@ const defaultForm = {
 }
 
 const form = reactive({ ...defaultForm })
+
+const {
+  sortConflictVisible,
+  sortConflictItems,
+  sortDialogTitle,
+  sortDialogDescription,
+  sortSubmitLoading,
+  startSortSubmit,
+  openSortManager,
+  moveToPosition,
+  confirmSortConflict,
+  cancelSortConflict
+} = useSortOrder({
+  tableData,
+  isEdit,
+  sortField: 'sortOrder',
+  baseUrl: '/api/admin/forum-posts',
+  headers,
+  getLabel: (item) => `${item?.title?.trim() || '未命名帖子'}（ID: ${item?.id ?? '新内容'}）`,
+  onSaved: (id) => {
+    form.id = id
+    isEdit.value = true
+  },
+  onSuccess: async () => {
+    dialogVisible.value = false
+    await fetchData()
+  }
+})
 
 const fetchData = async () => {
   loading.value = true
@@ -201,6 +244,8 @@ const handleEdit = (row) => {
   Object.assign(form, { ...row })
   dialogVisible.value = true
 }
+
+const handleMoveToTop = (row) => moveToPosition(row, 0)
 
 const beforeUpload = (file) => {
   const isImage = file.type.startsWith('image/')
@@ -234,26 +279,17 @@ const handleUploadError = (error) => {
 }
 
 const handleSubmit = async () => {
-  submitLoading.value = true
-  try {
-    const submitForm = {
-      ...form,
-      coverUrl: normalizeImageUrl(form.coverUrl)
-    }
-    if (isEdit.value) {
-      await axios.put(`/api/admin/forum-posts/${form.id}`, submitForm, { headers })
-      ElMessage.success('更新成功')
-    } else {
-      await axios.post('/api/admin/forum-posts', submitForm, { headers })
-      ElMessage.success('新增成功')
-    }
-    dialogVisible.value = false
-    fetchData()
-  } catch (e) {
-    ElMessage.error('操作失败')
-  } finally {
-    submitLoading.value = false
+  const submitForm = {
+    ...form,
+    coverUrl: normalizeImageUrl(form.coverUrl)
   }
+
+  await startSortSubmit({
+    submitForm,
+    saveItem: (payload) => isEdit.value
+      ? axios.put(`/api/admin/forum-posts/${payload.id}`, payload, { headers })
+      : axios.post('/api/admin/forum-posts', payload, { headers })
+  })
 }
 
 const handleDelete = (row) => {
@@ -288,5 +324,9 @@ onMounted(fetchData)
 .page-header h2 {
   margin: 0;
   color: #0C3D70;
+}
+.page-header-actions {
+  display: flex;
+  gap: 10px;
 }
 </style>

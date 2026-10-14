@@ -10,5 +10,9 @@ import java.util.List;
  */
 public interface ProjectProgressService extends IService<ProjectProgressItem> {
     List<ProjectProgressItem> getProjectProgressList(Integer limit);
+
+    boolean createAtTop(ProjectProgressItem item);
+
+    boolean moveToTop(String id);
 }
 

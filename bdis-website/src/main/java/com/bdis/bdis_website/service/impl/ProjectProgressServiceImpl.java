@@ -1,11 +1,13 @@
 package com.bdis.bdis_website.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bdis.bdis_website.entity.ProjectProgressItem;
 import com.bdis.bdis_website.mapper.ProjectProgressMapper;
 import com.bdis.bdis_website.service.ProjectProgressService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,6 +18,39 @@ import java.util.List;
 @Service
 public class ProjectProgressServiceImpl extends ServiceImpl<ProjectProgressMapper, ProjectProgressItem>
         implements ProjectProgressService {
+
+    @Override
+    @Transactional
+    public boolean createAtTop(ProjectProgressItem item) {
+        item.setSortOrder(0);
+        baseMapper.update(null, new UpdateWrapper<ProjectProgressItem>()
+                .ge("sort_order", 0)
+                .setSql("sort_order = sort_order + 1"));
+        return save(item);
+    }
+
+    @Override
+    @Transactional
+    public boolean moveToTop(String id) {
+        ProjectProgressItem item = getById(id);
+        if (item == null) {
+            return false;
+        }
+
+        int currentOrder = item.getSortOrder() == null ? 0 : item.getSortOrder();
+        if (currentOrder > 0) {
+            baseMapper.update(null, new UpdateWrapper<ProjectProgressItem>()
+                    .lt("sort_order", currentOrder)
+                    .setSql("sort_order = sort_order + 1"));
+            item.setSortOrder(0);
+            return updateById(item);
+        }
+        if (item.getSortOrder() == null) {
+            item.setSortOrder(0);
+            return updateById(item);
+        }
+        return true;
+    }
 
     @Override
     public List<ProjectProgressItem> getProjectProgressList(Integer limit) {

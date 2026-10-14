@@ -3,6 +3,7 @@ package com.bdis.bdis_website.controller.admin;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bdis.bdis_website.common.Result;
 import com.bdis.bdis_website.entity.NewsItem;
+import com.bdis.bdis_website.service.AdminSortService;
 import com.bdis.bdis_website.service.NewsItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,9 @@ public class AdminNewsController {
 
     @Autowired
     private NewsItemService newsItemService;
+
+    @Autowired
+    private AdminSortService adminSortService;
 
     @GetMapping
     public Result<List<NewsItem>> list(@RequestParam(required = false) String category) {
@@ -33,8 +37,28 @@ public class AdminNewsController {
 
     @PostMapping
     public Result<NewsItem> create(@RequestBody NewsItem item) {
-        newsItemService.save(item);
+        newsItemService.createAtTop(item);
         return Result.success(item);
+    }
+
+    @PutMapping("/reorder")
+    public Result<Void> reorder(@RequestBody List<String> orderedIds) {
+        boolean updated = adminSortService.reorder(
+                newsItemService,
+                orderedIds,
+                item -> String.valueOf(item.getId()),
+                (id, order) -> {
+                    NewsItem update = new NewsItem();
+                    update.setId(Long.valueOf(id));
+                    update.setOrder(order);
+                    return update;
+                });
+        return updated ? Result.success() : Result.fail("排序列表已变化，请刷新后重试");
+    }
+
+    @PutMapping("/{id}/top")
+    public Result<Void> moveToTop(@PathVariable Long id) {
+        return newsItemService.moveToTop(id) ? Result.success() : Result.fail("新闻不存在");
     }
 
     @PutMapping("/{id}")
