@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AdminResumeTest {
     @Autowired private MockMvc mvc;
     @Autowired private JwtUtil jwt;
+    @Autowired private com.bdis.bdis_website.mapper.ResumeSubmissionMapper submissions;
 
     private String auth() { return "Bearer " + jwt.generateToken(1L, "resume-test"); }
 
@@ -41,6 +42,26 @@ class AdminResumeTest {
                 .andExpect(jsonPath("$.data.recipient").value("test@example.com"));
         mvc.perform(put("/api/admin/resumes/settings").header("Authorization", auth()).contentType("application/json")
                 .content("{\"sendMode\":\"INVALID\",\"recipient\":\"bad\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void listsFilteredRecordsWithoutPrivateKeys() throws Exception {
+        var record = new com.bdis.bdis_website.entity.ResumeSubmission();
+        record.setName("后台列表测试");
+        record.setStudentNo("00000999");
+        record.setMailStatus(0);
+        record.setCreatedAt(java.time.LocalDateTime.now());
+        record.setSubmissionKey("a".repeat(64));
+        submissions.insert(record);
+        mvc.perform(get("/api/admin/resumes")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/admin/resumes").header("Authorization", auth()).param("studentNo", "00000999"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.list[0].id").value(record.getId().toString()))
+                .andExpect(jsonPath("$.data.list[0].fileAvailable").value(false))
+                .andExpect(jsonPath("$.data.list[0].submissionKey").doesNotExist())
+                .andExpect(jsonPath("$.data.list[0].wordKey").doesNotExist());
+        mvc.perform(get("/api/admin/resumes").header("Authorization", auth()).param("pageSize", "999"))
                 .andExpect(status().isBadRequest());
     }
 }

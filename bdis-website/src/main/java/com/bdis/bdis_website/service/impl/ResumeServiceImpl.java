@@ -174,6 +174,29 @@ public class ResumeServiceImpl implements ResumeService {
         return settings();
     }
 
+    @Override
+    public PageResult list(int page, int pageSize, String name, String studentNo, Integer mailStatus) {
+        if (page < 1 || pageSize < 1 || pageSize > 50 || (mailStatus != null && (mailStatus < 0 || mailStatus > 3)))
+            throw new ResumeException(400, "分页或邮件状态参数不正确");
+        if ((name != null && name.length() > 80) || (studentNo != null && studentNo.length() > 80))
+            throw new ResumeException(400, "搜索条件过长");
+        var query = new QueryWrapper<ResumeSubmission>();
+        if (name != null && !name.isBlank()) query.like("name", name.strip());
+        if (studentNo != null && !studentNo.isBlank()) query.like("student_no", studentNo.strip());
+        if (mailStatus != null) query.eq("mail_status", mailStatus);
+        query.orderByDesc("created_at", "id");
+        var result = submissions.selectPage(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(page, pageSize), query);
+        return new PageResult(result.getRecords().stream().map(this::adminView).toList(), result.getTotal(), page, pageSize);
+    }
+
+    private com.bdis.bdis_website.vo.ResumeAdminVO adminView(ResumeSubmission record) {
+        var result = new com.bdis.bdis_website.vo.ResumeAdminVO();
+        org.springframework.beans.BeanUtils.copyProperties(record, result);
+        result.setId(record.getId().toString());
+        result.setFileAvailable(record.getDocumentName() != null && storage.savedFileExists(record.getWordKey()) && storage.savedFileExists(record.getPdfKey()));
+        return result;
+    }
+
     @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
     public void recoverUncertainMail() {
         try {

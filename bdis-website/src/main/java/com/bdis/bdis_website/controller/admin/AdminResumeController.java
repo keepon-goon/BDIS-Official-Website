@@ -24,6 +24,13 @@ public class AdminResumeController {
         return Result.success(service.settings());
     }
 
+    @GetMapping
+    public Result<ResumeService.PageResult> list(@RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize, @RequestParam(required = false) String name,
+            @RequestParam(required = false) String studentNo, @RequestParam(required = false) Integer mailStatus) {
+        return Result.success(service.list(page, pageSize, name, studentNo, mailStatus));
+    }
+
     @PutMapping("/settings")
     public Result<ResumeSettingsVO> updateSettings(@jakarta.validation.Valid @RequestBody com.bdis.bdis_website.dto.ResumeSettingsDTO form) {
         return Result.success(service.updateSettings(form));

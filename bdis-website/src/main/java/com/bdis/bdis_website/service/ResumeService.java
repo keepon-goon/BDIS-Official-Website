@@ -12,6 +12,9 @@ public interface ResumeService {
     com.bdis.bdis_website.vo.ResumeSubmitVO confirm(String token);
     com.bdis.bdis_website.vo.ResumeSettingsVO settings();
     com.bdis.bdis_website.vo.ResumeSettingsVO updateSettings(com.bdis.bdis_website.dto.ResumeSettingsDTO form);
+    PageResult list(int page, int pageSize, String name, String studentNo, Integer mailStatus);
+
+    record PageResult(java.util.List<com.bdis.bdis_website.vo.ResumeAdminVO> list, long total, int page, int pageSize) { }
 
     record ResumeFile(byte[] bytes, String filename) { }
 }

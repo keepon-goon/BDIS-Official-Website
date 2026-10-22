@@ -115,6 +115,16 @@ public class ResumeStorageService {
         }
     }
 
+    public boolean savedFileExists(String key) {
+        if (key == null || !key.matches("[a-f0-9]{64}/[^/\\\\]+")) return false;
+        try {
+            int separator = key.indexOf('/');
+            return Files.isRegularFile(file(directory("submissions", key.substring(0, separator)), key.substring(separator + 1)));
+        } catch (ResumeException e) {
+            return false;
+        }
+    }
+
     public void deleteTemporary(Path directory) {
         if (directory == null || !(directory.startsWith(root.resolve("work"))
                 || directory.startsWith(root.resolve("previews")))) return;
