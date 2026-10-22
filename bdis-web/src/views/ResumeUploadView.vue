@@ -4,30 +4,21 @@
       <span>← 返回在线填表</span>
     </RouterLink>
 
-    <!-- 流程步骤条 -->
-    <div class="resume-step-bar">
-      <div class="step-item is-active">
-        <div class="step-number">1</div>
-        <div class="step-text">
-          <div class="step-title">上传 Word 原件</div>
-          <div class="step-desc">基本信息与本地排版原件</div>
-        </div>
+    <!-- Apple 风格分段进度指示条 -->
+    <div class="resume-step-indicator">
+      <div class="step-node is-active">
+        <span class="step-badge">1</span>
+        <span>上传 Word</span>
       </div>
-      <div class="step-connector"></div>
-      <div class="step-item">
-        <div class="step-number">2</div>
-        <div class="step-text">
-          <div class="step-title">排版预览与核对</div>
-          <div class="step-desc">格式核验与效果预览</div>
-        </div>
+      <span class="step-sep">›</span>
+      <div class="step-node">
+        <span class="step-badge">2</span>
+        <span>排版预览</span>
       </div>
-      <div class="step-connector"></div>
-      <div class="step-item">
-        <div class="step-number">3</div>
-        <div class="step-text">
-          <div class="step-title">正式确认提交</div>
-          <div class="step-desc">文档归档与投递登记</div>
-        </div>
+      <span class="step-sep">›</span>
+      <div class="step-node">
+        <span class="step-badge">3</span>
+        <span>确认提交</span>
       </div>
     </div>
 

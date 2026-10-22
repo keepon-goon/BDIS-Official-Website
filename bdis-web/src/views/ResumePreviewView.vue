@@ -1,29 +1,20 @@
 <template>
   <section class="resume-shell">
-    <!-- 流程步骤条 -->
-    <div class="resume-step-bar">
-      <div class="step-item is-done">
-        <div class="step-number">✓</div>
-        <div class="step-text">
-          <div class="step-title">在线填写信息</div>
-          <div class="step-desc">基本信息与个人陈述</div>
-        </div>
+    <!-- Apple 风格分段进度指示条 -->
+    <div class="resume-step-indicator">
+      <div class="step-node is-done">
+        <span class="step-badge">✓</span>
+        <span>在线填写</span>
       </div>
-      <div class="step-connector"></div>
-      <div class="step-item" :class="{ 'is-active': !resumeDraft.submission, 'is-done': resumeDraft.submission }">
-        <div class="step-number">{{ resumeDraft.submission ? '✓' : '2' }}</div>
-        <div class="step-text">
-          <div class="step-title">排版预览与核对</div>
-          <div class="step-desc">两页标准核验与照片合成</div>
-        </div>
+      <span class="step-sep">›</span>
+      <div class="step-node" :class="{ 'is-active': !resumeDraft.submission, 'is-done': resumeDraft.submission }">
+        <span class="step-badge">{{ resumeDraft.submission ? '✓' : '2' }}</span>
+        <span>排版预览</span>
       </div>
-      <div class="step-connector"></div>
-      <div class="step-item" :class="{ 'is-active': resumeDraft.submission }">
-        <div class="step-number">3</div>
-        <div class="step-text">
-          <div class="step-title">正式确认提交</div>
-          <div class="step-desc">文档归档与投递登记</div>
-        </div>
+      <span class="step-sep">›</span>
+      <div class="step-node" :class="{ 'is-active': resumeDraft.submission }">
+        <span class="step-badge">3</span>
+        <span>确认提交</span>
       </div>
     </div>
 
@@ -43,8 +34,10 @@
       <h1>核对报名表预览</h1>
       <p class="resume-lead">请核对全部内容与分页效果。你可以下载当前 Word 自行贴照，也可以上传照片合成后再次预览。</p>
       <el-alert title="如果无法显示，请检查是否开启了第三方下载插件（如IDM），建议将其暂时关闭" type="info" :closable="false" show-icon />
-      <p class="resume-filename">{{ preview.wordFilename }}</p>
-      <el-tag effect="plain" type="primary">{{ preview.sourceType === 'UPLOAD' ? '上传的 Word 原件' : preview.hasPhoto ? '已合成照片' : '照片留白' }}</el-tag>
+      <div class="resume-meta-bar">
+        <span class="resume-filename">{{ preview.wordFilename }}</span>
+        <el-tag effect="plain">{{ preview.sourceType === 'UPLOAD' ? '上传的 Word 原件' : preview.hasPhoto ? '已合成照片' : '照片留白' }}</el-tag>
+      </div>
       <el-alert v-if="errorText" :title="errorText" type="error" :closable="false" show-icon />
       <div class="resume-card resume-photo-panel" v-if="preview.sourceType === 'FORM'">
         <h2>证件照（可选）</h2>
