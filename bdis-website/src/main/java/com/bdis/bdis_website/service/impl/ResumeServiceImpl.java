@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
+import com.bdis.bdis_website.exception.ResumeException;
+import java.io.IOException;
 
 @Service
 public class ResumeServiceImpl implements ResumeService {
@@ -53,6 +55,19 @@ public class ResumeServiceImpl implements ResumeService {
                 storage.deleteTemporary(work);
             }
         });
+    }
+
+    @Override
+    public ResumeFile previewFile(String token, boolean pdf) {
+        var snapshot = storage.load(token);
+        String filename = snapshot.getDocumentName() + (pdf ? ".pdf" : ".docx");
+        try {
+            Path path = storage.file(storage.directory("previews", snapshot.getTokenHash()), filename);
+            if (!Files.isRegularFile(path)) throw new ResumeException(404, "预览文件不存在，请重新生成");
+            return new ResumeFile(Files.readAllBytes(path), filename);
+        } catch (IOException e) {
+            throw new ResumeException(503, "预览文件暂不可读，请稍后重试");
+        }
     }
 
     private ResumePreviewVO view(String token, ResumePreviewSnapshot snapshot) {

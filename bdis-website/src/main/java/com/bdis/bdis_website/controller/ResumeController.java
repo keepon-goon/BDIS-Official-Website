@@ -31,6 +31,12 @@ public class ResumeController {
         return Result.success(service.preview(form));
     }
 
+    @GetMapping("/previews/pdf")
+    public ResponseEntity<byte[]> pdf(@RequestHeader(value = "X-Resume-Preview-Token", required = false) String token) {
+        var file = service.previewFile(token, true);
+        return download(file.bytes(), file.filename(), true);
+    }
+
     public static ResponseEntity<byte[]> download(byte[] bytes, String filename, boolean pdf) {
         return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .header(HttpHeaders.CONTENT_DISPOSITION, (pdf ? ContentDisposition.inline() : ContentDisposition.attachment())
