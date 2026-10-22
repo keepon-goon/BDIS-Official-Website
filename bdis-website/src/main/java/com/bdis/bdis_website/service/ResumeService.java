@@ -7,6 +7,8 @@ public interface ResumeService {
     ResumePreviewVO preview(ResumeFormDTO form);
     ResumeFile previewFile(String token, boolean pdf);
     ResumePreviewVO photo(String token, org.springframework.web.multipart.MultipartFile photo);
+    ResumePreviewVO upload(com.bdis.bdis_website.dto.ResumeUploadDTO form,
+                           org.springframework.web.multipart.MultipartFile word, String sourceToken);
 
     record ResumeFile(byte[] bytes, String filename) { }
 }

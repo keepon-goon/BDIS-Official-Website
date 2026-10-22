@@ -35,6 +35,7 @@ class ResumePreviewIntegrationTest {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper json;
     @Autowired private ResumeStorageService storage;
+    @Autowired private com.bdis.bdis_website.service.ResumeDocumentService documents;
 
     @Test
     void createsRealTwoPageWordAndPdfWithPrivateSnapshot() throws Exception {
@@ -90,6 +91,36 @@ class ResumePreviewIntegrationTest {
     void rejectsInvalidFormWithoutGeneratingPreview() throws Exception {
         mvc.perform(post("/api/resume/previews").contentType("application/json").content("{}"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value(1));
+    }
+
+    @Test
+    void uploadsOriginalWordAndRejectsInvalidOrThreePageFiles() throws Exception {
+        byte[] original = documents.blankTemplate();
+        String response = mvc.perform(multipart("/api/resume/submit")
+                        .file(new MockMultipartFile("resume", "../原始文件名.docx", "application/octet-stream", original))
+                        .param("name", "离线测试").param("studentNo", "000001").param("phone", "13800000000"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.sourceType").value("UPLOAD"))
+                .andReturn().getResponse().getContentAsString();
+        String token = json.readTree(response).at("/data/previewToken").asText();
+        byte[] downloaded = mvc.perform(get("/api/resume/previews/word").header("X-Resume-Preview-Token", token))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
+        assertThat(downloaded).isEqualTo(original);
+        mvc.perform(multipart("/api/resume/previews/photo").file(picture(400, 600, Color.BLUE))
+                .header("X-Resume-Preview-Token", token)).andExpect(status().isBadRequest());
+        mvc.perform(multipart("/api/resume/submit")
+                        .file(new MockMultipartFile("resume", "假文件.docx", "application/octet-stream", new byte[]{1, 2, 3}))
+                        .param("name", "测试").param("studentNo", "001").param("phone", "13800000000"))
+                .andExpect(status().isBadRequest());
+        try (var document = new XWPFDocument(new java.io.ByteArrayInputStream(original)); var out = new ByteArrayOutputStream()) {
+            var run = document.createParagraph().createRun();
+            run.addBreak(org.apache.poi.xwpf.usermodel.BreakType.PAGE);
+            run.setText("超出的第三页");
+            document.write(out);
+            mvc.perform(multipart("/api/resume/submit")
+                            .file(new MockMultipartFile("resume", "三页.docx", "application/octet-stream", out.toByteArray()))
+                            .param("name", "测试").param("studentNo", "001").param("phone", "13800000000"))
+                    .andExpect(status().isUnprocessableEntity());
+        }
     }
 
     private MockMultipartFile picture(int width, int height, Color color) throws Exception {

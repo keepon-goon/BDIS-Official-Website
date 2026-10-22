@@ -132,4 +132,39 @@ public class ResumeServiceImpl implements ResumeService {
                 "FORM".equals(snapshot.getSourceType()) ? snapshot.isHasPhoto() : null,
                 snapshot.getDocumentName() + ".docx", snapshot.getDocumentName() + ".pdf");
     }
+
+    @Override
+    public ResumePreviewVO upload(com.bdis.bdis_website.dto.ResumeUploadDTO index,
+                                  org.springframework.web.multipart.MultipartFile upload, String sourceToken) {
+        if (upload.getSize() > 10L * 1024 * 1024) throw new ResumeException(413, "Word文档不能超过10MB");
+        String year = sourceToken == null || sourceToken.isBlank() ? documents.currentAcademicYear() : storage.load(sourceToken).getAcademicYear();
+        return conversions.execute(() -> {
+            byte[] bytes = documents.validateUpload(upload);
+            String token = storage.newToken();
+            String hash = storage.hash(token);
+            Path work = storage.directory("work", hash);
+            Files.createDirectory(work);
+            try {
+                var form = new ResumeFormDTO();
+                form.setName(index.getName().strip());
+                form.setStudentNo(index.getStudentNo().strip());
+                form.setPhone(index.getPhone().strip());
+                var snapshot = new ResumePreviewSnapshot();
+                snapshot.setForm(form);
+                snapshot.setTokenHash(hash);
+                snapshot.setSourceType("UPLOAD");
+                snapshot.setAcademicYear(year);
+                snapshot.setDocumentName(documents.documentName(form.getName(), form.getStudentNo(), year));
+                snapshot.setTemplateVersion("uploaded");
+                snapshot.setExpiresAt(clock.instant().plusSeconds(properties.getPreviewMinutes() * 60L));
+                Path word = storage.file(work, snapshot.getDocumentName() + ".docx");
+                Files.write(word, bytes);
+                conversions.convert(word);
+                storage.publish(work, snapshot);
+                return view(token, snapshot);
+            } finally {
+                storage.deleteTemporary(work);
+            }
+        });
+    }
 }

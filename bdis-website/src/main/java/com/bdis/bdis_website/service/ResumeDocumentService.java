@@ -117,6 +117,70 @@ public class ResumeDocumentService {
         }
     }
 
+    public byte[] validateUpload(org.springframework.web.multipart.MultipartFile upload) {
+        if (upload == null || upload.isEmpty()) throw new ResumeException(400, "请选择已填写的Word文档");
+        if (upload.getSize() > 10L * 1024 * 1024) throw new ResumeException(413, "Word文档不能超过10MB");
+        String name = upload.getOriginalFilename();
+        if (name == null || !name.toLowerCase(java.util.Locale.ROOT).endsWith(".docx"))
+            throw new ResumeException(400, "仅支持DOCX文件，请使用Word或WPS另存为.docx");
+        try {
+            byte[] bytes = upload.getBytes();
+            boolean documentFound = false;
+            boolean typesFound = false;
+            long total = 0;
+            int entries = 0;
+            try (var zip = new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(bytes))) {
+                java.util.zip.ZipEntry entry;
+                while ((entry = zip.getNextEntry()) != null) {
+                    String part = entry.getName().toLowerCase(java.util.Locale.ROOT);
+                    if (++entries > 1000 || part.contains("../") || part.contains("\\") || part.startsWith("/")
+                            || part.contains("vbaproject") || part.contains("/activex/") || part.contains("/embeddings/"))
+                        throw new ResumeException(400, "Word包含不支持的嵌入对象、宏或异常结构，请另存为普通DOCX");
+                    byte[] data = zip.readNBytes(20 * 1024 * 1024 + 1);
+                    total += data.length;
+                    if (data.length > 20 * 1024 * 1024 || total > 60L * 1024 * 1024)
+                        throw new ResumeException(400, "Word解压后过大，请压缩图片并减少内容后上传");
+                    if (part.equals("word/document.xml")) documentFound = true;
+                    if (part.equals("[content_types].xml")) {
+                        typesFound = true;
+                        if (new String(data, StandardCharsets.UTF_8).toLowerCase(java.util.Locale.ROOT).contains("macroenabled"))
+                            throw new ResumeException(400, "不支持包含宏的Word文档");
+                    }
+                    if (part.endsWith(".rels")) validateRelationships(data);
+                }
+            }
+            if (!documentFound || !typesFound) throw new ResumeException(400, "文件不是有效的DOCX文档");
+            try (var document = new XWPFDocument(new java.io.ByteArrayInputStream(bytes))) {
+                if (document.getDocument().getBody() == null) throw new ResumeException(400, "Word正文不存在");
+            }
+            return bytes;
+        } catch (ResumeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResumeException(400, "Word文件损坏、已加密或格式不受支持，请另存为DOCX后上传");
+        }
+    }
+
+    private void validateRelationships(byte[] xml) throws Exception {
+        var factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setXIncludeAware(false);
+        factory.setExpandEntityReferences(false);
+        factory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        var document = factory.newDocumentBuilder().parse(new java.io.ByteArrayInputStream(xml));
+        var relationships = document.getElementsByTagNameNS("*", "Relationship");
+        for (int i = 0; i < relationships.getLength(); i++) {
+            var relationship = (org.w3c.dom.Element) relationships.item(i);
+            if (!"External".equalsIgnoreCase(relationship.getAttribute("TargetMode"))) continue;
+            String type = relationship.getAttribute("Type");
+            String target = relationship.getAttribute("Target").toLowerCase(java.util.Locale.ROOT);
+            if (!type.endsWith("/hyperlink") || !(target.startsWith("https://") || target.startsWith("http://") || target.startsWith("mailto:")))
+                throw new ResumeException(400, "Word包含外部资源，请将照片直接嵌入文档后重新上传");
+        }
+    }
+
     private void setCell(XWPFTable table, int row, int column, String text, boolean narrative) {
         XWPFTableCell cell = table.getRow(row).getCell(column);
         while (cell.getParagraphs().size() > 1) cell.removeParagraph(1);
