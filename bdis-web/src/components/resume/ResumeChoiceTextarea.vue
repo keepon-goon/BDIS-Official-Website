@@ -73,130 +73,168 @@
           <!-- 初始状态居中字样 -->
           <span v-if="!choice" class="fluid-label label-initial">{{ yesLabel }}</span>
 
-          <!-- 压缩在左边缘时的凹形果冻质感液体（微波呼吸动效）与竖排标签 -->
+          <!-- 点击后压缩在左边缘时呈现的【更渐进的毛玻璃凹形液面】（微波呼吸动效）与竖排标签 -->
           <svg
             v-if="choice === 'no'"
             class="concave-liquid-svg svg-blue"
-            viewBox="0 0 44 124"
+            viewBox="0 0 46 124"
             preserveAspectRatio="none"
             aria-hidden="true"
           >
             <defs>
-              <linearGradient id="concaveBlueGrad" x1="1" y1="0" x2="0" y2="0">
-                <stop offset="0%" stop-color="#bae6fd" stop-opacity="0.8" />
-                <stop offset="35%" stop-color="#e0f2fe" stop-opacity="0.95" />
-                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="1" />
+              <!-- 渐进毛玻璃蓝调渐变（从透明自然过渡至柔蓝） -->
+              <linearGradient id="frostedBlueGrad" x1="1" y1="0" x2="0" y2="0">
+                <stop offset="0%" stop-color="#bae6fd" stop-opacity="0" />
+                <stop offset="25%" stop-color="#bae6fd" stop-opacity="0.32" />
+                <stop offset="60%" stop-color="#e0f2fe" stop-opacity="0.75" />
+                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.95" />
               </linearGradient>
+              <!-- 毛玻璃曲面微光边缘 -->
+              <linearGradient id="frostedBlueRimGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25" />
+                <stop offset="25%" stop-color="#7dd3fc" stop-opacity="0.8" />
+                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.9" />
+                <stop offset="75%" stop-color="#7dd3fc" stop-opacity="0.8" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.25" />
+              </linearGradient>
+              <filter id="softGlowBlue" x="-20%" y="-10%" width="140%" height="120%">
+                <feGaussianBlur stdDeviation="1" />
+              </filter>
             </defs>
+
+            <!-- 毛玻璃渐进光晕 -->
             <path
-              class="morphing-concave-path"
-              fill="url(#concaveBlueGrad)"
+              class="morphing-concave-halo"
+              fill="none"
+              stroke="url(#frostedBlueRimGrad)"
+              stroke-width="3"
+              filter="url(#softGlowBlue)"
+              opacity="0.35"
             >
               <animate
                 attributeName="d"
-                dur="2.8s"
+                dur="3.8s"
                 repeatCount="indefinite"
                 values="
-                  M 44 0 C 26 36, 26 88, 44 124 L 0 124 L 0 0 Z;
-                  M 44 0 C 22 42, 28 82, 44 124 L 0 124 L 0 0 Z;
-                  M 44 0 C 27 38, 24 86, 44 124 L 0 124 L 0 0 Z;
-                  M 44 0 C 26 36, 26 88, 44 124 L 0 124 L 0 0 Z
+                  M 46 0 C 30 38, 30 86, 46 124;
+                  M 46 0 C 27 42, 32 82, 46 124;
+                  M 46 0 C 31 36, 29 88, 46 124;
+                  M 46 0 C 30 38, 30 86, 46 124
                 "
                 calcMode="spline"
-                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
               />
             </path>
+
+            <!-- 凹形渐进毛玻璃主体 -->
+            <path
+              class="morphing-concave-path"
+              fill="url(#frostedBlueGrad)"
+            >
+              <animate
+                attributeName="d"
+                dur="3.8s"
+                repeatCount="indefinite"
+                values="
+                  M 46 0 C 30 38, 30 86, 46 124 L 0 124 L 0 0 Z;
+                  M 46 0 C 27 42, 32 82, 46 124 L 0 124 L 0 0 Z;
+                  M 46 0 C 31 36, 29 88, 46 124 L 0 124 L 0 0 Z;
+                  M 46 0 C 30 38, 30 86, 46 124 L 0 124 L 0 0 Z
+                "
+                calcMode="spline"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+              />
+            </path>
+
+            <!-- 柔和毛玻璃曲面高光棱线（仅 1.1px 纤细高光） -->
             <path
               class="morphing-concave-rim"
               fill="none"
-              stroke="#7dd3fc"
-              stroke-width="1.8"
+              stroke="url(#frostedBlueRimGrad)"
+              stroke-width="1.1"
               stroke-linecap="round"
             >
               <animate
                 attributeName="d"
-                dur="2.8s"
+                dur="3.8s"
                 repeatCount="indefinite"
                 values="
-                  M 44 0 C 26 36, 26 88, 44 124;
-                  M 44 0 C 22 42, 28 82, 44 124;
-                  M 44 0 C 27 38, 24 86, 44 124;
-                  M 44 0 C 26 36, 26 88, 44 124
+                  M 46 0 C 30 38, 30 86, 46 124;
+                  M 46 0 C 27 42, 32 82, 46 124;
+                  M 46 0 C 31 36, 29 88, 46 124;
+                  M 46 0 C 30 38, 30 86, 46 124
                 "
                 calcMode="spline"
-                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
               />
             </path>
           </svg>
           <span v-if="choice === 'no'" class="fluid-label label-compressed">{{ yesLabel }}</span>
         </button>
 
-        <!-- 初始状态：双向冲击晃动膜（柔缓多频谐波呼吸，上下两端严格锁定锚定，无任何气泡） -->
+        <!-- 初始状态：双向冲击隔断膜（换成更长且贯通全高的细线，严格 1px 细线，不粗糙，动作极其缓和呼吸） -->
         <div v-if="!choice" class="fixed-ends-membrane" aria-hidden="true">
-          <svg class="membrane-svg" viewBox="0 0 30 124" preserveAspectRatio="none">
+          <svg class="membrane-svg" viewBox="0 0 24 130" preserveAspectRatio="none">
             <defs>
               <linearGradient id="membraneGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.8" />
-                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.95" />
-                <stop offset="100%" stop-color="#22c55e" stop-opacity="0.8" />
+                <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.35" />
+                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#22c55e" stop-opacity="0.35" />
               </linearGradient>
             </defs>
 
-            <!-- 晃动柔光外晕（更舒缓的 2.6s 流体张力摆动） -->
+            <!-- 极细微柔光晕（仅 2.2px，动作放缓至 4.8s 优雅微澜） -->
             <path
               class="membrane-glow-path"
               fill="none"
               stroke="url(#membraneGrad)"
-              stroke-width="6.5"
+              stroke-width="2.2"
               stroke-linecap="round"
-              opacity="0.4"
+              opacity="0.25"
             >
               <animate
                 attributeName="d"
-                dur="2.6s"
+                dur="4.8s"
                 repeatCount="indefinite"
                 values="
-                  M 15 0 C 8 36, 22 88, 15 124;
-                  M 15 0 C 20 32, 10 92, 15 124;
-                  M 15 0 C 11 40, 19 84, 15 124;
-                  M 15 0 C 22 36, 8 88, 15 124;
-                  M 15 0 C 10 32, 20 92, 15 124;
-                  M 15 0 C 8 36, 22 88, 15 124
+                  M 12 0 C 10 38, 14 92, 12 130;
+                  M 12 0 C 13.5 35, 10.5 95, 12 130;
+                  M 12 0 C 11 42, 13 88, 12 130;
+                  M 12 0 C 14 38, 10 92, 12 130;
+                  M 12 0 C 10.5 35, 13.5 95, 12 130;
+                  M 12 0 C 12 42, 12 88, 12 130;
+                  M 12 0 C 10 38, 14 92, 12 130
                 "
                 calcMode="spline"
-                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
               />
             </path>
 
-            <!-- 晃动核心白色冲击膜（上下严格锁定在 15 0 与 15 124，如琴弦柔和振荡） -->
+            <!-- 核心纤细长线（严格 1.0px，顶天立地贯穿全高，去除两端圆圈阻断，线条更修长连贯） -->
             <path
               class="membrane-core-path"
               fill="none"
               stroke="#ffffff"
-              stroke-width="2.5"
-              stroke-linecap="round"
+              stroke-width="1.0"
+              stroke-linecap="square"
             >
               <animate
                 attributeName="d"
-                dur="2.6s"
+                dur="4.8s"
                 repeatCount="indefinite"
                 values="
-                  M 15 0 C 8 36, 22 88, 15 124;
-                  M 15 0 C 20 32, 10 92, 15 124;
-                  M 15 0 C 11 40, 19 84, 15 124;
-                  M 15 0 C 22 36, 8 88, 15 124;
-                  M 15 0 C 10 32, 20 92, 15 124;
-                  M 15 0 C 8 36, 22 88, 15 124
+                  M 12 0 C 10 38, 14 92, 12 130;
+                  M 12 0 C 13.5 35, 10.5 95, 12 130;
+                  M 12 0 C 11 42, 13 88, 12 130;
+                  M 12 0 C 14 38, 10 92, 12 130;
+                  M 12 0 C 10.5 35, 13.5 95, 12 130;
+                  M 12 0 C 12 42, 12 88, 12 130;
+                  M 12 0 C 10 38, 14 92, 12 130
                 "
                 calcMode="spline"
-                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
               />
             </path>
-
-            <!-- 上端严格固定锚栓点 -->
-            <circle cx="15" cy="1.5" r="2.5" fill="#ffffff" stroke="#94a3b8" stroke-width="1" />
-            <!-- 下端严格固定锚栓点 -->
-            <circle cx="15" cy="122.5" r="2.5" fill="#ffffff" stroke="#94a3b8" stroke-width="1" />
           </svg>
         </div>
 
@@ -216,60 +254,99 @@
           <!-- 初始状态居中字样 -->
           <span v-if="!choice" class="fluid-label label-initial">{{ noLabel }}</span>
 
-          <!-- 压缩在右边缘时的【凹形】（凹液面）果冻质感液体与竖排标签（带有呼吸微澜动效，柔和不突兀） -->
+          <!-- 点击后压缩在右边缘时的【更渐进的毛玻璃凹形液面】（带有呼吸微澜动效，柔和半透明过渡） -->
           <svg
             v-if="choice === 'yes'"
             class="concave-liquid-svg svg-green"
-            viewBox="0 0 44 124"
+            viewBox="0 0 46 124"
             preserveAspectRatio="none"
             aria-hidden="true"
           >
             <defs>
-              <linearGradient id="concaveGreenGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="#bbf7d0" stop-opacity="0.8" />
-                <stop offset="35%" stop-color="#dcfce7" stop-opacity="0.95" />
-                <stop offset="100%" stop-color="#dcfce7" stop-opacity="1" />
+              <!-- 渐进毛玻璃绿调渐变（从透明自然过渡至柔绿） -->
+              <linearGradient id="frostedGreenGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#bbf7d0" stop-opacity="0" />
+                <stop offset="25%" stop-color="#bbf7d0" stop-opacity="0.32" />
+                <stop offset="60%" stop-color="#dcfce7" stop-opacity="0.75" />
+                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.95" />
               </linearGradient>
+              <!-- 毛玻璃曲面微光边缘 -->
+              <linearGradient id="frostedGreenRimGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25" />
+                <stop offset="25%" stop-color="#86efac" stop-opacity="0.8" />
+                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.9" />
+                <stop offset="75%" stop-color="#86efac" stop-opacity="0.8" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.25" />
+              </linearGradient>
+              <filter id="softGlowGreen" x="-20%" y="-10%" width="140%" height="120%">
+                <feGaussianBlur stdDeviation="1" />
+              </filter>
             </defs>
-            <!-- 凹形液面主体（左侧向右内凹，动态微澜起伏，优雅自然） -->
+
+            <!-- 毛玻璃渐进光晕 -->
             <path
-              class="morphing-concave-path"
-              fill="url(#concaveGreenGrad)"
+              class="morphing-concave-halo"
+              fill="none"
+              stroke="url(#frostedGreenRimGrad)"
+              stroke-width="3"
+              filter="url(#softGlowGreen)"
+              opacity="0.35"
             >
               <animate
                 attributeName="d"
-                dur="2.8s"
+                dur="3.8s"
                 repeatCount="indefinite"
                 values="
-                  M 0 0 C 18 36, 18 88, 0 124 L 44 124 L 44 0 Z;
-                  M 0 0 C 22 42, 16 82, 0 124 L 44 124 L 44 0 Z;
-                  M 0 0 C 17 38, 20 86, 0 124 L 44 124 L 44 0 Z;
-                  M 0 0 C 18 36, 18 88, 0 124 L 44 124 L 44 0 Z
+                  M 0 0 C 16 38, 16 86, 0 124;
+                  M 0 0 C 19 42, 14 82, 0 124;
+                  M 0 0 C 15 36, 17 88, 0 124;
+                  M 0 0 C 16 38, 16 86, 0 124
                 "
                 calcMode="spline"
-                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
               />
             </path>
-            <!-- 凹形微光边缘线 -->
+
+            <!-- 凹形渐进毛玻璃主体（左侧向右内凹，渐进羽化，高雅自然） -->
+            <path
+              class="morphing-concave-path"
+              fill="url(#frostedGreenGrad)"
+            >
+              <animate
+                attributeName="d"
+                dur="3.8s"
+                repeatCount="indefinite"
+                values="
+                  M 0 0 C 16 38, 16 86, 0 124 L 46 124 L 46 0 Z;
+                  M 0 0 C 19 42, 14 82, 0 124 L 46 124 L 46 0 Z;
+                  M 0 0 C 15 36, 17 88, 0 124 L 46 124 L 46 0 Z;
+                  M 0 0 C 16 38, 16 86, 0 124 L 46 124 L 46 0 Z
+                "
+                calcMode="spline"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+              />
+            </path>
+
+            <!-- 柔和毛玻璃曲面高光棱线（仅 1.1px 纤细高光） -->
             <path
               class="morphing-concave-rim"
               fill="none"
-              stroke="#86efac"
-              stroke-width="1.8"
+              stroke="url(#frostedGreenRimGrad)"
+              stroke-width="1.1"
               stroke-linecap="round"
             >
               <animate
                 attributeName="d"
-                dur="2.8s"
+                dur="3.8s"
                 repeatCount="indefinite"
                 values="
-                  M 0 0 C 18 36, 18 88, 0 124;
-                  M 0 0 C 22 42, 16 82, 0 124;
-                  M 0 0 C 17 38, 20 86, 0 124;
-                  M 0 0 C 18 36, 18 88, 0 124
+                  M 0 0 C 16 38, 16 86, 0 124;
+                  M 0 0 C 19 42, 14 82, 0 124;
+                  M 0 0 C 15 36, 17 88, 0 124;
+                  M 0 0 C 16 38, 16 86, 0 124
                 "
                 calcMode="spline"
-                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
               />
             </path>
           </svg>
@@ -364,7 +441,7 @@ function reset() {
   display: flex;
 }
 
-/* 输入框无缝集成于左侧画布，右侧留白保证文字与绿色凹面试剂交融而不重叠 */
+/* 输入框无缝集成于左侧画布，右侧留白保证文字与毛玻璃凹面试剂交融而不重叠 */
 .underlay-input-wrap {
   width: 100%;
   height: 100%;
@@ -481,7 +558,7 @@ function reset() {
   display: flex;
 }
 
-/* 试剂色块：更柔缓高级的流体惯性过渡 (0.88s cubic-bezier(0.16, 1, 0.3, 1))，动作丝滑柔润，告别干脆单调 */
+/* 试剂色块：更柔缓高级的流体惯性过渡 (0.88s cubic-bezier(0.16, 1, 0.3, 1))，动作丝滑柔润 */
 .fluid-side,
 .fluid-side:focus,
 .fluid-side:focus-visible,
@@ -536,13 +613,13 @@ function reset() {
 }
 
 /* 选择蓝色状态：
-   1. 蓝色自身颜色以 0.75s 柔缓淡出消失（透明），平滑自然露出输入框
-   2. 绿色体积柔缓压缩至右边缘（约 44px）
-   3. 绿色试剂呈优雅【凹形】（concave），并在微澜中轻柔呼吸，与输入框自然衔接
+   1. 蓝色自身颜色柔缓淡出消失（透明），平滑自然露出输入框
+   2. 绿色体积柔缓压缩至右边缘（约 46px）
+   3. 绿色试剂呈优雅【渐进毛玻璃凹形】，配合 backdrop-filter 光学模糊与半透明渐变
    4. 颜色保持柔和淡绿，不加深
 */
 .reagent-choice-card.state-yes .side-blue {
-  width: calc(100% - 44px);
+  width: calc(100% - 46px);
   background: transparent !important;
   pointer-events: none;
 }
@@ -553,24 +630,26 @@ function reset() {
 }
 
 .reagent-choice-card.state-yes .side-green {
-  width: 44px;
+  width: 46px;
   background: transparent !important;
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
   cursor: pointer;
   pointer-events: auto;
 }
 
 .reagent-choice-card.state-yes .side-green:hover .concave-liquid-svg {
-  filter: brightness(1.04);
+  filter: brightness(1.05);
 }
 
 /* 选择绿色状态：
    1. 绿色试剂不消失，舒缓展开铺满右侧（绿色保留）
-   2. 蓝色以 0.88s 柔缓压缩至最左侧（约 44px）
-   3. 蓝色试剂呈凹形果冻弹性过渡，颜色保持原淡蓝色不加深
+   2. 蓝色以 0.88s 柔缓压缩至最左侧（约 46px）
+   3. 蓝色试剂呈渐进毛玻璃凹形微澜过渡，颜色保持原淡蓝色不加深
    4. 彻底消除点击产生的黑色焦点外框
 */
 .reagent-choice-card.state-no .side-green {
-  width: calc(100% - 44px);
+  width: calc(100% - 46px);
   background: transparent !important;
   pointer-events: none;
 }
@@ -581,17 +660,19 @@ function reset() {
 }
 
 .reagent-choice-card.state-no .side-blue {
-  width: 44px;
+  width: 46px;
   background: transparent !important;
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
   cursor: pointer;
   pointer-events: auto;
 }
 
 .reagent-choice-card.state-no .side-blue:hover .concave-liquid-svg {
-  filter: brightness(1.04);
+  filter: brightness(1.05);
 }
 
-/* 凹形矢量试剂背景（呼吸微澜动效，柔和淡入） */
+/* 渐进毛玻璃凹形矢量试剂背景（呼吸微澜动效，柔和淡入） */
 .concave-liquid-svg {
   position: absolute;
   inset: 0;
@@ -656,13 +737,13 @@ function reset() {
   color: #15803d;
 }
 
-/* 初始状态：上下两端均固定的动态冲击隔断膜（无气泡） */
+/* 初始状态：贯穿全高更长且极细的动态冲击隔断膜（长线、严格 1px 细线、动作缓和至 4.8s、无气泡） */
 .fixed-ends-membrane {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: -1px;
+  bottom: -1px;
   left: 50%;
-  width: 30px;
+  width: 24px;
   transform: translateX(-50%);
   z-index: 5;
   pointer-events: none;
@@ -691,7 +772,7 @@ function reset() {
   z-index: 25;
 }
 
-/* 左侧破口外喷（图二左侧区域喷出） */
+/* 左侧破口外喷 */
 .spray-left {
   left: -2px;
 }
