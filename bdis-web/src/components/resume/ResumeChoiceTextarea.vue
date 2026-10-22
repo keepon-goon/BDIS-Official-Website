@@ -55,218 +55,249 @@
         </div>
       </div>
 
-      <!-- 顶层流体试剂交互层 -->
-      <!-- A. 初始状态：蓝绿两色直接贴合无缝咬合（无中间任何白色部分，鼠标放上去后各自全区域完整加深） -->
-      <div v-if="!choice" class="initial-fluid-stage">
-        <svg class="initial-s-svg" viewBox="0 0 1000 124" preserveAspectRatio="none">
-          <!-- 蓝色区域：完整覆盖左半侧直至 S 曲线边界，与绿色直接贴合（无白色），鼠标悬浮全区域完整加深 -->
-          <path
-            class="initial-fluid-path path-blue"
-            :class="{ 'is-hovered': isHoverBlue }"
-            @mouseenter="isHoverBlue = true"
-            @mouseleave="isHoverBlue = false"
-            @click="onSideClick('yes')"
-          >
-            <animate
-              attributeName="d"
-              dur="4.5s"
-              repeatCount="indefinite"
-              values="
-                M 0 0 L 500 0 C 524 34, 476 90, 500 124 L 0 124 Z;
-                M 0 0 L 500 0 C 530 36, 470 88, 500 124 L 0 124 Z;
-                M 0 0 L 500 0 C 520 32, 480 92, 500 124 L 0 124 Z;
-                M 0 0 L 500 0 C 524 34, 476 90, 500 124 L 0 124 Z
-              "
-              calcMode="spline"
-              keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-            />
-          </path>
+      <!-- 顶层流体试剂交互层：保持元素常驻以维持 0.88s 果冻质感压缩过渡动效 -->
+      <div class="fluid-interaction-layer">
+        <!-- 蓝色试剂侧 (有 / 小露一手)：
+             未选择时占 50% 宽，选有(yes)时柔缓淡出露出输入框，选无(no)时以 0.88s 果冻动效压缩至最左侧 52px
+        -->
+        <button
+          type="button"
+          class="fluid-side side-blue"
+          :class="{
+            'is-initial': !choice,
+            'is-dissolved': choice === 'yes',
+            'is-compressed': choice === 'no',
+            'is-hovered': isHoverBlue
+          }"
+          :title="choice === 'no' ? `点击切换为：${yesLabel}` : ''"
+          :disabled="disabled"
+          @mouseenter="!choice && (isHoverBlue = true)"
+          @mouseleave="!choice && (isHoverBlue = false)"
+          @click="onSideClick('yes')"
+        >
+          <!-- 初始状态居中文本 -->
+          <span v-if="!choice" class="fluid-label label-initial text-blue">{{ yesLabel }}</span>
 
-          <!-- 绿色区域：完整覆盖右半侧直至 S 曲线边界，与蓝色直接紧密贴合，鼠标悬浮全区域完整加深 -->
-          <path
-            class="initial-fluid-path path-green"
-            :class="{ 'is-hovered': isHoverGreen }"
-            @mouseenter="isHoverGreen = true"
-            @mouseleave="isHoverGreen = false"
-            @click="onSideClick('no')"
+          <!-- 压缩在左边缘时的【超柔缓渐进羽化凹形液面】（毛玻璃微澜，彻底消除生硬线条）与竖排标签 -->
+          <svg
+            v-if="choice === 'no'"
+            class="concave-liquid-svg svg-blue"
+            viewBox="0 0 52 124"
+            preserveAspectRatio="none"
+            aria-hidden="true"
           >
-            <animate
-              attributeName="d"
-              dur="4.5s"
-              repeatCount="indefinite"
-              values="
-                M 1000 0 L 500 0 C 524 34, 476 90, 500 124 L 1000 124 Z;
-                M 1000 0 L 500 0 C 530 36, 470 88, 500 124 L 1000 124 Z;
-                M 1000 0 L 500 0 C 520 32, 480 92, 500 124 L 1000 124 Z;
-                M 1000 0 L 500 0 C 524 34, 476 90, 500 124 L 1000 124 Z
-              "
-              calcMode="spline"
-              keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-            />
-          </path>
-        </svg>
+            <defs>
+              <linearGradient id="softDiffuseBlueGrad" x1="1" y1="0" x2="0" y2="0">
+                <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0" />
+                <stop offset="30%" stop-color="#e0f2fe" stop-opacity="0.18" />
+                <stop offset="60%" stop-color="#e0f2fe" stop-opacity="0.55" />
+                <stop offset="85%" stop-color="#e0f2fe" stop-opacity="0.88" />
+                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.96" />
+              </linearGradient>
+              <linearGradient id="ambientBlueRim" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+                <stop offset="30%" stop-color="#bae6fd" stop-opacity="0.4" />
+                <stop offset="70%" stop-color="#bae6fd" stop-opacity="0.4" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+              </linearGradient>
+              <filter id="gentleFluidBlurBlue" x="-40%" y="-15%" width="180%" height="130%">
+                <feGaussianBlur stdDeviation="3" />
+              </filter>
+            </defs>
+            <path
+              class="morphing-concave-path"
+              fill="url(#softDiffuseBlueGrad)"
+            >
+              <animate
+                attributeName="d"
+                dur="4.2s"
+                repeatCount="indefinite"
+                values="
+                  M 52 0 C 34 38, 34 86, 52 124 L 0 124 L 0 0 Z;
+                  M 52 0 C 30 42, 37 82, 52 124 L 0 124 L 0 0 Z;
+                  M 52 0 C 35 37, 32 87, 52 124 L 0 124 L 0 0 Z;
+                  M 52 0 C 34 38, 34 86, 52 124 L 0 124 L 0 0 Z
+                "
+                calcMode="spline"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+              />
+            </path>
+            <path
+              class="morphing-concave-feather"
+              fill="none"
+              stroke="url(#ambientBlueRim)"
+              stroke-width="3"
+              filter="url(#gentleFluidBlurBlue)"
+              opacity="0.5"
+            >
+              <animate
+                attributeName="d"
+                dur="4.2s"
+                repeatCount="indefinite"
+                values="
+                  M 52 0 C 34 38, 34 86, 52 124;
+                  M 52 0 C 30 42, 37 82, 52 124;
+                  M 52 0 C 35 37, 32 87, 52 124;
+                  M 52 0 C 34 38, 34 86, 52 124
+                "
+                calcMode="spline"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+              />
+            </path>
+          </svg>
+          <span v-if="choice === 'no'" class="fluid-label label-compressed text-blue">{{ yesLabel }}</span>
+        </button>
 
-        <!-- 初始居中文本（悬浮穿透触发下方 SVG 事件） -->
-        <div class="initial-labels" aria-hidden="true">
-          <span class="initial-text text-blue">{{ yesLabel }}</span>
-          <span class="initial-text text-green">{{ noLabel }}</span>
+        <!-- 初始状态中央 S 形流体无缝直接贴合层：
+             宽度 60px 居中置于 50% 处，蓝绿两色公用同一条 S 曲线，0 缝隙，0 白线，悬浮全区域完整加深
+        -->
+        <div
+          class="s-seam-container"
+          :class="{ 'is-hidden': !!choice }"
+          aria-hidden="true"
+        >
+          <svg class="s-seam-svg" viewBox="0 0 60 124" preserveAspectRatio="none">
+            <!-- 蓝色咬合部：与左侧 side-blue 颜色完全一致，延伸至 S 曲线中线，悬浮时同步加深 -->
+            <path
+              class="seam-path seam-blue"
+              :class="{ 'is-hovered': isHoverBlue }"
+              :fill="isHoverBlue ? '#bae6fd' : '#e0f2fe'"
+              @mouseenter="isHoverBlue = true"
+              @mouseleave="isHoverBlue = false"
+              @click.stop="onSideClick('yes')"
+            >
+              <animate
+                attributeName="d"
+                dur="4.5s"
+                repeatCount="indefinite"
+                values="
+                  M 0 0 L 30 0 C 46 34, 14 90, 30 124 L 0 124 Z;
+                  M 0 0 L 30 0 C 50 36, 10 88, 30 124 L 0 124 Z;
+                  M 0 0 L 30 0 C 43 32, 17 92, 30 124 L 0 124 Z;
+                  M 0 0 L 30 0 C 46 34, 14 90, 30 124 L 0 124 Z
+                "
+                calcMode="spline"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+              />
+            </path>
+
+            <!-- 绿色咬合部：与右侧 side-green 颜色完全一致，从 S 曲线中线延伸至右侧，无任何白色间隔 -->
+            <path
+              class="seam-path seam-green"
+              :class="{ 'is-hovered': isHoverGreen }"
+              :fill="isHoverGreen ? '#bbf7d0' : '#dcfce7'"
+              @mouseenter="isHoverGreen = true"
+              @mouseleave="isHoverGreen = false"
+              @click.stop="onSideClick('no')"
+            >
+              <animate
+                attributeName="d"
+                dur="4.5s"
+                repeatCount="indefinite"
+                values="
+                  M 60 0 L 30 0 C 46 34, 14 90, 30 124 L 60 124 Z;
+                  M 60 0 L 30 0 C 50 36, 10 88, 30 124 L 60 124 Z;
+                  M 60 0 L 30 0 C 43 32, 17 92, 30 124 L 60 124 Z;
+                  M 60 0 L 30 0 C 46 34, 14 90, 30 124 L 60 124 Z
+                "
+                calcMode="spline"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+              />
+            </path>
+          </svg>
         </div>
+
+        <!-- 绿色试剂侧 (无 / 不告诉你)：
+             未选择时占 50% 宽，选有(yes)时以 0.88s 果冻动效压缩至最右侧 52px，选无(no)时展开保留绿色背景
+        -->
+        <button
+          type="button"
+          class="fluid-side side-green"
+          :class="{
+            'is-initial': !choice,
+            'is-expanded': choice === 'no',
+            'is-compressed': choice === 'yes',
+            'is-hovered': isHoverGreen
+          }"
+          :title="choice === 'yes' ? `点击切换为：${noLabel}` : ''"
+          :disabled="disabled"
+          @mouseenter="!choice && (isHoverGreen = true)"
+          @mouseleave="!choice && (isHoverGreen = false)"
+          @click="onSideClick('no')"
+        >
+          <!-- 初始状态居中文本 -->
+          <span v-if="!choice" class="fluid-label label-initial text-green">{{ noLabel }}</span>
+
+          <!-- 压缩在右边缘时的【超柔缓渐进羽化凹形液面】（毛玻璃微澜，彻底消除生硬线条）与竖排标签 -->
+          <svg
+            v-if="choice === 'yes'"
+            class="concave-liquid-svg svg-green"
+            viewBox="0 0 52 124"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="softDiffuseGreenGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#dcfce7" stop-opacity="0" />
+                <stop offset="30%" stop-color="#dcfce7" stop-opacity="0.18" />
+                <stop offset="60%" stop-color="#dcfce7" stop-opacity="0.55" />
+                <stop offset="85%" stop-color="#dcfce7" stop-opacity="0.88" />
+                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.96" />
+              </linearGradient>
+              <linearGradient id="ambientGreenRim" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+                <stop offset="30%" stop-color="#bbf7d0" stop-opacity="0.4" />
+                <stop offset="70%" stop-color="#bbf7d0" stop-opacity="0.4" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+              </linearGradient>
+              <filter id="gentleFluidBlurGreen" x="-40%" y="-15%" width="180%" height="130%">
+                <feGaussianBlur stdDeviation="3" />
+              </filter>
+            </defs>
+            <path
+              class="morphing-concave-path"
+              fill="url(#softDiffuseGreenGrad)"
+            >
+              <animate
+                attributeName="d"
+                dur="4.2s"
+                repeatCount="indefinite"
+                values="
+                  M 0 0 C 18 36, 18 88, 0 124 L 52 124 L 52 0 Z;
+                  M 0 0 C 22 42, 15 82, 0 124 L 52 124 L 52 0 Z;
+                  M 0 0 C 17 37, 20 87, 0 124 L 52 124 L 52 0 Z;
+                  M 0 0 C 18 36, 18 88, 0 124 L 52 124 L 52 0 Z
+                "
+                calcMode="spline"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+              />
+            </path>
+            <path
+              class="morphing-concave-feather"
+              fill="none"
+              stroke="url(#ambientGreenRim)"
+              stroke-width="3"
+              filter="url(#gentleFluidBlurGreen)"
+              opacity="0.5"
+            >
+              <animate
+                attributeName="d"
+                dur="4.2s"
+                repeatCount="indefinite"
+                values="
+                  M 0 0 C 18 36, 18 88, 0 124;
+                  M 0 0 C 22 42, 15 82, 0 124;
+                  M 0 0 C 17 37, 20 87, 0 124;
+                  M 0 0 C 18 36, 18 88, 0 124
+                "
+                calcMode="spline"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+              />
+            </path>
+          </svg>
+          <span v-if="choice === 'yes'" class="fluid-label label-compressed text-green">{{ noLabel }}</span>
+        </button>
       </div>
-
-      <!-- B. 已选择状态下的压缩边缘色柱（点击可随时反向切换） -->
-      <!-- 1. 选中蓝色时：绿色压缩在最右侧 -->
-      <button
-        v-if="choice === 'yes'"
-        type="button"
-        class="compressed-fluid-button button-green"
-        :title="`点击切换为：${noLabel}`"
-        :disabled="disabled"
-        @click="onSideClick('no')"
-      >
-        <svg
-          class="concave-liquid-svg svg-green"
-          viewBox="0 0 52 124"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <defs>
-            <linearGradient id="softDiffuseGreenGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#dcfce7" stop-opacity="0" />
-              <stop offset="30%" stop-color="#dcfce7" stop-opacity="0.18" />
-              <stop offset="60%" stop-color="#dcfce7" stop-opacity="0.55" />
-              <stop offset="85%" stop-color="#dcfce7" stop-opacity="0.88" />
-              <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.96" />
-            </linearGradient>
-            <linearGradient id="ambientGreenRim" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
-              <stop offset="30%" stop-color="#bbf7d0" stop-opacity="0.4" />
-              <stop offset="70%" stop-color="#bbf7d0" stop-opacity="0.4" />
-              <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
-            </linearGradient>
-            <filter id="gentleFluidBlurGreen" x="-40%" y="-15%" width="180%" height="130%">
-              <feGaussianBlur stdDeviation="3" />
-            </filter>
-          </defs>
-          <path
-            class="morphing-concave-path"
-            fill="url(#softDiffuseGreenGrad)"
-          >
-            <animate
-              attributeName="d"
-              dur="4.2s"
-              repeatCount="indefinite"
-              values="
-                M 0 0 C 18 36, 18 88, 0 124 L 52 124 L 52 0 Z;
-                M 0 0 C 22 42, 15 82, 0 124 L 52 124 L 52 0 Z;
-                M 0 0 C 17 37, 20 87, 0 124 L 52 124 L 52 0 Z;
-                M 0 0 C 18 36, 18 88, 0 124 L 52 124 L 52 0 Z
-              "
-              calcMode="spline"
-              keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-            />
-          </path>
-          <path
-            class="morphing-concave-feather"
-            fill="none"
-            stroke="url(#ambientGreenRim)"
-            stroke-width="3"
-            filter="url(#gentleFluidBlurGreen)"
-            opacity="0.5"
-          >
-            <animate
-              attributeName="d"
-              dur="4.2s"
-              repeatCount="indefinite"
-              values="
-                M 0 0 C 18 36, 18 88, 0 124;
-                M 0 0 C 22 42, 15 82, 0 124;
-                M 0 0 C 17 37, 20 87, 0 124;
-                M 0 0 C 18 36, 18 88, 0 124
-              "
-              calcMode="spline"
-              keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-            />
-          </path>
-        </svg>
-        <span class="compressed-label text-green">{{ noLabel }}</span>
-      </button>
-
-      <!-- 2. 选中绿色时：蓝色压缩在最左侧 -->
-      <button
-        v-if="choice === 'no'"
-        type="button"
-        class="compressed-fluid-button button-blue"
-        :title="`点击切换为：${yesLabel}`"
-        :disabled="disabled"
-        @click="onSideClick('yes')"
-      >
-        <svg
-          class="concave-liquid-svg svg-blue"
-          viewBox="0 0 52 124"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <defs>
-            <linearGradient id="softDiffuseBlueGrad" x1="1" y1="0" x2="0" y2="0">
-              <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0" />
-              <stop offset="30%" stop-color="#e0f2fe" stop-opacity="0.18" />
-              <stop offset="60%" stop-color="#e0f2fe" stop-opacity="0.55" />
-              <stop offset="85%" stop-color="#e0f2fe" stop-opacity="0.88" />
-              <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.96" />
-            </linearGradient>
-            <linearGradient id="ambientBlueRim" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
-              <stop offset="30%" stop-color="#bae6fd" stop-opacity="0.4" />
-              <stop offset="70%" stop-color="#bae6fd" stop-opacity="0.4" />
-              <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
-            </linearGradient>
-            <filter id="gentleFluidBlurBlue" x="-40%" y="-15%" width="180%" height="130%">
-              <feGaussianBlur stdDeviation="3" />
-            </filter>
-          </defs>
-          <path
-            class="morphing-concave-path"
-            fill="url(#softDiffuseBlueGrad)"
-          >
-            <animate
-              attributeName="d"
-              dur="4.2s"
-              repeatCount="indefinite"
-              values="
-                M 52 0 C 34 38, 34 86, 52 124 L 0 124 L 0 0 Z;
-                M 52 0 C 30 42, 37 82, 52 124 L 0 124 L 0 0 Z;
-                M 52 0 C 35 37, 32 87, 52 124 L 0 124 L 0 0 Z;
-                M 52 0 C 34 38, 34 86, 52 124 L 0 124 L 0 0 Z
-              "
-              calcMode="spline"
-              keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-            />
-          </path>
-          <path
-            class="morphing-concave-feather"
-            fill="none"
-            stroke="url(#ambientBlueRim)"
-            stroke-width="3"
-            filter="url(#gentleFluidBlurBlue)"
-            opacity="0.5"
-          >
-            <animate
-              attributeName="d"
-              dur="4.2s"
-              repeatCount="indefinite"
-              values="
-                M 52 0 C 34 38, 34 86, 52 124;
-                M 52 0 C 30 42, 37 82, 52 124;
-                M 52 0 C 35 37, 32 87, 52 124;
-                M 52 0 C 34 38, 34 86, 52 124
-              "
-              calcMode="spline"
-              keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-            />
-          </path>
-        </svg>
-        <span class="compressed-label text-blue">{{ yesLabel }}</span>
-      </button>
 
       <!-- 隐藏重置节点供测试兼容 -->
       <button
@@ -298,6 +329,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'update:choice'])
+
 const input = ref()
 const isHoverBlue = ref(false)
 const isHoverGreen = ref(false)
@@ -470,124 +502,201 @@ function reset() {
 }
 
 /* ==========================================================================
-   初始状态：蓝绿两色直接贴合无缝咬合（无中间任何白色部分，鼠标悬浮各自全区域完整加深）
+   顶层流体试剂交互层：
+   两端元素持久驻留，通过 0.88s cubic-bezier(0.16, 1, 0.3, 1) 呈现果冻质感收缩动效
    ========================================================================== */
-.initial-fluid-stage {
+.fluid-interaction-layer {
   position: absolute;
   inset: 0;
-  z-index: 3;
-  overflow: hidden;
-  border-radius: 14px;
-}
-
-.initial-s-svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.initial-fluid-path {
-  stroke: none !important;
-  outline: none !important;
-  cursor: pointer;
-  transition: fill 0.22s ease;
-}
-
-/* 蓝色流体：悬浮时自左边缘直至 S 曲线边界完全覆盖加深，无任何白色隔断 */
-.path-blue {
-  fill: #e0f2fe;
-}
-
-.path-blue.is-hovered,
-.path-blue:hover {
-  fill: #bae6fd;
-}
-
-/* 绿色流体：悬浮时自 S 曲线边界直至右边缘完全覆盖加深，无任何白色隔断 */
-.path-green {
-  fill: #dcfce7;
-}
-
-.path-green.is-hovered,
-.path-green:hover {
-  fill: #bbf7d0;
-}
-
-.initial-labels {
-  position: absolute;
-  inset: 0;
+  z-index: 2;
   pointer-events: none;
   display: flex;
-  z-index: 4;
 }
 
-.initial-text {
-  width: 50%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  user-select: none;
-}
-
-.initial-text.text-blue {
-  color: #0369a1;
-}
-
-.initial-text.text-green {
-  color: #15803d;
-}
-
-/* ==========================================================================
-   已选状态：压缩边缘按钮（52px 凹形微澜，去除任何硬黑框与蓝框）
-   ========================================================================== */
-.compressed-fluid-button {
+/* 试剂色块：更柔缓高级的流体惯性过渡 (0.88s cubic-bezier(0.16, 1, 0.3, 1))，果冻弹材质感 */
+.fluid-side,
+.fluid-side:focus,
+.fluid-side:focus-visible,
+.fluid-side:active {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 52px;
-  z-index: 5;
   border: none !important;
   outline: none !important;
   outline-offset: 0 !important;
   box-shadow: none !important;
   padding: 0;
   margin: 0;
-  background: transparent !important;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   -webkit-tap-highlight-color: transparent !important;
-  animation: compressedSlideIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition:
+    width 0.88s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.25s ease,
+    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.4s ease;
 }
 
-@keyframes compressedSlideIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.compressed-fluid-button.button-green {
-  right: 0;
-}
-
-.compressed-fluid-button.button-blue {
+/* 蓝色试剂侧（默认 50% 宽，原色 #e0f2fe） */
+.fluid-side.side-blue {
   left: 0;
+  width: 50%;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 2;
 }
 
-.compressed-fluid-button:hover .concave-liquid-svg {
+/* 绿色试剂侧（默认 50% 宽，原色 #dcfce7） */
+.fluid-side.side-green {
+  right: 0;
+  width: 50%;
+  background-color: #dcfce7;
+  color: #15803d;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* 悬浮全区域完整加深（无任何矩形生硬截断，与 S 咬合部全幅联动同步加深） */
+.side-blue.is-hovered,
+.side-blue:hover:not(.is-dissolved):not(.is-compressed),
+.fluid-interaction-layer:has(.side-blue:hover) .side-blue,
+.fluid-interaction-layer:has(.seam-blue:hover) .side-blue {
+  background-color: #bae6fd;
+}
+
+.side-green.is-hovered,
+.side-green:hover:not(.is-compressed),
+.fluid-interaction-layer:has(.side-green:hover) .side-green,
+.fluid-interaction-layer:has(.seam-green:hover) .side-green {
+  background-color: #bbf7d0;
+}
+
+/* --------------------------------------------------------------------------
+   初始状态 S 形无缝直接咬合层 (Central S-Seam Interface)
+   位于 50% 宽度中心（宽 60px），两色共用同一条 S 曲线，完全消除白色分割线与矩形断层
+   -------------------------------------------------------------------------- */
+.s-seam-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 60px;
+  transform: translateX(-50%);
+  z-index: 3;
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+}
+
+.s-seam-container.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.s-seam-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.seam-path {
+  stroke: none !important;
+  outline: none !important;
+  cursor: pointer;
+  transition: fill 0.25s ease;
+}
+
+.seam-blue {
+  fill: #e0f2fe;
+}
+
+.seam-blue.is-hovered,
+.seam-blue:hover,
+.fluid-interaction-layer:has(.side-blue:hover) .seam-blue,
+.fluid-interaction-layer:has(.seam-blue:hover) .seam-blue {
+  fill: #bae6fd;
+}
+
+.seam-green {
+  fill: #dcfce7;
+}
+
+.seam-green.is-hovered,
+.seam-green:hover,
+.fluid-interaction-layer:has(.side-green:hover) .seam-green,
+.fluid-interaction-layer:has(.seam-green:hover) .seam-green {
+  fill: #bbf7d0;
+}
+
+/* --------------------------------------------------------------------------
+   状态分支：
+   A. 选择蓝色 (state-yes):
+      - 蓝色柔缓淡出消失（透明），平滑自然露出输入框
+      - 绿色体积以 0.88s 果冻质感向右边缘压缩至 52px
+      - 压缩在右侧的绿色显示柔缓渐进羽化凹形毛玻璃液面
+   -------------------------------------------------------------------------- */
+.reagent-choice-card.state-yes .side-blue {
+  width: calc(100% - 52px);
+  background-color: transparent !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reagent-choice-card.state-yes .side-blue .label-initial {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.reagent-choice-card.state-yes .side-green {
+  width: 52px;
+  background-color: transparent !important;
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.reagent-choice-card.state-yes .side-green:hover .concave-liquid-svg {
   filter: brightness(1.05);
 }
 
+/* --------------------------------------------------------------------------
+   B. 选择绿色 (state-no):
+      - 绿色试剂不消失，舒缓展开铺满右侧（绿色保留），显示温馨寄语
+      - 蓝色以 0.88s 果冻质感向左边缘压缩至 52px
+      - 压缩在左侧的蓝色显示柔缓渐进羽化凹形毛玻璃液面
+   -------------------------------------------------------------------------- */
+.reagent-choice-card.state-no .side-green {
+  width: calc(100% - 52px);
+  background-color: transparent !important;
+  pointer-events: none;
+}
+
+.reagent-choice-card.state-no .side-green .label-initial {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.reagent-choice-card.state-no .side-blue {
+  width: 52px;
+  background-color: transparent !important;
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 5;
+}
+
+.reagent-choice-card.state-no .side-blue:hover .concave-liquid-svg {
+  filter: brightness(1.05);
+}
+
+/* 渐进毛玻璃凹形矢量试剂背景（微澜呼吸） */
 .concave-liquid-svg {
   position: absolute;
   inset: 0;
@@ -595,9 +704,30 @@ function reset() {
   height: 100%;
   display: block;
   pointer-events: none;
+  animation: concaveFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.compressed-label {
+@keyframes concaveFadeIn {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+/* 文字标签样式：带有柔缓缩放与淡出过渡 */
+.fluid-label.label-initial {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.fluid-label.label-compressed {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -608,15 +738,35 @@ function reset() {
   letter-spacing: 2px;
   pointer-events: none;
   z-index: 6;
+  animation: compressedLabelFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
 }
 
-.compressed-label.text-blue {
+@keyframes compressedLabelFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+.side-blue .label-compressed {
   left: 12px;
   color: #0369a1;
 }
 
-.compressed-label.text-green {
+.side-green .label-compressed {
   right: 12px;
+  color: #15803d;
+}
+
+.text-blue {
+  color: #0369a1;
+}
+
+.text-green {
   color: #15803d;
 }
 
@@ -628,8 +778,7 @@ function reset() {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 0;
-  overflow: visible;
+  width: 60px;
   pointer-events: none;
   z-index: 25;
 }
@@ -646,35 +795,41 @@ function reset() {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 3px;
-  height: 48px;
+  width: 2px;
+  height: 38px;
   border-radius: 99px;
-  filter: blur(1px);
-  animation: fissurePulse 3s ease-in-out infinite alternate;
-}
-
-@keyframes fissurePulse {
-  0% { opacity: 0.6; transform: translateY(-50%) scaleY(0.9); }
-  100% { opacity: 0.95; transform: translateY(-50%) scaleY(1.08); }
+  opacity: 0.65;
+  filter: blur(0.5px);
+  animation: fissurePulse 2.8s ease-in-out infinite;
 }
 
 .fissure-left {
   left: 0;
-  background: linear-gradient(180deg, transparent, #38bdf8, #ffffff, #38bdf8, transparent);
-  box-shadow: -2px 0 8px rgba(56, 189, 248, 0.7);
+  background: linear-gradient(to bottom, transparent, #38bdf8 30%, #7dd3fc 70%, transparent);
 }
 
 .fissure-right {
   right: 0;
-  background: linear-gradient(180deg, transparent, #4ade80, #ffffff, #4ade80, transparent);
-  box-shadow: 2px 0 8px rgba(74, 222, 128, 0.7);
+  background: linear-gradient(to bottom, transparent, #4ade80 30%, #86efac 70%, transparent);
 }
 
-/* 破损气泡基础样式：长周期（2.2s ~ 3.4s）柔缓上升飘散 */
+@keyframes fissurePulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateY(-50%) scaleY(0.8);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateY(-50%) scaleY(1.15);
+  }
+}
+
 .r-bubble {
   position: absolute;
   border-radius: 50%;
+  pointer-events: none;
   opacity: 0;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
 }
 
 /* 蓝色气泡向左侧外部虚空柔缓逸出 */
