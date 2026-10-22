@@ -64,4 +64,21 @@ class AdminResumeTest {
         mvc.perform(get("/api/admin/resumes").header("Authorization", auth()).param("pageSize", "999"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void detailsRequireAdminAndDoNotExposePaths() throws Exception {
+        var record = new com.bdis.bdis_website.entity.ResumeSubmission();
+        record.setName("详情测试");
+        record.setStudentNo("000001");
+        record.setIntro("测试正文");
+        record.setSubmissionKey("b".repeat(64));
+        submissions.insert(record);
+        mvc.perform(get("/api/admin/resumes/" + record.getId())).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/admin/resumes/" + record.getId()).header("Authorization", auth()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.intro").value("测试正文"))
+                .andExpect(jsonPath("$.data.id").value(record.getId().toString()))
+                .andExpect(jsonPath("$.data.submissionKey").doesNotExist())
+                .andExpect(jsonPath("$.data.wordKey").doesNotExist());
+        mvc.perform(get("/api/admin/resumes/99999999").header("Authorization", auth())).andExpect(status().isNotFound());
+    }
 }

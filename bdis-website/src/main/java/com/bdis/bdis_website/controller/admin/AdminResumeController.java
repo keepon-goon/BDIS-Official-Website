@@ -35,4 +35,9 @@ public class AdminResumeController {
     public Result<ResumeSettingsVO> updateSettings(@jakarta.validation.Valid @RequestBody com.bdis.bdis_website.dto.ResumeSettingsDTO form) {
         return Result.success(service.updateSettings(form));
     }
+
+    @GetMapping("/{id}")
+    public Result<com.bdis.bdis_website.vo.ResumeAdminVO> detail(@PathVariable long id) {
+        return Result.success(service.detail(id));
+    }
 }

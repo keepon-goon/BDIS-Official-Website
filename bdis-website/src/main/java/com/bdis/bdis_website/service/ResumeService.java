@@ -13,6 +13,7 @@ public interface ResumeService {
     com.bdis.bdis_website.vo.ResumeSettingsVO settings();
     com.bdis.bdis_website.vo.ResumeSettingsVO updateSettings(com.bdis.bdis_website.dto.ResumeSettingsDTO form);
     PageResult list(int page, int pageSize, String name, String studentNo, Integer mailStatus);
+    com.bdis.bdis_website.vo.ResumeAdminVO detail(long id);
 
     record PageResult(java.util.List<com.bdis.bdis_website.vo.ResumeAdminVO> list, long total, int page, int pageSize) { }
 

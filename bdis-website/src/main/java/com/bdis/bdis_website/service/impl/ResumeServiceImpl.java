@@ -197,6 +197,17 @@ public class ResumeServiceImpl implements ResumeService {
         return result;
     }
 
+    private ResumeSubmission requireRecord(long id) {
+        var record = submissions.selectById(id);
+        if (record == null) throw new ResumeException(404, "简历记录不存在");
+        return record;
+    }
+
+    @Override
+    public com.bdis.bdis_website.vo.ResumeAdminVO detail(long id) {
+        return adminView(requireRecord(id));
+    }
+
     @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
     public void recoverUncertainMail() {
         try {
