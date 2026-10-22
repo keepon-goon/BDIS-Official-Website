@@ -1,5 +1,18 @@
 <template>
   <section class="resume-shell">
+    <!-- 显眼顶部倒计时警示弹窗（细长红底白框三角感叹号） -->
+    <transition name="tg-alert">
+      <div v-if="alertState.visible" class="custom-warning-toast" role="alert">
+        <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
+        <span class="warning-text">{{ alertState.message }}</span>
+        <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
+        <button type="button" class="warning-close-btn" title="关闭提示" @click="closeAlert">
+          <el-icon><Close /></el-icon>
+        </button>
+        <div class="warning-progress-line" :key="alertState.key" @animationend="onAlertTimeout"></div>
+      </div>
+    </transition>
+
     <RouterLink class="resume-back" to="/info/join">
       <span>← 返回加入我们</span>
     </RouterLink>
@@ -23,7 +36,7 @@
     </div>
 
     <h1>在线填写招新报名表</h1>
-    <p class="resume-lead">填写后生成两页标准报名表，下一步可核对 PDF、下载 Word，或上传证件照。照片可以留空。</p>
+    <p class="resume-lead">填写后生成两页标准报名表，下一步可核对 PDF、下载 Word，或上传证件照 照片可以留空 </p>
     <el-alert v-if="errorText" :title="errorText" type="error" :closable="false" show-icon />
     <el-form ref="formRef" :model="form" :rules="rules" label-position="top" :disabled="busy" @submit.prevent="generate">
       <div class="resume-card">
@@ -69,7 +82,7 @@
             yes-label="小露一手" no-label="不告诉你" placeholder="can can need" declined-text="伤心了...(ㄒoㄒ)" :disabled="busy" />
         </el-form-item>
       </div>
-      <p class="resume-note">最终文档须为一到两页。内容较多无法完整排版时，可下载空白 Word，调整后通过“上传已填写 Word”提交。</p>
+      <p class="resume-note">最终文档须为一到两页 内容较多无法完整排版时，可下载空白 Word，调整后通过“上传已填写 Word”提交 </p>
       <div class="resume-actions">
         <el-button type="primary" size="large" :loading="busy" native-type="submit">生成预览</el-button>
         <el-button :loading="downloading" @click="downloadTemplate">下载空白 Word 模板</el-button>
@@ -80,9 +93,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { WarningFilled, Close } from '@element-plus/icons-vue'
 import ResumeChoiceTextarea from '../components/resume/ResumeChoiceTextarea.vue'
 import resumeOptions from '../data/resumeOptions.json'
 import { resumePhonePattern, resumePhoneMessage } from '../utils/resumeValidation'
@@ -107,8 +121,45 @@ const selections = reactive({
   gender: form.gender, ethnicity: selectionFor(form.ethnicity, ethnicities),
   college: selectionFor(form.college, colleges), major: selectionFor(form.major, majors.value)
 })
+
+/* 提示弹窗控制 */
+const alertState = reactive({
+  visible: false,
+  message: '',
+  key: 0,
+  timer: null
+})
+
+function showAlert(message) {
+  if (alertState.timer) clearTimeout(alertState.timer)
+  alertState.message = message
+  alertState.key++
+  alertState.visible = true
+  alertState.timer = setTimeout(() => {
+    closeAlert()
+  }, 3000)
+}
+
+function closeAlert() {
+  alertState.visible = false
+  if (alertState.timer) {
+    clearTimeout(alertState.timer)
+    alertState.timer = null
+  }
+}
+
+function onAlertTimeout() {
+  closeAlert()
+}
+
 let active = true
-onBeforeUnmount(() => { active = false })
+onMounted(() => {
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+})
+onBeforeUnmount(() => {
+  active = false
+  closeAlert()
+})
 
 const fields = [
   { key: 'name', label: '姓名', max: 30 }, { key: 'gender', label: '性别', max: 10 },
@@ -149,8 +200,34 @@ watch(form, () => {
 }, { deep: true })
 
 async function generate() {
-  if (busy.value || !await formRef.value.validate().catch(() => false)) return
+  if (busy.value) return
   errorText.value = ''
+  
+  let valid = false
+  try {
+    valid = await formRef.value.validate()
+  } catch (err) {
+    valid = false
+  }
+
+  if (!valid) {
+    const missing = []
+    if (!form.name?.trim()) missing.push('姓名')
+    if (!form.college) missing.push('学院')
+    if (!form.studentNo?.trim()) missing.push('学号')
+    if (!form.major) missing.push('专业')
+    if (!form.phone?.trim() || !resumePhonePattern.test(form.phone)) missing.push('联系电话')
+    if (form.hasCompetitionExperience === null || form.hasCompetitionExperience === undefined) missing.push('比赛经历')
+    if (!form.intro?.trim()) missing.push('个人简历')
+    
+    let tip = '请先完整填写报名信息'
+    if (missing.length > 0) {
+      tip = `请先完整填写：${missing.slice(0, 3).join('、')}${missing.length > 3 ? ' 等必填项' : ''}`
+    }
+    showAlert(tip)
+    return
+  }
+
   busy.value = true
   const version = resumeDraft.version
   try {
@@ -160,6 +237,7 @@ async function generate() {
     await router.push('/resume/preview')
   } catch (error) {
     errorText.value = error.message
+    showAlert(error.message || '生成预览失败，请检查填写内容')
   } finally {
     busy.value = false
   }

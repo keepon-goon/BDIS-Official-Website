@@ -1,10 +1,10 @@
-<template>
+﻿<template>
   <div ref="container" v-show="url" class="resume-pdf">
     <div class="resume-actions">
       <a :href="url" target="_blank" rel="noopener">新窗口查看 PDF</a>
       <a :href="url" :download="filename">下载 PDF</a>
     </div>
-    <p class="resume-note">{{ loading ? '正在绘制PDF预览…' : `共${pageCount}页，请滚动查看并核对全部内容。` }}</p>
+    <p class="resume-note">{{ loading ? '正在绘制PDF预览…' : `共${pageCount}页，请滚动查看并核对全部内容 ` }}</p>
     <el-alert v-if="errorText" :title="errorText" type="error" :closable="false" />
     <div class="resume-pdf-pages" aria-label="报名表 PDF 预览" :aria-busy="loading">
       <div v-for="index in pageCount" :key="`${url}-${index}`" class="resume-pdf-page">
@@ -79,7 +79,7 @@ async function render() {
   } catch (error) {
     if (version !== generation) return
     if (import.meta.env.DEV) console.error('PDF预览绘制失败', error)
-    errorText.value = 'PDF预览暂无法显示，请重新加载，或下载文件后核对。'
+    errorText.value = 'PDF预览暂无法显示，请重新加载，或下载文件后核对 '
     emit('error', errorText.value)
   } finally {
     if (version === generation) loading.value = false
@@ -114,3 +114,4 @@ onBeforeUnmount(() => {
 .resume-pdf a { color: #0c3d70; font-size: 14px; }
 @media (max-width: 700px) { .resume-pdf-pages { max-height: 620px; padding: 10px; } }
 </style>
+

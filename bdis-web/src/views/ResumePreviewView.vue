@@ -1,5 +1,18 @@
 <template>
   <section class="resume-shell">
+    <!-- 显眼顶部倒计时警示弹窗（细长红底白框三角感叹号） -->
+    <transition name="tg-alert">
+      <div v-if="alertState.visible" class="custom-warning-toast" role="alert">
+        <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
+        <span class="warning-text">{{ alertState.message }}</span>
+        <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
+        <button type="button" class="warning-close-btn" title="关闭提示" @click="closeAlert">
+          <el-icon><Close /></el-icon>
+        </button>
+        <div class="warning-progress-line" :key="alertState.key" @animationend="onAlertTimeout"></div>
+      </div>
+    </transition>
+
     <!-- Apple 风格分段进度指示条 -->
     <div class="resume-step-indicator">
       <div class="step-node is-done">
@@ -22,7 +35,7 @@
       <el-result icon="success" title="报名已成功保存" :sub-title="resumeDraft.submission.message">
         <template #extra>
           <p>提交编号：<strong>{{ resumeDraft.submission.submissionId }}</strong></p>
-          <p class="resume-note">无需重复提交。邮件尚未成功时，可由管理员后续补发。</p>
+          <p class="resume-note">无需重复提交 邮件尚未成功时，可由管理员后续补发 </p>
           <div class="resume-actions">
             <el-button @click="router.push('/info/join')">返回加入我们</el-button>
             <el-button type="primary" @click="newApplication">填写新的报名表</el-button>
@@ -32,7 +45,7 @@
     </template>
     <template v-else-if="preview">
       <h1>核对报名表预览</h1>
-      <p class="resume-lead">请核对全部内容与分页效果。你可以下载当前 Word 自行贴照，也可以上传照片合成后再次预览。</p>
+      <p class="resume-lead">请核对全部内容与分页效果 你可以下载当前 Word 自行贴照，也可以上传照片合成后再次预览 </p>
       <el-alert title="如果无法显示，请检查是否开启了第三方下载插件（如IDM），建议将其暂时关闭" type="info" :closable="false" show-icon />
       <div class="resume-meta-bar">
         <span class="resume-filename">{{ preview.wordFilename }}</span>
@@ -41,23 +54,23 @@
       <el-alert v-if="errorText" :title="errorText" type="error" :closable="false" show-icon />
       <div class="resume-card resume-photo-panel" v-if="preview.sourceType === 'FORM'">
         <h2>证件照（可选）</h2>
-        <p class="resume-note">支持 JPG/JPEG、PNG，单张不超过 <strong>10 MB</strong>。不限照片比例，照片会等比缩放、居中留白，不拉伸或裁切；竖版照片更适合当前照片框。</p>
+        <p class="resume-note">支持 JPG/JPEG、PNG，单张不超过 <strong>10 MB</strong> 不限照片比例，照片会等比缩放、居中留白，不拉伸或裁切；竖版照片更适合当前照片框 </p>
         <div class="resume-actions">
           <el-button type="primary" :loading="operation === 'photo'" :disabled="busy || loadingPdf" @click="photoInput.click()">
             {{ preview.hasPhoto ? '更换照片并重新预览' : '上传照片合成预览' }}
           </el-button>
-          <span class="resume-note">不上传照片也可以确认提交。</span>
+          <span class="resume-note">不上传照片也可以确认提交 </span>
         </div>
         <input ref="photoInput" data-testid="resume-photo-input" class="resume-file-input" type="file" accept="image/jpeg,image/png" @change="changePhoto" />
       </div>
-      <p v-else class="resume-note">此预览保留上传 Word 的原内容。需要更换照片或修改文字时，请在本地编辑后重新上传。</p>
+      <p v-else class="resume-note">此预览保留上传 Word 的原内容 需要更换照片或修改文字时，请在本地编辑后重新上传 </p>
       <div class="resume-actions">
         <el-button :loading="operation === 'download'" :disabled="busy || loadingPdf" @click="downloadWord">下载当前 Word</el-button>
         <el-button :disabled="busy || loadingPdf" @click="router.push('/resume/upload')">上传已编辑 Word</el-button>
         <el-button v-if="preview.sourceType === 'FORM'" :disabled="busy || loadingPdf" @click="router.push('/resume/apply')">返回修改表单</el-button>
         <el-button :disabled="busy || loadingPdf" @click="loadPdf">重新加载预览</el-button>
       </div>
-      <p class="resume-note">下载后在本地修改不会自动同步。自行贴照后，请上传修改后的 Word，再预览并确认提交。</p>
+      <p class="resume-note">下载后在本地修改不会自动同步 自行贴照后，请上传修改后的 Word，再预览并确认提交 </p>
       <div v-loading="loadingPdf || operation === 'photo'" element-loading-text="正在生成或读取预览，请稍候">
         <ResumePdfPreview :url="pdfUrl" :filename="preview.pdfFilename" :max-pages="preview.sourceType === 'UPLOAD' ? 6 : 2"
           @ready="renderedUrl = $event" @error="renderFailed" />
@@ -69,7 +82,7 @@
     </template>
     <div v-else class="resume-empty">
       <h1>请先生成报名表预览</h1>
-      <p class="resume-note">页面刷新或预览凭证丢失后，需要重新填写生成，或上传已保存的 Word。</p>
+      <p class="resume-note">页面刷新或预览凭证丢失后，需要重新填写生成，或上传已保存的 Word </p>
       <div class="resume-actions">
         <el-button type="primary" @click="router.push('/resume/apply')">在线填写</el-button>
         <el-button @click="router.push('/resume/upload')">上传已填写 Word</el-button>
@@ -79,8 +92,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import { WarningFilled, Close } from '@element-plus/icons-vue'
 import ResumePdfPreview from '../components/resume/ResumePdfPreview.vue'
 import { resumeDraft, setResumePreview, resetResumeDraft } from '../utils/resumeDraft'
 import { resumeApi, downloadResumeFile } from '../utils/resumeApi'
@@ -102,6 +116,36 @@ const canConfirm = computed(() => preview.value && !busy.value && !loadingPdf.va
   && (preview.value.sourceType !== 'FORM' || preview.value.formVersion === resumeDraft.version))
 let active = true
 
+/* 警示弹窗控制 */
+const alertState = reactive({
+  visible: false,
+  message: '',
+  key: 0,
+  timer: null
+})
+
+function showAlert(message) {
+  if (alertState.timer) clearTimeout(alertState.timer)
+  alertState.message = message
+  alertState.key++
+  alertState.visible = true
+  alertState.timer = setTimeout(() => {
+    closeAlert()
+  }, 3000)
+}
+
+function closeAlert() {
+  alertState.visible = false
+  if (alertState.timer) {
+    clearTimeout(alertState.timer)
+    alertState.timer = null
+  }
+}
+
+function onAlertTimeout() {
+  closeAlert()
+}
+
 function clearPdf() {
   if (pdfUrl.value) URL.revokeObjectURL(pdfUrl.value)
   pdfUrl.value = ''
@@ -109,9 +153,22 @@ function clearPdf() {
   renderedUrl.value = ''
 }
 
-function renderFailed(message) { renderedUrl.value = ''; errorText.value = message }
-onBeforeUnmount(() => { active = false; clearPdf() })
-onMounted(() => { if (preview.value) loadPdf() })
+function renderFailed(message) {
+  renderedUrl.value = ''
+  errorText.value = message
+  showAlert(message)
+}
+
+onBeforeUnmount(() => {
+  active = false
+  clearPdf()
+  closeAlert()
+})
+
+onMounted(() => {
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  if (preview.value) loadPdf()
+})
 
 async function loadPdf() {
   if (!preview.value) return
@@ -124,7 +181,10 @@ async function loadPdf() {
     if (!active || preview.value?.previewToken !== token) return
     pdfUrl.value = URL.createObjectURL(blob)
     pdfToken.value = token
-  } catch (error) { errorText.value = error.message }
+  } catch (error) {
+    errorText.value = error.message
+    showAlert(error.message)
+  }
   finally { loadingPdf.value = false }
 }
 
@@ -153,14 +213,20 @@ async function changePhoto(event) {
     if (!active) return
     setResumePreview(result)
     await loadPdf()
-  } catch (error) { errorText.value = error.message }
+  } catch (error) {
+    errorText.value = error.message
+    showAlert(error.message)
+  }
   finally { operation.value = ''; event.target.value = '' }
 }
 
 async function downloadWord() {
   operation.value = 'download'
   try { downloadResumeFile(await resumeApi.previewWord(preview.value.previewToken)) }
-  catch (error) { errorText.value = error.message }
+  catch (error) {
+    errorText.value = error.message
+    showAlert(error.message)
+  }
   finally { operation.value = '' }
 }
 
@@ -174,7 +240,10 @@ async function confirm() {
     resumeDraft.submission = result
     resumeDraft.preview = null
     clearPdf()
-  } catch (error) { errorText.value = error.message }
+  } catch (error) {
+    errorText.value = error.message
+    showAlert(error.message)
+  }
   finally { operation.value = '' }
 }
 

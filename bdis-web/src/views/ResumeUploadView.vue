@@ -1,5 +1,18 @@
 <template>
   <section class="resume-shell">
+    <!-- 显眼顶部倒计时警示弹窗（细长红底白框三角感叹号） -->
+    <transition name="tg-alert">
+      <div v-if="alertState.visible" class="custom-warning-toast" role="alert">
+        <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
+        <span class="warning-text">{{ alertState.message }}</span>
+        <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
+        <button type="button" class="warning-close-btn" title="关闭提示" @click="closeAlert">
+          <el-icon><Close /></el-icon>
+        </button>
+        <div class="warning-progress-line" :key="alertState.key" @animationend="onAlertTimeout"></div>
+      </div>
+    </transition>
+
     <RouterLink class="resume-back" to="/resume/apply">
       <span>← 返回在线填表</span>
     </RouterLink>
@@ -23,11 +36,11 @@
     </div>
 
     <h1>上传已填写的 Word</h1>
-    <p class="resume-lead">上传你已填写或贴好照片的 DOCX，先预览，再确认提交。文件最多6页、不超过50 MB。</p>
+    <p class="resume-lead">上传你已填写或贴好照片的 DOCX，先预览，再确认提交 文件最多6页、不超过50 MB </p>
     <el-alert v-if="errorText" :title="errorText" type="error" :closable="false" show-icon />
     <el-form ref="formRef" :model="index" :rules="rules" label-position="top" :disabled="busy" @submit.prevent="upload">
       <div class="resume-card">
-        <p class="resume-note">以下信息用于文件命名和联系，请与 Word 正文保持一致，无需重新填写整份报名表。</p>
+        <p class="resume-note">以下信息用于文件命名和联系，请与 Word 正文保持一致，无需重新填写整份报名表 </p>
         <div class="resume-grid">
           <el-form-item label="姓名" prop="name"><el-input id="upload-name" v-model="index.name" maxlength="30" /></el-form-item>
           <el-form-item label="学号" prop="studentNo"><el-input id="upload-studentNo" v-model="index.studentNo" maxlength="40" /></el-form-item>
@@ -36,7 +49,7 @@
         <el-form-item label="已填写的 Word 文件">
           <input data-testid="resume-word-input" type="file" accept=".docx" :disabled="busy" @change="selectWord" />
         </el-form-item>
-        <p class="resume-note">上传原件会保留正文和照片。若文件含外链照片，请先将照片直接粘贴到 Word 中，再另存为 DOCX。</p>
+        <p class="resume-note">上传原件会保留正文和照片 若文件含外链照片，请先将照片直接粘贴到 Word 中，再另存为 DOCX </p>
       </div>
       <div class="resume-actions">
         <el-button type="primary" size="large" native-type="submit" :loading="busy">上传并生成预览</el-button>
@@ -47,8 +60,9 @@
 </template>
 
 <script setup>
-import { ref, onBeforeUnmount } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import { WarningFilled, Close } from '@element-plus/icons-vue'
 import { resumeDraft, setResumePreview } from '../utils/resumeDraft'
 import { resumeApi, downloadResumeFile } from '../utils/resumeApi'
 import { resumePhonePattern, resumePhoneMessage } from '../utils/resumeValidation'
@@ -64,7 +78,45 @@ const busy = ref(false)
 const errorText = ref('')
 const file = ref(null)
 let active = true
-onBeforeUnmount(() => { active = false })
+
+/* 警示弹窗控制 */
+const alertState = reactive({
+  visible: false,
+  message: '',
+  key: 0,
+  timer: null
+})
+
+function showAlert(message) {
+  if (alertState.timer) clearTimeout(alertState.timer)
+  alertState.message = message
+  alertState.key++
+  alertState.visible = true
+  alertState.timer = setTimeout(() => {
+    closeAlert()
+  }, 3000)
+}
+
+function closeAlert() {
+  alertState.visible = false
+  if (alertState.timer) {
+    clearTimeout(alertState.timer)
+    alertState.timer = null
+  }
+}
+
+function onAlertTimeout() {
+  closeAlert()
+}
+
+onMounted(() => {
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+})
+
+onBeforeUnmount(() => {
+  active = false
+  closeAlert()
+})
 
 const rules = {
   name: [{ required: true, whitespace: true, message: '请填写姓名', trigger: 'blur' }],
@@ -80,9 +132,15 @@ function selectWord(event) {
 }
 
 async function upload() {
-  if (busy.value || !await formRef.value.validate().catch(() => false)) return
+  if (busy.value) return
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) {
+    showAlert('请先完整填写姓名、学号及联系电话')
+    return
+  }
   if (!file.value) {
     errorText.value = '请选择需要上传的 Word 文件'
+    showAlert('请选择需要上传的 Word 文件')
     return
   }
   errorText.value = ''
@@ -95,6 +153,7 @@ async function upload() {
     await router.push('/resume/preview')
   } catch (error) {
     errorText.value = error.message
+    showAlert(error.message || '上传处理失败，请检查文件格式')
   } finally {
     busy.value = false
   }
@@ -105,6 +164,7 @@ async function downloadTemplate() {
     downloadResumeFile(await resumeApi.template())
   } catch (error) {
     errorText.value = error.message
+    showAlert(error.message)
   }
 }
 </script>
