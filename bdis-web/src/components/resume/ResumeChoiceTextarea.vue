@@ -26,7 +26,7 @@
       <!-- 底层内容区：选择蓝色时露出无框输入框 -->
       <div class="underlay-content">
         <!-- 选择蓝色时呈现的纯净输入区域（无内部边框，柔缓渐隐露出，与右侧绿色凹形试剂自然融为一体） -->
-        <div v-show="choice === 'yes' || !choice" class="underlay-input-wrap">
+        <div v-show="choice === 'yes'" class="underlay-input-wrap">
           <el-input
             :id="id"
             ref="input"
@@ -56,303 +56,217 @@
       </div>
 
       <!-- 顶层流体试剂交互层 -->
-      <div class="fluid-interaction-layer">
-        <!-- 蓝色试剂侧 (有 / 小露一手) -->
-        <button
-          type="button"
-          class="fluid-side side-blue"
-          :class="{
-            'is-initial': !choice,
-            'is-dissolved': choice === 'yes',
-            'is-compressed': choice === 'no'
-          }"
-          :title="choice === 'no' ? `点击切换为：${yesLabel}` : ''"
-          :disabled="disabled"
-          @click="onSideClick('yes')"
-        >
-          <!-- 初始状态居中字样 -->
-          <span v-if="!choice" class="fluid-label label-initial">{{ yesLabel }}</span>
-
-          <!-- 点击后压缩在左边缘时呈现的【超柔缓渐进羽化凹形液面】（彻底去除生硬线条，柔和漫射）与竖排标签 -->
-          <svg
-            v-if="choice === 'no'"
-            class="concave-liquid-svg svg-blue"
-            viewBox="0 0 52 124"
-            preserveAspectRatio="none"
-            aria-hidden="true"
+      <!-- A. 初始状态：蓝绿两色直接贴合无缝咬合（无中间任何白色部分，鼠标放上去后各自全区域完整加深） -->
+      <div v-if="!choice" class="initial-fluid-stage">
+        <svg class="initial-s-svg" viewBox="0 0 1000 124" preserveAspectRatio="none">
+          <!-- 蓝色区域：完整覆盖左半侧直至 S 曲线边界，与绿色直接贴合（无白色），鼠标悬浮全区域完整加深 -->
+          <path
+            class="initial-fluid-path path-blue"
+            :class="{ 'is-hovered': isHoverBlue }"
+            @mouseenter="isHoverBlue = true"
+            @mouseleave="isHoverBlue = false"
+            @click="onSideClick('yes')"
           >
-            <defs>
-              <!-- 超柔缓无断阶渐变：从右侧完全透明平滑过渡至柔蓝，与右侧绿底如水彩般无痕晕染 -->
-              <linearGradient id="softDiffuseBlueGrad" x1="1" y1="0" x2="0" y2="0">
-                <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0" />
-                <stop offset="30%" stop-color="#e0f2fe" stop-opacity="0.18" />
-                <stop offset="60%" stop-color="#e0f2fe" stop-opacity="0.55" />
-                <stop offset="85%" stop-color="#e0f2fe" stop-opacity="0.88" />
-                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.96" />
-              </linearGradient>
+            <animate
+              attributeName="d"
+              dur="4.5s"
+              repeatCount="indefinite"
+              values="
+                M 0 0 L 500 0 C 524 34, 476 90, 500 124 L 0 124 Z;
+                M 0 0 L 500 0 C 530 36, 470 88, 500 124 L 0 124 Z;
+                M 0 0 L 500 0 C 520 32, 480 92, 500 124 L 0 124 Z;
+                M 0 0 L 500 0 C 524 34, 476 90, 500 124 L 0 124 Z
+              "
+              calcMode="spline"
+              keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+            />
+          </path>
 
-              <!-- 极柔和环境弥散光晕（无锐利描边线） -->
-              <linearGradient id="ambientBlueRim" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
-                <stop offset="30%" stop-color="#bae6fd" stop-opacity="0.4" />
-                <stop offset="70%" stop-color="#bae6fd" stop-opacity="0.4" />
-                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
-              </linearGradient>
+          <!-- 绿色区域：完整覆盖右半侧直至 S 曲线边界，与蓝色直接紧密贴合，鼠标悬浮全区域完整加深 -->
+          <path
+            class="initial-fluid-path path-green"
+            :class="{ 'is-hovered': isHoverGreen }"
+            @mouseenter="isHoverGreen = true"
+            @mouseleave="isHoverGreen = false"
+            @click="onSideClick('no')"
+          >
+            <animate
+              attributeName="d"
+              dur="4.5s"
+              repeatCount="indefinite"
+              values="
+                M 1000 0 L 500 0 C 524 34, 476 90, 500 124 L 1000 124 Z;
+                M 1000 0 L 500 0 C 530 36, 470 88, 500 124 L 1000 124 Z;
+                M 1000 0 L 500 0 C 520 32, 480 92, 500 124 L 1000 124 Z;
+                M 1000 0 L 500 0 C 524 34, 476 90, 500 124 L 1000 124 Z
+              "
+              calcMode="spline"
+              keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+            />
+          </path>
+        </svg>
 
-              <filter id="gentleFluidBlurBlue" x="-40%" y="-15%" width="180%" height="130%">
-                <feGaussianBlur stdDeviation="3" />
-              </filter>
-            </defs>
-
-            <!-- 凹形微澜羽化主体（彻底去除硬边，极度柔和自然） -->
-            <path
-              class="morphing-concave-path"
-              fill="url(#softDiffuseBlueGrad)"
-            >
-              <animate
-                attributeName="d"
-                dur="4.2s"
-                repeatCount="indefinite"
-                values="
-                  M 52 0 C 34 38, 34 86, 52 124 L 0 124 L 0 0 Z;
-                  M 52 0 C 30 42, 37 82, 52 124 L 0 124 L 0 0 Z;
-                  M 52 0 C 35 37, 32 87, 52 124 L 0 124 L 0 0 Z;
-                  M 52 0 C 34 38, 34 86, 52 124 L 0 124 L 0 0 Z
-                "
-                calcMode="spline"
-                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-              />
-            </path>
-
-            <!-- 极轻柔的虚化漫射柔光（高斯模糊弥散，绝非生硬描边线） -->
-            <path
-              class="morphing-concave-feather"
-              fill="none"
-              stroke="url(#ambientBlueRim)"
-              stroke-width="3"
-              filter="url(#gentleFluidBlurBlue)"
-              opacity="0.5"
-            >
-              <animate
-                attributeName="d"
-                dur="4.2s"
-                repeatCount="indefinite"
-                values="
-                  M 52 0 C 34 38, 34 86, 52 124;
-                  M 52 0 C 30 42, 37 82, 52 124;
-                  M 52 0 C 35 37, 32 87, 52 124;
-                  M 52 0 C 34 38, 34 86, 52 124
-                "
-                calcMode="spline"
-                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-              />
-            </path>
-          </svg>
-          <span v-if="choice === 'no'" class="fluid-label label-compressed">{{ yesLabel }}</span>
-        </button>
-
-        <!-- 初始状态：双向流体交汇 S 形隔断膜（清晰明显的 S 形曲线、蓝绿试剂沿 S 曲线无缝咬合、纯白微光立体分隔线、缓和呼吸微澜） -->
-        <div v-if="!choice" class="s-membrane-container" aria-hidden="true">
-          <svg class="s-membrane-svg" viewBox="0 0 60 124" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="sMembraneGlow" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="#0284c7" stop-opacity="0.45" />
-                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.95" />
-                <stop offset="100%" stop-color="#16a34a" stop-opacity="0.45" />
-              </linearGradient>
-              <filter id="sDropShadow" x="-30%" y="-15%" width="160%" height="130%">
-                <feDropShadow dx="-1" dy="0" stdDeviation="1.5" flood-color="rgba(3, 105, 161, 0.3)" />
-                <feDropShadow dx="1" dy="0" stdDeviation="1.5" flood-color="rgba(21, 128, 61, 0.3)" />
-              </filter>
-            </defs>
-
-            <!-- 蓝色液体沿 S 曲线向右侧伸展（平滑覆盖中间直切缝，形成原生 S 形液体分界） -->
-            <path
-              class="s-fluid-blue"
-              fill="#e0f2fe"
-            >
-              <animate
-                attributeName="d"
-                dur="4.5s"
-                repeatCount="indefinite"
-                values="
-                  M 0 0 L 30 0 C 44 34, 16 90, 30 124 L 0 124 Z;
-                  M 0 0 L 30 0 C 48 36, 12 88, 30 124 L 0 124 Z;
-                  M 0 0 L 30 0 C 41 32, 19 92, 30 124 L 0 124 Z;
-                  M 0 0 L 30 0 C 45 35, 15 89, 30 124 L 0 124 Z;
-                  M 0 0 L 30 0 C 44 34, 16 90, 30 124 L 0 124 Z
-                "
-                calcMode="spline"
-                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-              />
-            </path>
-
-            <!-- 绿色液体沿 S 曲线向左侧伸展 -->
-            <path
-              class="s-fluid-green"
-              fill="#dcfce7"
-            >
-              <animate
-                attributeName="d"
-                dur="4.5s"
-                repeatCount="indefinite"
-                values="
-                  M 60 0 L 30 0 C 44 34, 16 90, 30 124 L 60 124 Z;
-                  M 60 0 L 30 0 C 48 36, 12 88, 30 124 L 60 124 Z;
-                  M 60 0 L 30 0 C 41 32, 19 92, 30 124 L 60 124 Z;
-                  M 60 0 L 30 0 C 45 35, 15 89, 30 124 L 60 124 Z;
-                  M 60 0 L 30 0 C 44 34, 16 90, 30 124 L 60 124 Z
-                "
-                calcMode="spline"
-                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-              />
-            </path>
-
-            <!-- 明显可见的 S 形环境微光晕 -->
-            <path
-              class="s-line-halo"
-              fill="none"
-              stroke="url(#sMembraneGlow)"
-              stroke-width="5"
-              opacity="0.45"
-            >
-              <animate
-                attributeName="d"
-                dur="4.5s"
-                repeatCount="indefinite"
-                values="
-                  M 30 0 C 44 34, 16 90, 30 124;
-                  M 30 0 C 48 36, 12 88, 30 124;
-                  M 30 0 C 41 32, 19 92, 30 124;
-                  M 30 0 C 45 35, 15 89, 30 124;
-                  M 30 0 C 44 34, 16 90, 30 124
-                "
-                calcMode="spline"
-                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-              />
-            </path>
-
-            <!-- 核心明显清晰的纯白立体 S 形隔断线条（明显可见、S形曲率优雅、立体微阴影、缓和呼吸微澜） -->
-            <path
-              class="s-line-core"
-              fill="none"
-              stroke="#ffffff"
-              stroke-width="2.4"
-              stroke-linecap="round"
-              filter="url(#sDropShadow)"
-            >
-              <animate
-                attributeName="d"
-                dur="4.5s"
-                repeatCount="indefinite"
-                values="
-                  M 30 0 C 44 34, 16 90, 30 124;
-                  M 30 0 C 48 36, 12 88, 30 124;
-                  M 30 0 C 41 32, 19 92, 30 124;
-                  M 30 0 C 45 35, 15 89, 30 124;
-                  M 30 0 C 44 34, 16 90, 30 124
-                "
-                calcMode="spline"
-                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-              />
-            </path>
-          </svg>
+        <!-- 初始居中文本（悬浮穿透触发下方 SVG 事件） -->
+        <div class="initial-labels" aria-hidden="true">
+          <span class="initial-text text-blue">{{ yesLabel }}</span>
+          <span class="initial-text text-green">{{ noLabel }}</span>
         </div>
-
-        <!-- 绿色试剂侧 (无 / 不告诉你) -->
-        <button
-          type="button"
-          class="fluid-side side-green"
-          :class="{
-            'is-initial': !choice,
-            'is-expanded-green': choice === 'no',
-            'is-compressed': choice === 'yes'
-          }"
-          :title="choice === 'yes' ? `点击切换为：${noLabel}` : ''"
-          :disabled="disabled"
-          @click="onSideClick('no')"
-        >
-          <!-- 初始状态居中字样 -->
-          <span v-if="!choice" class="fluid-label label-initial">{{ noLabel }}</span>
-
-          <!-- 点击后压缩在右边缘时的【超柔缓渐进羽化凹形液面】（彻底去除生硬线条，柔和漫射）与竖排标签 -->
-          <svg
-            v-if="choice === 'yes'"
-            class="concave-liquid-svg svg-green"
-            viewBox="0 0 52 124"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <defs>
-              <!-- 超柔缓无断阶渐变：从左侧完全透明平滑过渡至柔绿，与左侧白底如晨雾般无痕晕染 -->
-              <linearGradient id="softDiffuseGreenGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="#dcfce7" stop-opacity="0" />
-                <stop offset="30%" stop-color="#dcfce7" stop-opacity="0.18" />
-                <stop offset="60%" stop-color="#dcfce7" stop-opacity="0.55" />
-                <stop offset="85%" stop-color="#dcfce7" stop-opacity="0.88" />
-                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.96" />
-              </linearGradient>
-
-              <!-- 极柔和环境弥散光晕（无锐利描边线） -->
-              <linearGradient id="ambientGreenRim" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
-                <stop offset="30%" stop-color="#bbf7d0" stop-opacity="0.4" />
-                <stop offset="70%" stop-color="#bbf7d0" stop-opacity="0.4" />
-                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
-              </linearGradient>
-
-              <filter id="gentleFluidBlurGreen" x="-40%" y="-15%" width="180%" height="130%">
-                <feGaussianBlur stdDeviation="3" />
-              </filter>
-            </defs>
-
-            <!-- 凹形微澜羽化主体（彻底去除硬边，极度柔和自然） -->
-            <path
-              class="morphing-concave-path"
-              fill="url(#softDiffuseGreenGrad)"
-            >
-              <animate
-                attributeName="d"
-                dur="4.2s"
-                repeatCount="indefinite"
-                values="
-                  M 0 0 C 18 36, 18 88, 0 124 L 52 124 L 52 0 Z;
-                  M 0 0 C 22 42, 15 82, 0 124 L 52 124 L 52 0 Z;
-                  M 0 0 C 17 37, 20 87, 0 124 L 52 124 L 52 0 Z;
-                  M 0 0 C 18 36, 18 88, 0 124 L 52 124 L 52 0 Z
-                "
-                calcMode="spline"
-                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-              />
-            </path>
-
-            <!-- 极轻柔的虚化漫射柔光（高斯模糊弥散，绝非生硬描边线） -->
-            <path
-              class="morphing-concave-feather"
-              fill="none"
-              stroke="url(#ambientGreenRim)"
-              stroke-width="3"
-              filter="url(#gentleFluidBlurGreen)"
-              opacity="0.5"
-            >
-              <animate
-                attributeName="d"
-                dur="4.2s"
-                repeatCount="indefinite"
-                values="
-                  M 0 0 C 18 36, 18 88, 0 124;
-                  M 0 0 C 22 42, 15 82, 0 124;
-                  M 0 0 C 17 37, 20 87, 0 124;
-                  M 0 0 C 18 36, 18 88, 0 124
-                "
-                calcMode="spline"
-                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-              />
-            </path>
-          </svg>
-          <span v-if="choice === 'yes'" class="fluid-label label-compressed">{{ noLabel }}</span>
-        </button>
       </div>
+
+      <!-- B. 已选择状态下的压缩边缘色柱（点击可随时反向切换） -->
+      <!-- 1. 选中蓝色时：绿色压缩在最右侧 -->
+      <button
+        v-if="choice === 'yes'"
+        type="button"
+        class="compressed-fluid-button button-green"
+        :title="`点击切换为：${noLabel}`"
+        :disabled="disabled"
+        @click="onSideClick('no')"
+      >
+        <svg
+          class="concave-liquid-svg svg-green"
+          viewBox="0 0 52 124"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient id="softDiffuseGreenGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#dcfce7" stop-opacity="0" />
+              <stop offset="30%" stop-color="#dcfce7" stop-opacity="0.18" />
+              <stop offset="60%" stop-color="#dcfce7" stop-opacity="0.55" />
+              <stop offset="85%" stop-color="#dcfce7" stop-opacity="0.88" />
+              <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.96" />
+            </linearGradient>
+            <linearGradient id="ambientGreenRim" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+              <stop offset="30%" stop-color="#bbf7d0" stop-opacity="0.4" />
+              <stop offset="70%" stop-color="#bbf7d0" stop-opacity="0.4" />
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+            </linearGradient>
+            <filter id="gentleFluidBlurGreen" x="-40%" y="-15%" width="180%" height="130%">
+              <feGaussianBlur stdDeviation="3" />
+            </filter>
+          </defs>
+          <path
+            class="morphing-concave-path"
+            fill="url(#softDiffuseGreenGrad)"
+          >
+            <animate
+              attributeName="d"
+              dur="4.2s"
+              repeatCount="indefinite"
+              values="
+                M 0 0 C 18 36, 18 88, 0 124 L 52 124 L 52 0 Z;
+                M 0 0 C 22 42, 15 82, 0 124 L 52 124 L 52 0 Z;
+                M 0 0 C 17 37, 20 87, 0 124 L 52 124 L 52 0 Z;
+                M 0 0 C 18 36, 18 88, 0 124 L 52 124 L 52 0 Z
+              "
+              calcMode="spline"
+              keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+            />
+          </path>
+          <path
+            class="morphing-concave-feather"
+            fill="none"
+            stroke="url(#ambientGreenRim)"
+            stroke-width="3"
+            filter="url(#gentleFluidBlurGreen)"
+            opacity="0.5"
+          >
+            <animate
+              attributeName="d"
+              dur="4.2s"
+              repeatCount="indefinite"
+              values="
+                M 0 0 C 18 36, 18 88, 0 124;
+                M 0 0 C 22 42, 15 82, 0 124;
+                M 0 0 C 17 37, 20 87, 0 124;
+                M 0 0 C 18 36, 18 88, 0 124
+              "
+              calcMode="spline"
+              keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+            />
+          </path>
+        </svg>
+        <span class="compressed-label text-green">{{ noLabel }}</span>
+      </button>
+
+      <!-- 2. 选中绿色时：蓝色压缩在最左侧 -->
+      <button
+        v-if="choice === 'no'"
+        type="button"
+        class="compressed-fluid-button button-blue"
+        :title="`点击切换为：${yesLabel}`"
+        :disabled="disabled"
+        @click="onSideClick('yes')"
+      >
+        <svg
+          class="concave-liquid-svg svg-blue"
+          viewBox="0 0 52 124"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient id="softDiffuseBlueGrad" x1="1" y1="0" x2="0" y2="0">
+              <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0" />
+              <stop offset="30%" stop-color="#e0f2fe" stop-opacity="0.18" />
+              <stop offset="60%" stop-color="#e0f2fe" stop-opacity="0.55" />
+              <stop offset="85%" stop-color="#e0f2fe" stop-opacity="0.88" />
+              <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.96" />
+            </linearGradient>
+            <linearGradient id="ambientBlueRim" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+              <stop offset="30%" stop-color="#bae6fd" stop-opacity="0.4" />
+              <stop offset="70%" stop-color="#bae6fd" stop-opacity="0.4" />
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+            </linearGradient>
+            <filter id="gentleFluidBlurBlue" x="-40%" y="-15%" width="180%" height="130%">
+              <feGaussianBlur stdDeviation="3" />
+            </filter>
+          </defs>
+          <path
+            class="morphing-concave-path"
+            fill="url(#softDiffuseBlueGrad)"
+          >
+            <animate
+              attributeName="d"
+              dur="4.2s"
+              repeatCount="indefinite"
+              values="
+                M 52 0 C 34 38, 34 86, 52 124 L 0 124 L 0 0 Z;
+                M 52 0 C 30 42, 37 82, 52 124 L 0 124 L 0 0 Z;
+                M 52 0 C 35 37, 32 87, 52 124 L 0 124 L 0 0 Z;
+                M 52 0 C 34 38, 34 86, 52 124 L 0 124 L 0 0 Z
+              "
+              calcMode="spline"
+              keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+            />
+          </path>
+          <path
+            class="morphing-concave-feather"
+            fill="none"
+            stroke="url(#ambientBlueRim)"
+            stroke-width="3"
+            filter="url(#gentleFluidBlurBlue)"
+            opacity="0.5"
+          >
+            <animate
+              attributeName="d"
+              dur="4.2s"
+              repeatCount="indefinite"
+              values="
+                M 52 0 C 34 38, 34 86, 52 124;
+                M 52 0 C 30 42, 37 82, 52 124;
+                M 52 0 C 35 37, 32 87, 52 124;
+                M 52 0 C 34 38, 34 86, 52 124
+              "
+              calcMode="spline"
+              keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+            />
+          </path>
+        </svg>
+        <span class="compressed-label text-blue">{{ yesLabel }}</span>
+      </button>
 
       <!-- 隐藏重置节点供测试兼容 -->
       <button
@@ -385,9 +299,13 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'update:choice'])
 const input = ref()
+const isHoverBlue = ref(false)
+const isHoverGreen = ref(false)
 
 async function onSideClick(side) {
   if (props.disabled) return
+  isHoverBlue.value = false
+  isHoverGreen.value = false
   if (side === 'yes') {
     emit('update:choice', 'yes')
     if (props.modelValue === props.negativeValue) {
@@ -404,6 +322,8 @@ async function onSideClick(side) {
 function reset() {
   emit('update:choice', null)
   emit('update:modelValue', '')
+  isHoverBlue.value = false
+  isHoverGreen.value = false
 }
 </script>
 
@@ -549,130 +469,125 @@ function reset() {
   }
 }
 
-/* 顶层流体试剂交互层 */
-.fluid-interaction-layer {
+/* ==========================================================================
+   初始状态：蓝绿两色直接贴合无缝咬合（无中间任何白色部分，鼠标悬浮各自全区域完整加深）
+   ========================================================================== */
+.initial-fluid-stage {
   position: absolute;
   inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  display: flex;
+  z-index: 3;
+  overflow: hidden;
+  border-radius: 14px;
 }
 
-/* 试剂色块：更柔缓高级的流体惯性过渡 (0.88s cubic-bezier(0.16, 1, 0.3, 1))，动作丝滑柔润 */
-.fluid-side,
-.fluid-side:focus,
-.fluid-side:focus-visible,
-.fluid-side:active {
+.initial-s-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.initial-fluid-path {
+  stroke: none !important;
+  outline: none !important;
+  cursor: pointer;
+  transition: fill 0.22s ease;
+}
+
+/* 蓝色流体：悬浮时自左边缘直至 S 曲线边界完全覆盖加深，无任何白色隔断 */
+.path-blue {
+  fill: #e0f2fe;
+}
+
+.path-blue.is-hovered,
+.path-blue:hover {
+  fill: #bae6fd;
+}
+
+/* 绿色流体：悬浮时自 S 曲线边界直至右边缘完全覆盖加深，无任何白色隔断 */
+.path-green {
+  fill: #dcfce7;
+}
+
+.path-green.is-hovered,
+.path-green:hover {
+  fill: #bbf7d0;
+}
+
+.initial-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  z-index: 4;
+}
+
+.initial-text {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+.initial-text.text-blue {
+  color: #0369a1;
+}
+
+.initial-text.text-green {
+  color: #15803d;
+}
+
+/* ==========================================================================
+   已选状态：压缩边缘按钮（52px 凹形微澜，去除任何硬黑框与蓝框）
+   ========================================================================== */
+.compressed-fluid-button {
   position: absolute;
   top: 0;
   bottom: 0;
+  width: 52px;
+  z-index: 5;
   border: none !important;
   outline: none !important;
   outline-offset: 0 !important;
   box-shadow: none !important;
   padding: 0;
   margin: 0;
+  background: transparent !important;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
   -webkit-tap-highlight-color: transparent !important;
-  transition:
-    width 0.88s cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 0.75s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.65s ease,
-    transform 0.4s ease;
+  animation: compressedSlideIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* 蓝色试剂侧（默认与压缩态均保持 #e0f2fe 原色，颜色不加深） */
-.fluid-side.side-blue {
-  left: 0;
-  width: 50%;
-  background: #e0f2fe;
-  color: #0369a1;
-  pointer-events: auto;
-  cursor: pointer;
+@keyframes compressedSlideIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.fluid-side.side-blue:hover:not(.is-dissolved):not(.is-compressed) {
-  background: #bae6fd;
-}
-
-/* 绿色试剂侧（默认与压缩态均保持 #dcfce7 原色，颜色不加深） */
-.fluid-side.side-green {
+.compressed-fluid-button.button-green {
   right: 0;
-  width: 50%;
-  background: #dcfce7;
-  color: #15803d;
-  pointer-events: auto;
-  cursor: pointer;
 }
 
-.fluid-side.side-green:hover:not(.is-compressed) {
-  background: #bbf7d0;
+.compressed-fluid-button.button-blue {
+  left: 0;
 }
 
-/* 选择蓝色状态：
-   1. 蓝色自身颜色柔缓淡出消失（透明），平滑自然露出输入框
-   2. 绿色体积柔缓压缩至右边缘（约 52px）
-   3. 绿色试剂呈【超柔缓渐进羽化凹形】，剔除任何突兀硬线，配合柔和弥散光晕
-   4. 颜色保持柔和淡绿，不加深
-*/
-.reagent-choice-card.state-yes .side-blue {
-  width: calc(100% - 52px);
-  background: transparent !important;
-  pointer-events: none;
+.compressed-fluid-button:hover .concave-liquid-svg {
+  filter: brightness(1.05);
 }
 
-.reagent-choice-card.state-yes .side-blue .label-initial {
-  opacity: 0;
-  transform: scale(0.94);
-}
-
-.reagent-choice-card.state-yes .side-green {
-  width: 52px;
-  background: transparent !important;
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-.reagent-choice-card.state-yes .side-green:hover .concave-liquid-svg {
-  filter: brightness(1.04);
-}
-
-/* 选择绿色状态：
-   1. 绿色试剂不消失，舒缓展开铺满右侧（绿色保留）
-   2. 蓝色以 0.88s 柔缓压缩至最左侧（约 52px）
-   3. 蓝色试剂呈【超柔缓渐进羽化凹形】，剔除任何突兀硬线，与右侧绿底自然晕染交融
-   4. 彻底消除点击产生的黑色焦点外框
-*/
-.reagent-choice-card.state-no .side-green {
-  width: calc(100% - 52px);
-  background: transparent !important;
-  pointer-events: none;
-}
-
-.reagent-choice-card.state-no .side-green .label-initial {
-  opacity: 0;
-  transform: scale(0.94);
-}
-
-.reagent-choice-card.state-no .side-blue {
-  width: 52px;
-  background: transparent !important;
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-.reagent-choice-card.state-no .side-blue:hover .concave-liquid-svg {
-  filter: brightness(1.04);
-}
-
-/* 渐进毛玻璃凹形矢量试剂背景（微澜呼吸，柔和淡入） */
 .concave-liquid-svg {
   position: absolute;
   inset: 0;
@@ -680,29 +595,9 @@ function reset() {
   height: 100%;
   display: block;
   pointer-events: none;
-  animation: concaveSvgFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@keyframes concaveSvgFadeIn {
-  0% {
-    opacity: 0;
-    transform: scaleX(0.75);
-  }
-  100% {
-    opacity: 1;
-    transform: scaleX(1);
-  }
-}
-
-/* 文字标签样式：带有柔缓缩放与淡出过渡 */
-.fluid-label.label-initial {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.fluid-label.label-compressed {
+.compressed-label {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -712,50 +607,17 @@ function reset() {
   font-weight: 700;
   letter-spacing: 2px;
   pointer-events: none;
-  z-index: 3;
-  animation: compressedLabelSoftFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  z-index: 6;
 }
 
-@keyframes compressedLabelSoftFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-50%) scale(0.85);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(-50%) scale(1);
-  }
-}
-
-.side-blue .label-compressed {
+.compressed-label.text-blue {
   left: 12px;
   color: #0369a1;
 }
 
-.side-green .label-compressed {
+.compressed-label.text-green {
   right: 12px;
   color: #15803d;
-}
-
-/* 初始状态：明显的 S 形流体交汇隔断膜（显著可见 S 曲线、纯白高光、柔和呼吸张力） */
-.s-membrane-container {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 60px;
-  transform: translateX(-50%);
-  z-index: 5;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.s-membrane-svg {
-  width: 100%;
-  height: 100%;
-  display: block;
 }
 
 /* ==========================================================================
@@ -772,17 +634,14 @@ function reset() {
   z-index: 25;
 }
 
-/* 左侧破口外喷 */
 .spray-left {
   left: -2px;
 }
 
-/* 右侧破口外喷 */
 .spray-right {
   right: -2px;
 }
 
-/* 破裂缝隙光斑柔和微动效 */
 .rupture-fissure {
   position: absolute;
   top: 50%;
