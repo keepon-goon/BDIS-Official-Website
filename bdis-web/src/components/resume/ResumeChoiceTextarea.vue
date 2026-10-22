@@ -1,16 +1,20 @@
 <template>
   <div class="reagent-choice-wrapper" :data-choice="choice || 'pending'">
-    <!-- 破裂外喷气泡群（柔缓物理浮力与微气流逸散，像试管壁微破裂后高压气体柔缓涌出） -->
-    <!-- 状态为“无/不告诉你”时：蓝色被压缩在最左侧，向左外侧区域柔缓喷逸 -->
+    <!-- 破裂外喷气泡群（所有的气泡均从单一破口高压高速喷涌，绝无多个漏洞） -->
+    <!-- 状态为“无/不告诉你”时：蓝色被压缩在最左侧，向左外侧区域自单一破口高速高密喷逸 -->
     <div v-if="choice === 'no'" class="rupture-spray spray-left" aria-hidden="true">
-      <div class="rupture-fissure fissure-left"></div>
-      <span v-for="i in 14" :key="`rb-${i}`" :class="`r-bubble rb-${i}`"></span>
+      <div class="rupture-nozzle">
+        <div class="rupture-fissure"></div>
+        <span v-for="i in 32" :key="`rb-${i}`" :class="`r-bubble rb-${i}`"></span>
+      </div>
     </div>
 
-    <!-- 状态为“有/小露一手”时：绿色被压缩在最右侧，向右外侧区域柔缓喷逸 -->
+    <!-- 状态为“有/小露一手”时：绿色被压缩在最右侧，向右外侧区域自单一破口高速高密喷逸 -->
     <div v-if="choice === 'yes'" class="rupture-spray spray-right" aria-hidden="true">
-      <div class="rupture-fissure fissure-right"></div>
-      <span v-for="i in 14" :key="`rg-${i}`" :class="`r-bubble rg-${i}`"></span>
+      <div class="rupture-nozzle">
+        <div class="rupture-fissure"></div>
+        <span v-for="i in 32" :key="`rg-${i}`" :class="`r-bubble rg-${i}`"></span>
+      </div>
     </div>
 
     <!-- 试管主容器（纯净 Apple 灰边框，彻底消除任何蓝色提示框与黑色焦点框） -->
@@ -836,136 +840,340 @@ function reset() {
 }
 
 /* ==========================================================================
-   试管外侧破裂喷射气泡特效 (Rupture Leak Spray)
-   在被压缩一侧的外侧虚空区域柔缓喷逸，模拟试管微破后气体受浮力与气流缓缓升腾逸散
+   试管外侧高压喷射气泡特效 (High-Pressure Rupture Spray)
+   单一破口单点喷发、高密度超喷射流，32 枚气泡全自中心同一破口疾速喷涌出
    ========================================================================== */
 .rupture-spray {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 60px;
+  width: 140px;
   pointer-events: none;
   z-index: 25;
 }
 
 .spray-left {
-  left: -2px;
+  left: 0;
 }
 
 .spray-right {
-  right: -2px;
+  right: 0;
 }
 
+/* 唯一的破口中心喷嘴（保证所有气泡 100% 自同一原点射出） */
+.rupture-nozzle {
+  position: absolute;
+  top: 50%;
+  width: 0;
+  height: 0;
+}
+
+.spray-left .rupture-nozzle {
+  left: 0;
+}
+
+.spray-right .rupture-nozzle {
+  right: 0;
+}
+
+/* 唯一的破口微裂缝（单点聚焦破损） */
 .rupture-fissure {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 2px;
-  height: 38px;
+  width: 3.5px;
+  height: 20px;
   border-radius: 99px;
-  opacity: 0.65;
-  filter: blur(0.5px);
-  animation: fissurePulse 2.8s ease-in-out infinite;
+  opacity: 0.95;
+  filter: blur(0.3px);
+  animation: fissurePulse 0.9s ease-in-out infinite;
 }
 
-.fissure-left {
-  left: 0;
-  background: linear-gradient(to bottom, transparent, #38bdf8 30%, #7dd3fc 70%, transparent);
+.spray-left .rupture-fissure {
+  left: -2px;
+  background: linear-gradient(to bottom, transparent, #38bdf8 30%, #ffffff 50%, #0284c7 70%, transparent);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.95), 0 0 4px #ffffff;
 }
 
-.fissure-right {
-  right: 0;
-  background: linear-gradient(to bottom, transparent, #4ade80 30%, #86efac 70%, transparent);
+.spray-right .rupture-fissure {
+  right: -2px;
+  background: linear-gradient(to bottom, transparent, #4ade80 30%, #ffffff 50%, #16a34a 70%, transparent);
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.95), 0 0 4px #ffffff;
 }
 
 @keyframes fissurePulse {
   0%, 100% {
-    opacity: 0.3;
-    transform: translateY(-50%) scaleY(0.8);
+    opacity: 0.6;
+    transform: translateY(-50%) scaleY(0.85);
   }
   50% {
-    opacity: 0.85;
-    transform: translateY(-50%) scaleY(1.15);
+    opacity: 1;
+    transform: translateY(-50%) scaleY(1.2);
   }
 }
 
+/* 所有气泡 100% 绝对统一起点：唯一原点 (0, 0) */
 .r-bubble {
   position: absolute;
+  top: 0;
+  left: 0;
   border-radius: 50%;
   pointer-events: none;
   opacity: 0;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.85), inset 0 0 3px rgba(255, 255, 255, 0.9);
 }
 
-/* 蓝色气泡向左侧外部虚空柔缓逸出 */
-.spray-left .rb-1  { width: 5px; height: 5px; background: #38bdf8; top: 22%; left: 0; animation: ruptureFloatLeft 2.5s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.1s; }
-.spray-left .rb-2  { width: 7px; height: 7px; background: #ffffff; top: 34%; left: 0; animation: ruptureFloatLeft 3.0s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.4s; }
-.spray-left .rb-3  { width: 4px; height: 4px; background: #7dd3fc; top: 46%; left: 0; animation: ruptureFloatLeft 2.3s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.2s; }
-.spray-left .rb-4  { width: 8px; height: 8px; background: #0284c7; top: 58%; left: 0; animation: ruptureFloatLeft 3.3s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.7s; }
-.spray-left .rb-5  { width: 5px; height: 5px; background: #ffffff; top: 70%; left: 0; animation: ruptureFloatLeft 2.6s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.3s; }
-.spray-left .rb-6  { width: 6px; height: 6px; background: #38bdf8; top: 28%; left: 0; animation: ruptureFloatLeft 2.8s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.9s; }
-.spray-left .rb-7  { width: 4px; height: 4px; background: #bae6fd; top: 40%; left: 0; animation: ruptureFloatLeft 2.4s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.5s; }
-.spray-left .rb-8  { width: 7px; height: 7px; background: #ffffff; top: 52%; left: 0; animation: ruptureFloatLeft 3.1s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.1s; }
-.spray-left .rb-9  { width: 5px; height: 5px; background: #7dd3fc; top: 64%; left: 0; animation: ruptureFloatLeft 2.5s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.8s; }
-.spray-left .rb-10 { width: 6px; height: 6px; background: #0ea5e9; top: 76%; left: 0; animation: ruptureFloatLeft 2.9s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.3s; }
-.spray-left .rb-11 { width: 4px; height: 4px; background: #ffffff; top: 18%; left: 0; animation: ruptureFloatLeft 2.2s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.0s; }
-.spray-left .rb-12 { width: 6px; height: 6px; background: #38bdf8; top: 82%; left: 0; animation: ruptureFloatLeft 2.8s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.5s; }
-.spray-left .rb-13 { width: 3px; height: 3px; background: #7dd3fc; top: 38%; left: 0; animation: ruptureFloatLeft 2.1s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.45s; }
-.spray-left .rb-14 { width: 5px; height: 5px; background: #ffffff; top: 60%; left: 0; animation: ruptureFloatLeft 2.7s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.85s; }
-
-@keyframes ruptureFloatLeft {
+/* 左侧自单点喷射轨迹 1: 远距水平疾速喷射 */
+@keyframes ruptureJetFarLeft {
   0% {
     opacity: 0;
-    transform: translate(0, 0) scale(0.3);
+    transform: translate(0, 0) scale(0.2);
   }
-  25% {
-    opacity: 0.95;
-    transform: translate(-12px, -8px) scale(1.05);
+  12% {
+    opacity: 1;
+    transform: translate(-32px, -6px) scale(1.25);
   }
-  70% {
-    opacity: 0.75;
-    transform: translate(-28px, -24px) scale(1.15);
+  50% {
+    opacity: 0.92;
+    transform: translate(-76px, -18px) scale(1.05);
+  }
+  80% {
+    opacity: 0.6;
+    transform: translate(-104px, -34px) scale(0.8);
   }
   100% {
     opacity: 0;
-    transform: translate(-42px, -38px) scale(0.2);
+    transform: translate(-124px, -48px) scale(0.1);
   }
 }
 
-/* 绿色气泡向右侧外部虚空柔缓逸出 */
-.spray-right .rg-1  { width: 5px; height: 5px; background: #4ade80; top: 22%; right: 0; animation: ruptureFloatRight 2.5s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.1s; }
-.spray-right .rg-2  { width: 7px; height: 7px; background: #ffffff; top: 34%; right: 0; animation: ruptureFloatRight 3.0s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.4s; }
-.spray-right .rg-3  { width: 4px; height: 4px; background: #86efac; top: 46%; right: 0; animation: ruptureFloatRight 2.3s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.2s; }
-.spray-right .rg-4  { width: 8px; height: 8px; background: #16a34a; top: 58%; right: 0; animation: ruptureFloatRight 3.3s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.7s; }
-.spray-right .rg-5  { width: 5px; height: 5px; background: #ffffff; top: 70%; right: 0; animation: ruptureFloatRight 2.6s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.3s; }
-.spray-right .rg-6  { width: 6px; height: 6px; background: #4ade80; top: 28%; right: 0; animation: ruptureFloatRight 2.8s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.9s; }
-.spray-right .rg-7  { width: 4px; height: 4px; background: #bbf7d0; top: 40%; right: 0; animation: ruptureFloatRight 2.4s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.5s; }
-.spray-right .rg-8  { width: 7px; height: 7px; background: #ffffff; top: 52%; right: 0; animation: ruptureFloatRight 3.1s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.1s; }
-.spray-right .rg-9  { width: 5px; height: 5px; background: #86efac; top: 64%; right: 0; animation: ruptureFloatRight 2.5s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.8s; }
-.spray-right .rg-10 { width: 6px; height: 6px; background: #22c55e; top: 76%; right: 0; animation: ruptureFloatRight 2.9s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.3s; }
-.spray-right .rg-11 { width: 4px; height: 4px; background: #ffffff; top: 18%; right: 0; animation: ruptureFloatRight 2.2s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.0s; }
-.spray-right .rg-12 { width: 6px; height: 6px; background: #4ade80; top: 82%; right: 0; animation: ruptureFloatRight 2.8s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.5s; }
-.spray-right .rg-13 { width: 3px; height: 3px; background: #86efac; top: 38%; right: 0; animation: ruptureFloatRight 2.1s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.45s; }
-.spray-right .rg-14 { width: 5px; height: 5px; background: #ffffff; top: 60%; right: 0; animation: ruptureFloatRight 2.7s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.85s; }
-
-@keyframes ruptureFloatRight {
+/* 左侧自单点喷射轨迹 2: 高角斜上飞扬 */
+@keyframes ruptureJetHighLeft {
   0% {
     opacity: 0;
-    transform: translate(0, 0) scale(0.3);
+    transform: translate(0, 0) scale(0.2);
   }
-  25% {
-    opacity: 0.95;
-    transform: translate(12px, -8px) scale(1.05);
+  15% {
+    opacity: 1;
+    transform: translate(-26px, -24px) scale(1.3);
   }
-  70% {
-    opacity: 0.75;
-    transform: translate(28px, -24px) scale(1.15);
+  55% {
+    opacity: 0.88;
+    transform: translate(-64px, -58px) scale(1.0);
+  }
+  85% {
+    opacity: 0.5;
+    transform: translate(-88px, -82px) scale(0.7);
   }
   100% {
     opacity: 0;
-    transform: translate(42px, -38px) scale(0.2);
+    transform: translate(-105px, -102px) scale(0.1);
   }
 }
+
+/* 左侧自单点喷射轨迹 3: 低角冲出后浮起 */
+@keyframes ruptureJetLowLeft {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.2);
+  }
+  14% {
+    opacity: 1;
+    transform: translate(-28px, 16px) scale(1.2);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(-68px, 12px) scale(1.0);
+  }
+  80% {
+    opacity: 0.55;
+    transform: translate(-96px, -8px) scale(0.75);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-116px, -24px) scale(0.1);
+  }
+}
+
+/* 左侧自单点喷射轨迹 4: 超疾速爆发微气泡 */
+@keyframes ruptureJetFastLeft {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.1);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(-36px, -10px) scale(1.35);
+  }
+  55% {
+    opacity: 0.78;
+    transform: translate(-78px, -26px) scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-102px, -38px) scale(0.1);
+  }
+}
+
+/* 蓝色气泡喷射群 (32枚气泡全部自单点 (0, 0) 射出，绝无分散漏洞) */
+.spray-left .rb-1  { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #38bdf8; animation: ruptureJetFarLeft 0.85s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.02s; }
+.spray-left .rb-2  { width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #ffffff; animation: ruptureJetHighLeft 0.98s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.06s; }
+.spray-left .rb-3  { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #7dd3fc; animation: ruptureJetLowLeft 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.04s; }
+.spray-left .rb-4  { width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; background: #0284c7; animation: ruptureJetFarLeft 1.15s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.1s; }
+.spray-left .rb-5  { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #ffffff; animation: ruptureJetFastLeft 0.72s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.01s; }
+.spray-left .rb-6  { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; background: #38bdf8; animation: ruptureJetLowLeft 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.12s; }
+.spray-left .rb-7  { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #bae6fd; animation: ruptureJetHighLeft 0.82s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.08s; }
+.spray-left .rb-8  { width: 12px; height: 12px; margin: -6px 0 0 -6px; background: #ffffff; animation: ruptureJetFarLeft 1.25s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.15s; }
+.spray-left .rb-9  { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #7dd3fc; animation: ruptureJetHighLeft 0.95s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.18s; }
+.spray-left .rb-10 { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: #0ea5e9; animation: ruptureJetLowLeft 1.02s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.2s; }
+.spray-left .rb-11 { width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; background: #ffffff; animation: ruptureJetFastLeft 0.65s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.05s; }
+.spray-left .rb-12 { width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #38bdf8; animation: ruptureJetFarLeft 0.96s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.24s; }
+.spray-left .rb-13 { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #7dd3fc; animation: ruptureJetFastLeft 0.7s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.14s; }
+.spray-left .rb-14 { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #ffffff; animation: ruptureJetHighLeft 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.28s; }
+.spray-left .rb-15 { width: 10px; height: 10px; margin: -5px 0 0 -5px; background: #0284c7; animation: ruptureJetLowLeft 1.18s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.3s; }
+.spray-left .rb-16 { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #38bdf8; animation: ruptureJetFarLeft 0.88s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.22s; }
+.spray-left .rb-17 { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: #bae6fd; animation: ruptureJetLowLeft 1.08s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.34s; }
+.spray-left .rb-18 { width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; background: #ffffff; animation: ruptureJetHighLeft 0.76s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.16s; }
+.spray-left .rb-19 { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; background: #0ea5e9; animation: ruptureJetFarLeft 1.12s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.38s; }
+.spray-left .rb-20 { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #7dd3fc; animation: ruptureJetFastLeft 0.68s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.26s; }
+.spray-left .rb-21 { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #ffffff; animation: ruptureJetHighLeft 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.42s; }
+.spray-left .rb-22 { width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; background: #38bdf8; animation: ruptureJetFarLeft 1.28s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.46s; }
+.spray-left .rb-23 { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #0284c7; animation: ruptureJetLowLeft 0.98s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.36s; }
+.spray-left .rb-24 { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #ffffff; animation: ruptureJetFastLeft 0.72s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.32s; }
+.spray-left .rb-25 { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: #7dd3fc; animation: ruptureJetHighLeft 0.95s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.48s; }
+.spray-left .rb-26 { width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #bae6fd; animation: ruptureJetLowLeft 1.1s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.5s; }
+.spray-left .rb-27 { width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; background: #ffffff; animation: ruptureJetFastLeft 0.62s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.08s; }
+.spray-left .rb-28 { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #0ea5e9; animation: ruptureJetFarLeft 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.4s; }
+.spray-left .rb-29 { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; background: #ffffff; animation: ruptureJetHighLeft 1.16s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.54s; }
+.spray-left .rb-30 { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #38bdf8; animation: ruptureJetLowLeft 0.86s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.24s; }
+.spray-left .rb-31 { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #7dd3fc; animation: ruptureJetFastLeft 0.75s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.44s; }
+.spray-left .rb-32 { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: #ffffff; animation: ruptureJetFarLeft 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.56s; }
+
+/* 右侧自单点喷射轨迹 1: 远距水平疾速喷射 */
+@keyframes ruptureJetFarRight {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.2);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(32px, -6px) scale(1.25);
+  }
+  50% {
+    opacity: 0.92;
+    transform: translate(76px, -18px) scale(1.05);
+  }
+  80% {
+    opacity: 0.6;
+    transform: translate(104px, -34px) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(124px, -48px) scale(0.1);
+  }
+}
+
+/* 右侧自单点喷射轨迹 2: 高角斜上飞扬 */
+@keyframes ruptureJetHighRight {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.2);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(26px, -24px) scale(1.3);
+  }
+  55% {
+    opacity: 0.88;
+    transform: translate(64px, -58px) scale(1.0);
+  }
+  85% {
+    opacity: 0.5;
+    transform: translate(88px, -82px) scale(0.7);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(105px, -102px) scale(0.1);
+  }
+}
+
+/* 右侧自单点喷射轨迹 3: 低角冲出后浮起 */
+@keyframes ruptureJetLowRight {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.2);
+  }
+  14% {
+    opacity: 1;
+    transform: translate(28px, 16px) scale(1.2);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(68px, 12px) scale(1.0);
+  }
+  80% {
+    opacity: 0.55;
+    transform: translate(96px, -8px) scale(0.75);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(116px, -24px) scale(0.1);
+  }
+}
+
+/* 右侧自单点喷射轨迹 4: 超疾速爆发微气泡 */
+@keyframes ruptureJetFastRight {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.1);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(36px, -10px) scale(1.35);
+  }
+  55% {
+    opacity: 0.78;
+    transform: translate(78px, -26px) scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(102px, -38px) scale(0.1);
+  }
+}
+
+/* 绿色气泡喷射群 (32枚气泡全部自单点 (0, 0) 射出，绝无分散漏洞) */
+.spray-right .rg-1  { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #4ade80; animation: ruptureJetFarRight 0.85s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.02s; }
+.spray-right .rg-2  { width: 8px; height: 8px; margin: -4px -4px 0 0; background: #ffffff; animation: ruptureJetHighRight 0.98s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.06s; }
+.spray-right .rg-3  { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #86efac; animation: ruptureJetLowRight 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.04s; }
+.spray-right .rg-4  { width: 11px; height: 11px; margin: -5.5px -5.5px 0 0; background: #16a34a; animation: ruptureJetFarRight 1.15s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.1s; }
+.spray-right .rg-5  { width: 6px; height: 6px; margin: -3px -3px 0 0; background: #ffffff; animation: ruptureJetFastRight 0.72s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.01s; }
+.spray-right .rg-6  { width: 9px; height: 9px; margin: -4.5px -4.5px 0 0; background: #4ade80; animation: ruptureJetLowRight 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.12s; }
+.spray-right .rg-7  { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #bbf7d0; animation: ruptureJetHighRight 0.82s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.08s; }
+.spray-right .rg-8  { width: 12px; height: 12px; margin: -6px -6px 0 0; background: #ffffff; animation: ruptureJetFarRight 1.25s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.15s; }
+.spray-right .rg-9  { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #86efac; animation: ruptureJetHighRight 0.95s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.18s; }
+.spray-right .rg-10 { width: 7px; height: 7px; margin: -3.5px -3.5px 0 0; background: #22c55e; animation: ruptureJetLowRight 1.02s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.2s; }
+.spray-right .rg-11 { width: 3px; height: 3px; margin: -1.5px -1.5px 0 0; background: #ffffff; animation: ruptureJetFastRight 0.65s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.05s; }
+.spray-right .rg-12 { width: 8px; height: 8px; margin: -4px -4px 0 0; background: #4ade80; animation: ruptureJetFarRight 0.96s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.24s; }
+.spray-right .rg-13 { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #86efac; animation: ruptureJetFastRight 0.7s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.14s; }
+.spray-right .rg-14 { width: 6px; height: 6px; margin: -3px -3px 0 0; background: #ffffff; animation: ruptureJetHighRight 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.28s; }
+.spray-right .rg-15 { width: 10px; height: 10px; margin: -5px -5px 0 0; background: #16a34a; animation: ruptureJetLowRight 1.18s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.3s; }
+.spray-right .rg-16 { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #4ade80; animation: ruptureJetFarRight 0.88s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.22s; }
+.spray-right .rg-17 { width: 7px; height: 7px; margin: -3.5px -3.5px 0 0; background: #bbf7d0; animation: ruptureJetLowRight 1.08s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.34s; }
+.spray-right .rg-18 { width: 3px; height: 3px; margin: -1.5px -1.5px 0 0; background: #ffffff; animation: ruptureJetHighRight 0.76s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.16s; }
+.spray-right .rg-19 { width: 9px; height: 9px; margin: -4.5px -4.5px 0 0; background: #22c55e; animation: ruptureJetFarRight 1.12s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.38s; }
+.spray-right .rg-20 { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #86efac; animation: ruptureJetFastRight 0.68s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.26s; }
+.spray-right .rg-21 { width: 6px; height: 6px; margin: -3px -3px 0 0; background: #ffffff; animation: ruptureJetHighRight 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.42s; }
+.spray-right .rg-22 { width: 13px; height: 13px; margin: -6.5px -6.5px 0 0; background: #4ade80; animation: ruptureJetFarRight 1.28s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.46s; }
+.spray-right .rg-23 { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #16a34a; animation: ruptureJetLowRight 0.98s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.36s; }
+.spray-right .rg-24 { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #ffffff; animation: ruptureJetFastRight 0.72s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.32s; }
+.spray-right .rg-25 { width: 7px; height: 7px; margin: -3.5px -3.5px 0 0; background: #86efac; animation: ruptureJetHighRight 0.95s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.48s; }
+.spray-right .rg-26 { width: 8px; height: 8px; margin: -4px -4px 0 0; background: #bbf7d0; animation: ruptureJetLowRight 1.1s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.5s; }
+.spray-right .rg-27 { width: 3px; height: 3px; margin: -1.5px -1.5px 0 0; background: #ffffff; animation: ruptureJetFastRight 0.62s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.08s; }
+.spray-right .rg-28 { width: 6px; height: 6px; margin: -3px -3px 0 0; background: #22c55e; animation: ruptureJetFarRight 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.4s; }
+.spray-right .rg-29 { width: 9px; height: 9px; margin: -4.5px -4.5px 0 0; background: #ffffff; animation: ruptureJetHighRight 1.16s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.54s; }
+.spray-right .rg-30 { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #4ade80; animation: ruptureJetLowRight 0.86s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.24s; }
+.spray-right .rg-31 { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #86efac; animation: ruptureJetFastRight 0.75s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.44s; }
+.spray-right .rg-32 { width: 7px; height: 7px; margin: -3.5px -3.5px 0 0; background: #ffffff; animation: ruptureJetFarRight 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.56s; }
 
 .visually-hidden {
   position: absolute !important;
