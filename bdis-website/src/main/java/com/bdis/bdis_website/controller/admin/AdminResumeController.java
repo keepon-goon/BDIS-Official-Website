@@ -23,4 +23,9 @@ public class AdminResumeController {
     public Result<ResumeSettingsVO> settings() {
         return Result.success(service.settings());
     }
+
+    @PutMapping("/settings")
+    public Result<ResumeSettingsVO> updateSettings(@jakarta.validation.Valid @RequestBody com.bdis.bdis_website.dto.ResumeSettingsDTO form) {
+        return Result.success(service.updateSettings(form));
+    }
 }

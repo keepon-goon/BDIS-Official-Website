@@ -163,6 +163,17 @@ public class ResumeServiceImpl implements ResumeService {
         return new com.bdis.bdis_website.vo.ResumeSettingsVO(rules.getSendMode(), rules.getRecipient(), mail.configured());
     }
 
+    @Override
+    public com.bdis.bdis_website.vo.ResumeSettingsVO updateSettings(com.bdis.bdis_website.dto.ResumeSettingsDTO form) {
+        var rules = settings.selectById(1L);
+        if (rules == null) throw new ResumeException(503, "报名设置尚未初始化，请联系管理员");
+        rules.setSendMode(form.sendMode());
+        rules.setRecipient(form.recipient().strip());
+        rules.setUpdatedAt(LocalDateTime.now(clock));
+        if (settings.updateById(rules) != 1) throw new ResumeException(500, "设置保存失败，请重试");
+        return settings();
+    }
+
     @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
     public void recoverUncertainMail() {
         try {

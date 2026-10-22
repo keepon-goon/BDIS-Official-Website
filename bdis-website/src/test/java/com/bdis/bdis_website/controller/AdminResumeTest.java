@@ -28,4 +28,19 @@ class AdminResumeTest {
                 .andExpect(jsonPath("$.data.password").doesNotExist())
                 .andExpect(header().string("Cache-Control", "no-store"));
     }
+
+    @Test
+    void updatesMailModeAndRecipientWithoutSendingAnything() throws Exception {
+        mvc.perform(put("/api/admin/resumes/settings").contentType("application/json")
+                .content("{\"sendMode\":\"MANUAL\",\"recipient\":\"test@example.com\"}"))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(put("/api/admin/resumes/settings").header("Authorization", auth()).contentType("application/json")
+                .content("{\"sendMode\":\"MANUAL\",\"recipient\":\"test@example.com\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.sendMode").value("MANUAL"));
+        mvc.perform(get("/api/admin/resumes/settings").header("Authorization", auth()))
+                .andExpect(jsonPath("$.data.recipient").value("test@example.com"));
+        mvc.perform(put("/api/admin/resumes/settings").header("Authorization", auth()).contentType("application/json")
+                .content("{\"sendMode\":\"INVALID\",\"recipient\":\"bad\"}"))
+                .andExpect(status().isBadRequest());
+    }
 }

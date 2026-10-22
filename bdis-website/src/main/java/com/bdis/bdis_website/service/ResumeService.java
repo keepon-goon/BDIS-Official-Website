@@ -11,6 +11,7 @@ public interface ResumeService {
                            org.springframework.web.multipart.MultipartFile word, String sourceToken);
     com.bdis.bdis_website.vo.ResumeSubmitVO confirm(String token);
     com.bdis.bdis_website.vo.ResumeSettingsVO settings();
+    com.bdis.bdis_website.vo.ResumeSettingsVO updateSettings(com.bdis.bdis_website.dto.ResumeSettingsDTO form);
 
     record ResumeFile(byte[] bytes, String filename) { }
 }
