@@ -55,10 +55,10 @@
         </div>
       </div>
 
-      <!-- 顶层流体试剂交互层：保持元素常驻以维持 0.88s 果冻质感压缩过渡动效 -->
+      <!-- 顶层流体试剂交互层：保持元素常驻，完美模仿上方比赛按钮 cubic-bezier(0.25, 1, 0.5, 1) 的果冻质感过渡 -->
       <div class="fluid-interaction-layer">
         <!-- 蓝色试剂侧 (有 / 小露一手)：
-             未选择时占 50% 宽，选有(yes)时柔缓淡出露出输入框，选无(no)时以 0.88s 果冻动效压缩至最左侧 52px
+             未选择时占 50% 宽，选有(yes)时柔缓淡出露出输入框，选无(no)时以同款果冻动效压缩至最左侧 52px
         -->
         <button
           type="button"
@@ -148,12 +148,13 @@
           <span v-if="choice === 'no'" class="fluid-label label-compressed text-blue">{{ yesLabel }}</span>
         </button>
 
-        <!-- 初始状态中央 S 形流体无缝直接贴合层：
-             宽度 60px 居中置于 50% 处，蓝绿两色公用同一条 S 曲线，0 缝隙，0 白线，悬浮全区域完整加深
+        <!-- 试剂交汇液面 (Reagent Meniscus)：
+             模仿比赛按钮的 .reagent-meniscus，随点击沿管体横向平滑滑动 (transition: left 0.48s cubic-bezier(0.25, 1, 0.5, 1))
+             初始居中 50%，选有(yes)时随绿色压缩滑向右端，选无(no)时随蓝色压缩滑向左端
+             两色共用同一条 S 曲线，0 缝隙，0 白线，悬浮各自全区域完整加深
         -->
         <div
-          class="s-seam-container"
-          :class="{ 'is-hidden': !!choice }"
+          class="reagent-meniscus-tube"
           aria-hidden="true"
         >
           <svg class="s-seam-svg" viewBox="0 0 60 124" preserveAspectRatio="none">
@@ -162,8 +163,8 @@
               class="seam-path seam-blue"
               :class="{ 'is-hovered': isHoverBlue }"
               :fill="isHoverBlue ? '#bae6fd' : '#e0f2fe'"
-              @mouseenter="isHoverBlue = true"
-              @mouseleave="isHoverBlue = false"
+              @mouseenter="!choice && (isHoverBlue = true)"
+              @mouseleave="!choice && (isHoverBlue = false)"
               @click.stop="onSideClick('yes')"
             >
               <animate
@@ -186,8 +187,8 @@
               class="seam-path seam-green"
               :class="{ 'is-hovered': isHoverGreen }"
               :fill="isHoverGreen ? '#bbf7d0' : '#dcfce7'"
-              @mouseenter="isHoverGreen = true"
-              @mouseleave="isHoverGreen = false"
+              @mouseenter="!choice && (isHoverGreen = true)"
+              @mouseleave="!choice && (isHoverGreen = false)"
               @click.stop="onSideClick('no')"
             >
               <animate
@@ -208,7 +209,7 @@
         </div>
 
         <!-- 绿色试剂侧 (无 / 不告诉你)：
-             未选择时占 50% 宽，选有(yes)时以 0.88s 果冻动效压缩至最右侧 52px，选无(no)时展开保留绿色背景
+             未选择时占 50% 宽，选有(yes)时以比赛按钮同款果冻动效压缩至最右侧 52px，选无(no)时展开保留绿色背景
         -->
         <button
           type="button"
@@ -399,7 +400,7 @@ function reset() {
   height: 100%;
   padding-right: 64px;
   box-sizing: border-box;
-  animation: contentGentleFadeIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: contentGentleFadeIn 0.48s cubic-bezier(0.25, 1, 0.5, 1) both;
 }
 
 .chamber-seamless-textarea {
@@ -456,7 +457,7 @@ function reset() {
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  animation: contentGentleFadeIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: contentGentleFadeIn 0.48s cubic-bezier(0.25, 1, 0.5, 1) both;
 }
 
 .pure-statement-container {
@@ -478,7 +479,7 @@ function reset() {
   line-height: 1.5;
   border: none !important;
   outline: none !important;
-  animation: statementSoftRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: statementSoftRise 0.5s cubic-bezier(0.25, 1, 0.5, 1) both;
 }
 
 @keyframes contentGentleFadeIn {
@@ -503,7 +504,9 @@ function reset() {
 
 /* ==========================================================================
    顶层流体试剂交互层：
-   两端元素持久驻留，通过 0.88s cubic-bezier(0.16, 1, 0.3, 1) 呈现果冻质感收缩动效
+   完全模仿上方比赛按钮动画机制：
+   - 试剂侧采用 width 0.48s cubic-bezier(0.25, 1, 0.5, 1) 结合 active 缩放 (transform: scale(0.985))
+   - 中间交汇液面沿管体横向平滑滑动 (left 0.48s cubic-bezier(0.25, 1, 0.5, 1))
    ========================================================================== */
 .fluid-interaction-layer {
   position: absolute;
@@ -513,11 +516,10 @@ function reset() {
   display: flex;
 }
 
-/* 试剂色块：更柔缓高级的流体惯性过渡 (0.88s cubic-bezier(0.16, 1, 0.3, 1))，果冻弹材质感 */
+/* 试剂色块：完全对标比赛按钮的流畅度 (0.48s cubic-bezier(0.25, 1, 0.5, 1)) 与轻微触觉回弹 */
 .fluid-side,
 .fluid-side:focus,
-.fluid-side:focus-visible,
-.fluid-side:active {
+.fluid-side:focus-visible {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -533,10 +535,15 @@ function reset() {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent !important;
   transition:
-    width 0.88s cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 0.25s ease,
-    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.4s ease;
+    width 0.48s cubic-bezier(0.25, 1, 0.5, 1),
+    background-color 0.22s ease,
+    opacity 0.42s cubic-bezier(0.25, 1, 0.5, 1),
+    transform 0.15s ease;
+}
+
+/* 点击时的即时触觉微缩放响应（与比赛按钮一致） */
+.fluid-side:active:not(.is-compressed):not(.is-dissolved) {
+  transform: scale(0.985);
 }
 
 /* 蓝色试剂侧（默认 50% 宽，原色 #e0f2fe） */
@@ -577,22 +584,36 @@ function reset() {
 }
 
 /* --------------------------------------------------------------------------
-   初始状态 S 形无缝直接咬合层 (Central S-Seam Interface)
-   位于 50% 宽度中心（宽 60px），两色共用同一条 S 曲线，完全消除白色分割线与矩形断层
+   动态试剂交汇液面 (Reagent Meniscus Tube Interface)
+   对标比赛按钮的 .reagent-meniscus：
+   - 宽度 60px，默认 left: 50%
+   - 随用户选择，以 left 0.48s cubic-bezier(0.25, 1, 0.5, 1) 平滑横向滑行动画
+   - 选有(yes)时随绿色压缩滑向右端 (left: calc(100% - 26px))
+   - 选无(no)时随蓝色压缩滑向左端 (left: 26px)
+   - 蓝绿两色共用同一条 S 曲线边界，0 间隙，0 白线，悬浮各自全区域完整加深
    -------------------------------------------------------------------------- */
-.s-seam-container {
+.reagent-meniscus-tube {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 50%;
   width: 60px;
   transform: translateX(-50%);
-  z-index: 3;
+  z-index: 4;
   pointer-events: auto;
-  transition: opacity 0.3s ease;
+  transition:
+    left 0.48s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.45s ease;
 }
 
-.s-seam-container.is-hidden {
+.reagent-choice-card.state-yes .reagent-meniscus-tube {
+  left: calc(100% - 26px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reagent-choice-card.state-no .reagent-meniscus-tube {
+  left: 26px;
   opacity: 0;
   pointer-events: none;
 }
@@ -607,7 +628,7 @@ function reset() {
   stroke: none !important;
   outline: none !important;
   cursor: pointer;
-  transition: fill 0.25s ease;
+  transition: fill 0.22s ease;
 }
 
 .seam-blue {
@@ -636,7 +657,7 @@ function reset() {
    状态分支：
    A. 选择蓝色 (state-yes):
       - 蓝色柔缓淡出消失（透明），平滑自然露出输入框
-      - 绿色体积以 0.88s 果冻质感向右边缘压缩至 52px
+      - 绿色体积以 0.48s 丝滑果冻动效压缩至 52px
       - 压缩在右侧的绿色显示柔缓渐进羽化凹形毛玻璃液面
    -------------------------------------------------------------------------- */
 .reagent-choice-card.state-yes .side-blue {
@@ -668,7 +689,7 @@ function reset() {
 /* --------------------------------------------------------------------------
    B. 选择绿色 (state-no):
       - 绿色试剂不消失，舒缓展开铺满右侧（绿色保留），显示温馨寄语
-      - 蓝色以 0.88s 果冻质感向左边缘压缩至 52px
+      - 蓝色以 0.48s 丝滑果冻动效向左边缘压缩至 52px
       - 压缩在左侧的蓝色显示柔缓渐进羽化凹形毛玻璃液面
    -------------------------------------------------------------------------- */
 .reagent-choice-card.state-no .side-green {
@@ -704,13 +725,13 @@ function reset() {
   height: 100%;
   display: block;
   pointer-events: none;
-  animation: concaveFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: concaveFadeIn 0.45s cubic-bezier(0.25, 1, 0.5, 1) both;
 }
 
 @keyframes concaveFadeIn {
   0% {
     opacity: 0;
-    transform: scaleX(0.8);
+    transform: scaleX(0.85);
   }
   100% {
     opacity: 1;
@@ -723,7 +744,7 @@ function reset() {
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.5px;
-  transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   pointer-events: none;
 }
 
@@ -738,7 +759,7 @@ function reset() {
   letter-spacing: 2px;
   pointer-events: none;
   z-index: 6;
-  animation: compressedLabelFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  animation: compressedLabelFadeIn 0.45s cubic-bezier(0.25, 1, 0.5, 1) 0.08s both;
 }
 
 @keyframes compressedLabelFadeIn {
