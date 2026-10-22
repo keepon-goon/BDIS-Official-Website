@@ -51,6 +51,8 @@ class ResumeAccessTest {
                 .andExpect(status().isNotFound()).andExpect(jsonPath("$.code").value(1));
         mvc.perform(get("/api/resume/previews/pdf").header("X-Resume-Preview-Token", token))
                 .andExpect(status().isOk()).andExpect(content().contentType("application/pdf"))
+                .andExpect(header().doesNotExist("Content-Disposition"))
+                .andExpect(header().exists("X-Resume-Filename"))
                 .andExpect(header().string("Cache-Control", "no-store"));
     }
 

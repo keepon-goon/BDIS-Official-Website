@@ -13,17 +13,20 @@ import org.springframework.stereotype.Service;
 public class ResumeMailService {
     private final ObjectProvider<JavaMailSender> sender;
     private final String from;
+    private final String password;
     private final ResumeStorageService storage;
 
     public ResumeMailService(ObjectProvider<JavaMailSender> sender,
-                              @Value("${spring.mail.username:}") String from, ResumeStorageService storage) {
+                              @Value("${spring.mail.username:}") String from,
+                              @Value("${spring.mail.password:}") String password, ResumeStorageService storage) {
         this.sender = sender;
         this.from = from;
+        this.password = password;
         this.storage = storage;
     }
 
     public boolean configured() {
-        return !from.isBlank() && sender.getIfAvailable() != null;
+        return !from.isBlank() && !password.isBlank() && sender.getIfAvailable() != null;
     }
 
     public void send(ResumeSubmission submission, String recipient) throws Exception {

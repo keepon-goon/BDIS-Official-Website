@@ -129,6 +129,8 @@ public class ResumeServiceImpl implements ResumeService {
                     conversions.convert(word);
                     if (Thread.currentThread().isInterrupted()) throw new ResumeException(503, "照片合成已取消，请重试");
                     synchronized (stateLock) {
+                        if (Thread.currentThread().isInterrupted() || confirmed(oldHash) != null)
+                            throw new ResumeException(409, "预览已确认或本次更新已取消，请重新生成");
                         var active = storage.load(token);
                         storage.publish(work, snapshot);
                         active.setSuperseded(true);
@@ -340,7 +342,7 @@ public class ResumeServiceImpl implements ResumeService {
             case 2 -> "报名已保存，邮件服务器已接受发送";
             case 1 -> "报名已保存，邮件处理中或结果待核实，请勿重复提交";
             case 3 -> "报名已保存，邮件暂未成功，管理员可稍后补发";
-            default -> "报名已保存，等待管理员发送";
+            default -> "AUTO".equals(record.getSubmitMailMode()) ? "报名已保存，正在准备发送邮件" : "报名已保存，等待管理员发送";
         };
         return new ResumeSubmitVO(record.getId().toString(), record.getCreatedAt().atZone(clock.getZone()).toOffsetDateTime(), status, message);
     }
@@ -349,7 +351,15 @@ public class ResumeServiceImpl implements ResumeService {
     public ResumePreviewVO upload(com.bdis.bdis_website.dto.ResumeUploadDTO index,
                                   org.springframework.web.multipart.MultipartFile upload, String sourceToken) {
         if (upload.getSize() > 10L * 1024 * 1024) throw new ResumeException(413, "Word文档不能超过10MB");
-        String year = sourceToken == null || sourceToken.isBlank() ? documents.currentAcademicYear() : storage.load(sourceToken).getAcademicYear();
+        String inheritedYear = documents.currentAcademicYear();
+        if (sourceToken != null && !sourceToken.isBlank()) {
+            try {
+                inheritedYear = storage.load(sourceToken).getAcademicYear();
+            } catch (ResumeException expired) {
+                if (expired.getStatus() != 404 && expired.getStatus() != 410) throw expired;
+            }
+        }
+        String year = inheritedYear;
         return conversions.execute(() -> {
             byte[] bytes = documents.validateUpload(upload);
             String token = storage.newToken();

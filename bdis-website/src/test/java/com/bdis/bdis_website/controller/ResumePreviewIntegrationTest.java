@@ -123,6 +123,19 @@ class ResumePreviewIntegrationTest {
         }
     }
 
+    @Test
+    void expiredSourceDoesNotBlockEditedWordAndLongOnlineTextIsRejected() throws Exception {
+        mvc.perform(multipart("/api/resume/submit")
+                        .file(new MockMultipartFile("resume", "已编辑.docx", "application/octet-stream", documents.blankTemplate()))
+                        .param("name", "测试").param("studentNo", "001").param("phone", "13800000000")
+                        .header("X-Resume-Preview-Token", "c".repeat(64)))
+                .andExpect(status().isOk());
+        var form = json.readTree(new ClassPathResource("resume-form.json").getContentAsByteArray());
+        ((com.fasterxml.jackson.databind.node.ObjectNode) form).put("intro", "测试内容\n".repeat(100));
+        mvc.perform(post("/api/resume/previews").contentType("application/json").content(json.writeValueAsBytes(form)))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
     private MockMultipartFile picture(int width, int height, Color color) throws Exception {
         var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         var graphics = image.createGraphics();

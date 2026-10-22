@@ -68,10 +68,12 @@ public class ResumeController {
     }
 
     public static ResponseEntity<byte[]> download(byte[] bytes, String filename, boolean pdf) {
-        return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .header(HttpHeaders.CONTENT_DISPOSITION, (pdf ? ContentDisposition.inline() : ContentDisposition.attachment())
-                        .filename(filename, StandardCharsets.UTF_8).build().toString())
-                .contentType(MediaType.parseMediaType(pdf ? "application/pdf" :
+        var response = ResponseEntity.ok()
+                .header("X-Resume-Filename", java.net.URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20"))
+                .header("Access-Control-Expose-Headers", "Content-Disposition, X-Resume-Filename");
+        if (!pdf) response.header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
+                .filename(filename, StandardCharsets.UTF_8).build().toString());
+        return response.contentType(MediaType.parseMediaType(pdf ? "application/pdf" :
                         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
                 .body(bytes);
     }

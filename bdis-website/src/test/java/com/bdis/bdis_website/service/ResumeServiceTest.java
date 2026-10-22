@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +22,8 @@ import java.time.Instant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -32,6 +36,13 @@ class ResumeServiceTest {
     @Autowired private ResumeSubmissionMapper submissions;
     @Autowired private ResumeService service;
     @Autowired private com.bdis.bdis_website.config.ResumeProperties properties;
+    @MockBean private ResumeMailService mail;
+
+    @BeforeEach
+    void disableRealMail() throws Exception {
+        doThrow(new com.bdis.bdis_website.exception.ResumeException(503, "邮件服务未配置，管理员可配置后补发"))
+                .when(mail).send(any(ResumeSubmission.class), anyString());
+    }
 
     private String preview() throws Exception {
         String token = storage.newToken();
@@ -123,5 +134,28 @@ class ResumeServiceTest {
         var second = java.util.concurrent.CompletableFuture.supplyAsync(() -> service.confirm(token));
         assertThat(first.get().submissionId()).isEqualTo(second.get().submissionId());
         assertThat(submissions.selectCount(null)).isEqualTo(before + 1);
+    }
+
+    @Test
+    void automaticSendRunsOnceAfterDatabaseCommit() throws Exception {
+        var rules = settings.selectById(1L);
+        rules.setSendMode("AUTO");
+        rules.setRecipient("test@example.com");
+        settings.updateById(rules);
+        String token = preview();
+        var snapshot = storage.load(token);
+        byte[] expected = Files.readAllBytes(storage.directory("previews", snapshot.getTokenHash()).resolve(snapshot.getDocumentName() + ".docx"));
+        doAnswer(invocation -> {
+            ResumeSubmission record = invocation.getArgument(0);
+            assertThat(java.util.concurrent.CompletableFuture.supplyAsync(() -> submissions.selectById(record.getId()))
+                    .get(2, java.util.concurrent.TimeUnit.SECONDS)).isNotNull();
+            assertThat(storage.savedFile(record.getWordKey())).isEqualTo(expected);
+            return null;
+        }).when(mail).send(any(ResumeSubmission.class), eq("test@example.com"));
+        mvc.perform(post("/api/resume/confirm").header("X-Resume-Preview-Token", token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.mailStatus").value(2));
+        mvc.perform(post("/api/resume/confirm").header("X-Resume-Preview-Token", token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.mailStatus").value(2));
+        verify(mail, times(1)).send(any(ResumeSubmission.class), eq("test@example.com"));
     }
 }

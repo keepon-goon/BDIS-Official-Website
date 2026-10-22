@@ -57,8 +57,12 @@ public class ResumeConversionService {
             if (docker) {
                 command.addAll(List.of(properties.getDockerPath(), "run", "--rm", "--name", container,
                         "--network", "none", "--cpus", "1", "--memory", "768m", "--pids-limit", "256",
-                        "--mount", "type=bind,source=" + directory.toAbsolutePath() + ",target=/data",
-                        properties.getDockerImage(), "soffice", "-env:UserInstallation=file:///data/profile"));
+                        "--mount", "type=bind,source=" + directory.toAbsolutePath() + ",target=/data"));
+                if (Files.getFileStore(directory).supportsFileAttributeView("unix")) {
+                    command.addAll(List.of("--user", Files.getAttribute(directory, "unix:uid") + ":" + Files.getAttribute(directory, "unix:gid"),
+                            "--env", "HOME=/tmp"));
+                }
+                command.addAll(List.of(properties.getDockerImage(), "soffice", "-env:UserInstallation=file:///data/profile"));
             } else {
                 command.addAll(List.of(properties.getLibreofficePath(), "-env:UserInstallation=" + profile.toUri()));
             }

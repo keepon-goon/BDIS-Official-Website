@@ -37,7 +37,7 @@ class ResumeMailServiceTest {
         when(sender.createMimeMessage()).thenReturn(new MimeMessage(Session.getInstance(new Properties())));
         var beans = new DefaultListableBeanFactory();
         beans.registerSingleton("mail", sender);
-        var service = new ResumeMailService(beans.getBeanProvider(JavaMailSender.class), "sender@example.com", storage);
+        var service = new ResumeMailService(beans.getBeanProvider(JavaMailSender.class), "sender@example.com", "test-only-password", storage);
         var record = new ResumeSubmission();
         record.setName("测试同学");
         record.setStudentNo("000001");
@@ -54,5 +54,16 @@ class ResumeMailServiceTest {
         var attachment = multipart.getBodyPart(1);
         assertThat(attachment.getFileName()).isEqualTo(record.getDocumentName() + ".docx");
         assertThat(attachment.getInputStream().readAllBytes()).isEqualTo(original);
+    }
+
+    @Test
+    void missingPasswordIsReportedAsNotConfigured() throws Exception {
+        var properties = new ResumeProperties();
+        properties.setStorageRoot(temporary.resolve("private").toString());
+        var storage = new ResumeStorageService(properties, new ObjectMapper(), Clock.systemUTC(), temporary.resolve("public").toString());
+        var beans = new DefaultListableBeanFactory();
+        beans.registerSingleton("mail", mock(JavaMailSender.class));
+        var service = new ResumeMailService(beans.getBeanProvider(JavaMailSender.class), "sender@example.com", "", storage);
+        assertThat(service.configured()).isFalse();
     }
 }

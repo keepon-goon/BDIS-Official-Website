@@ -23,6 +23,12 @@ class ResumeDocumentServiceTest {
         assertThat(ResumeDocumentService.academicYear(LocalDate.of(2027, 8, 31))).isEqualTo("2026-2027");
         assertThat(ResumeDocumentService.academicYear(LocalDate.of(2027, 9, 1))).isEqualTo("2027-2028");
         assertThat(ResumeDocumentService.academicYear(LocalDate.of(2027, 1, 1))).isEqualTo("2026-2027");
+        var beforeMidnight = new ResumeDocumentService(new ResumeProperties(), new DefaultResourceLoader(),
+                Clock.fixed(Instant.parse("2027-08-31T15:59:00Z"), ZoneOffset.UTC));
+        var afterMidnight = new ResumeDocumentService(new ResumeProperties(), new DefaultResourceLoader(),
+                Clock.fixed(Instant.parse("2027-08-31T16:00:00Z"), ZoneOffset.UTC));
+        assertThat(beforeMidnight.currentAcademicYear()).isEqualTo("2026-2027");
+        assertThat(afterMidnight.currentAcademicYear()).isEqualTo("2027-2028");
     }
 
     @Test

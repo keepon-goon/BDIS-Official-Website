@@ -161,5 +161,14 @@ public class ResumeStorageService {
         } catch (IOException e) {
             org.slf4j.LoggerFactory.getLogger(getClass()).warn("简历过期检查暂不可用");
         }
+        try (var stream = Files.list(root.resolve("work"))) {
+            for (Path directory : stream.toList()) {
+                if (Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)
+                        && Files.getLastModifiedTime(directory).toInstant().isBefore(clock.instant().minusSeconds(7200)))
+                    deleteTemporary(directory);
+            }
+        } catch (IOException e) {
+            org.slf4j.LoggerFactory.getLogger(getClass()).warn("简历遗留工作目录检查暂不可用");
+        }
     }
 }
