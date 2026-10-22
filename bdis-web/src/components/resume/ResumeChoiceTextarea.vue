@@ -1,61 +1,18 @@
 <template>
-  <div class="resume-choice" :data-choice="choice || 'pending'">
-    <!-- 试剂交汇试管切换条（双色试剂、压缩保留色条、多气泡动态交汇） -->
-    <div
-      class="choice-reagent-tube"
-      :class="{
-        'state-initial': !choice,
-        'state-yes': choice === 'yes',
-        'state-no': choice === 'no'
-      }"
-    >
-      <!-- 蓝色试剂侧 (有 / 小露一手) -->
-      <button
-        type="button"
-        class="choice-side side-blue"
-        :class="{ 'is-expanded': choice === 'yes', 'is-compressed': choice === 'no' }"
-        :title="choice === 'no' ? `点击切换为：${yesLabel}` : ''"
-        :disabled="disabled"
-        @click="chooseSide('yes')"
-      >
-        <span v-if="choice !== 'no'" class="choice-label-full">{{ yesLabel }}</span>
-        <span v-else class="choice-label-mini">{{ yesLabel }}</span>
-        <span v-if="choice === 'yes'" class="choice-dot">✓</span>
-      </button>
-
-      <!-- 中间动态交汇液面与密集冒泡 -->
-      <div class="choice-meniscus" :class="{ 'is-active': !!choice }">
-        <div class="choice-wave"></div>
-        <div class="choice-bubble cb-1"></div>
-        <div class="choice-bubble cb-2"></div>
-        <div class="choice-bubble cb-3"></div>
-        <div class="choice-bubble cb-4"></div>
-        <div class="choice-bubble cb-5"></div>
-        <div class="choice-bubble cb-6"></div>
-        <div class="choice-bubble cb-7"></div>
-        <div class="choice-bubble cb-8"></div>
-        <div class="choice-bubble cb-9"></div>
-        <div class="choice-bubble cb-10"></div>
-      </div>
-
-      <!-- 绿色试剂侧 (无 / 不告诉你) -->
-      <button
-        type="button"
-        class="choice-side side-green"
-        :class="{ 'is-expanded': choice === 'no', 'is-compressed': choice === 'yes' }"
-        :title="choice === 'yes' ? `点击切换为：${noLabel}` : ''"
-        :disabled="disabled"
-        @click="chooseSide('no')"
-      >
-        <span v-if="choice !== 'yes'" class="choice-label-full">{{ noLabel }}</span>
-        <span v-else class="choice-label-mini">{{ noLabel }}</span>
-        <span v-if="choice === 'no'" class="choice-dot">✓</span>
-      </button>
-    </div>
-
-    <!-- 文本内容区域 -->
-    <div class="choice-body">
-      <div v-show="choice === 'yes' || !choice" class="choice-input-container">
+  <div
+    class="reagent-choice-card"
+    :class="{
+      'state-initial': !choice,
+      'state-yes': choice === 'yes',
+      'state-no': choice === 'no',
+      'is-disabled': disabled
+    }"
+    :data-choice="choice || 'pending'"
+  >
+    <!-- 底层内容（输入框或婉拒卡片，完全位于液体选择图层之下） -->
+    <div class="underlay-content">
+      <!-- 选择蓝色（有/小露一手）后，蓝色液体消失，直接露出输入框 -->
+      <div v-show="choice === 'yes' || !choice" class="underlay-input-wrap">
         <el-input
           :id="id"
           ref="input"
@@ -65,34 +22,91 @@
           maxlength="500"
           show-word-limit
           :placeholder="placeholder"
-          :disabled="disabled || !choice"
+          :disabled="disabled || choice !== 'yes'"
+          class="chamber-textarea"
           @update:model-value="emit('update:modelValue', $event)"
         />
-        <div v-if="!choice" class="choice-initial-mask" @click="chooseSide('yes')">
-          <span>点击上方试剂条选择状态</span>
-        </div>
       </div>
 
-      <!-- 选择“无 / 不告诉你”时的委婉陈述卡片 -->
-      <div v-if="choice === 'no'" class="choice-declined-card">
+      <!-- 选择绿色（无/不告诉你）后，绿色液体消失，露出婉拒寄语 -->
+      <div v-if="choice === 'no'" class="underlay-declined-wrap">
         <el-input
           :id="id"
           ref="inputHidden"
           :model-value="modelValue"
           type="textarea"
-          :rows="2"
-          class="hidden-test-input"
+          class="visually-hidden"
           @update:model-value="emit('update:modelValue', $event)"
         />
-        <div class="declined-content">
-          <span class="declined-badge">已选择：{{ noLabel }}</span>
-          <p class="declined-text">{{ declinedText }}</p>
-          <span class="declined-hint">（点击最左侧蓝色试剂条可重新切回编辑）</span>
+        <div class="declined-card-inner">
+          <span class="declined-pill">已选择：{{ noLabel }}</span>
+          <p class="declined-quote">{{ declinedText }}</p>
+          <span class="declined-tip">（点击最左侧蓝色色条可重新展开填写）</span>
         </div>
       </div>
     </div>
 
-    <!-- 隐藏的重置按钮（保留无害DOM节点供旧测试兼容，UI中完全无缝移除） -->
+    <!-- 顶层液体交互层（双色液体、中心振动隔断膜、挤压气泡喷射） -->
+    <div class="liquid-overlay">
+      <!-- 蓝色试剂层 (有 / 小露一手) -->
+      <button
+        type="button"
+        class="liquid-side side-blue"
+        :class="{
+          'is-active-fill': !choice,
+          'is-dissolved': choice === 'yes',
+          'is-compressed': choice === 'no'
+        }"
+        :title="choice === 'no' ? `点击切换为：${yesLabel}` : ''"
+        :disabled="disabled"
+        @click="onSideClick('yes')"
+      >
+        <!-- 初始状态居中文本 -->
+        <span v-if="!choice" class="liquid-label label-initial">{{ yesLabel }}</span>
+
+        <!-- 压缩在最左侧时的竖排指示文本与切换按钮 -->
+        <span v-if="choice === 'no'" class="liquid-label label-compressed">{{ yesLabel }}</span>
+
+        <!-- 压缩在最左侧时，超自己左方喷出的大量蓝色气泡 -->
+        <div v-if="choice === 'no'" class="spray-bubble-chamber spray-to-left">
+          <span v-for="i in 12" :key="`bb-${i}`" :class="`s-bubble bb-${i}`"></span>
+        </div>
+      </button>
+
+      <!-- 两个液体公用的振动边界膜（仅在初始状态显示，无冒泡，膜本身在一直晃动被双方冲击） -->
+      <div v-if="!choice" class="fluid-dividing-membrane">
+        <div class="membrane-glow"></div>
+        <div class="membrane-line"></div>
+        <div class="membrane-impact-pulse"></div>
+      </div>
+
+      <!-- 绿色试剂层 (无 / 不告诉你) -->
+      <button
+        type="button"
+        class="liquid-side side-green"
+        :class="{
+          'is-active-fill': !choice,
+          'is-dissolved': choice === 'no',
+          'is-compressed': choice === 'yes'
+        }"
+        :title="choice === 'yes' ? `点击切换为：${noLabel}` : ''"
+        :disabled="disabled"
+        @click="onSideClick('no')"
+      >
+        <!-- 初始状态居中文本 -->
+        <span v-if="!choice" class="liquid-label label-initial">{{ noLabel }}</span>
+
+        <!-- 压缩在最右侧时的竖排指示文本与切换按钮 -->
+        <span v-if="choice === 'yes'" class="liquid-label label-compressed">{{ noLabel }}</span>
+
+        <!-- 压缩在最右侧时，超自己右方喷出的大量绿色气泡 -->
+        <div v-if="choice === 'yes'" class="spray-bubble-chamber spray-to-right">
+          <span v-for="i in 12" :key="`gb-${i}`" :class="`s-bubble gb-${i}`"></span>
+        </div>
+      </button>
+    </div>
+
+    <!-- 隐藏的重置节点（保证测试兼容性） -->
     <button
       type="button"
       class="resume-choice-reset visually-hidden"
@@ -124,7 +138,7 @@ const emit = defineEmits(['update:modelValue', 'update:choice'])
 const input = ref()
 const inputHidden = ref()
 
-async function chooseSide(side) {
+async function onSideClick(side) {
   if (props.disabled) return
   if (side === 'yes') {
     emit('update:choice', 'yes')
@@ -146,385 +160,385 @@ function reset() {
 </script>
 
 <style scoped>
-.resume-choice {
-  width: 100%;
-}
-
-/* 试管试剂外观 */
-.choice-reagent-tube {
+.reagent-choice-card {
   position: relative;
   width: 100%;
-  height: 44px;
-  border-radius: 980px;
-  background-color: #f1f5f9;
+  min-height: 124px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #ffffff;
   border: 1.5px solid #d2d2d7;
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), inset 0 -1px 3px rgba(0, 0, 0, 0.08), 0 3px 10px rgba(0, 0, 0, 0.03);
-  display: flex;
-  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
   user-select: none;
-  margin-bottom: 12px;
-  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.choice-side {
-  position: relative;
-  height: 100%;
+.reagent-choice-card.state-yes {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12), 0 4px 12px rgba(2, 132, 199, 0.06);
+}
+
+.reagent-choice-card.state-no {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12), 0 4px 12px rgba(22, 163, 74, 0.06);
+}
+
+/* 底层内容区域（输入框与婉拒卡片位于此处） */
+.underlay-content {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: none;
-  cursor: pointer;
-  z-index: 2;
-  transition: width 0.45s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.2s ease, opacity 0.2s ease, transform 0.15s ease;
-  overflow: hidden;
+}
+
+.underlay-input-wrap {
+  width: 100%;
+  height: 100%;
+  padding-right: 42px;
   box-sizing: border-box;
 }
 
-.choice-side:active {
-  transform: scale(0.98);
+.chamber-textarea {
+  width: 100%;
+  height: 100%;
 }
 
-/* 蓝色试剂侧 (有 / 小露一手) */
-.choice-side.side-blue {
-  width: 50%;
-  background: #e0f2fe;
-  color: #0369a1;
-  padding: 0 16px;
-}
-
-/* 绿色试剂侧 (无 / 不告诉你) */
-.choice-side.side-green {
-  width: 50%;
-  background: #dcfce7;
-  color: #15803d;
-  padding: 0 16px;
-}
-
-/* 压缩态与展开态 (被选择后另一方保留一点颜色条，点击可切回) */
-.choice-reagent-tube.state-yes .side-blue {
-  width: 86%;
-}
-
-.choice-reagent-tube.state-yes .side-green {
-  width: 14%;
-  cursor: pointer;
-  opacity: 0.9;
-  background: #bbf7d0;
-}
-
-.choice-reagent-tube.state-yes .side-green:hover {
-  opacity: 1;
-  background: #86efac;
-}
-
-.choice-reagent-tube.state-no .side-blue {
-  width: 14%;
-  cursor: pointer;
-  opacity: 0.9;
-  background: #bae6fd;
-}
-
-.choice-reagent-tube.state-no .side-blue:hover {
-  opacity: 1;
-  background: #7dd3fc;
-}
-
-.choice-reagent-tube.state-no .side-green {
-  width: 86%;
-}
-
-.choice-label-full {
+.chamber-textarea :deep(.el-textarea__inner) {
+  height: 100% !important;
+  min-height: 120px !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  resize: none;
   font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
+  line-height: 1.6;
+  padding: 14px 16px;
+  color: #1e293b;
 }
 
-.choice-label-mini {
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
+.chamber-textarea :deep(.el-input__count) {
+  background: transparent !important;
+  right: 12px;
+  bottom: 8px;
 }
 
-.choice-dot {
-  font-size: 13px;
-  font-weight: 700;
-}
-
-/* 中间液面分界 */
-.choice-meniscus {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 34px;
-  transform: translateX(-50%);
-  pointer-events: none;
-  z-index: 5;
-  transition: left 0.45s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.choice-reagent-tube.state-yes .choice-meniscus {
-  left: 86%;
-}
-
-.choice-reagent-tube.state-no .choice-meniscus {
-  left: 14%;
-}
-
-.choice-wave {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(90deg, #e0f2fe 0%, rgba(224, 242, 254, 0.85) 40%, rgba(220, 252, 231, 0.85) 60%, #dcfce7 100%);
-  filter: blur(1.5px);
-  animation: waveUndulate 2.6s ease-in-out infinite alternate;
-}
-
-@keyframes waveUndulate {
-  0% {
-    transform: scaleX(0.85) skewX(-4deg);
-    opacity: 0.9;
-  }
-  100% {
-    transform: scaleX(1.15) skewX(4deg);
-    opacity: 1;
-  }
-}
-
-/* 密集冒泡特效 */
-.choice-bubble {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  opacity: 0;
-}
-
-.cb-1 {
-  width: 6px;
-  height: 6px;
-  background: #38bdf8;
-  top: 60%;
-  left: 30%;
-  animation: bubbleToRight 3.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-}
-
-.cb-2 {
-  width: 5px;
-  height: 5px;
-  background: #38bdf8;
-  top: 30%;
-  left: 35%;
-  animation: bubbleToRight 4.4s cubic-bezier(0.25, 1, 0.5, 1) infinite 1.5s;
-}
-
-.cb-3 {
-  width: 6px;
-  height: 6px;
-  background: #4ade80;
-  top: 50%;
-  right: 30%;
-  animation: bubbleToLeft 3.6s cubic-bezier(0.25, 1, 0.5, 1) infinite 0.8s;
-}
-
-.cb-4 {
-  width: 7px;
-  height: 7px;
-  background: #4ade80;
-  top: 25%;
-  right: 35%;
-  animation: bubbleToLeft 4.8s cubic-bezier(0.25, 1, 0.5, 1) infinite 2.2s;
-}
-
-.cb-5 {
-  width: 7px;
-  height: 7px;
-  background: #ffffff;
-  box-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
-  top: 70%;
-  left: 45%;
-  animation: bubbleToRight 2.8s cubic-bezier(0.25, 1, 0.5, 1) infinite 0.4s;
-}
-
-.cb-6 {
-  width: 5px;
-  height: 5px;
-  background: #ffffff;
-  box-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
-  top: 20%;
-  right: 45%;
-  animation: bubbleToLeft 3.1s cubic-bezier(0.25, 1, 0.5, 1) infinite 1.2s;
-}
-
-/* 选中后被压缩端产生的高频活跃气泡 */
-.cb-7 {
-  width: 4px;
-  height: 4px;
-  background: #38bdf8;
-  top: 40%;
-  left: 20%;
-  opacity: 0;
-}
-
-.cb-8 {
-  width: 6px;
-  height: 6px;
-  background: #4ade80;
-  top: 65%;
-  right: 20%;
-  opacity: 0;
-}
-
-.cb-9 {
-  width: 5px;
-  height: 5px;
-  background: #ffffff;
-  box-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
-  top: 15%;
-  left: 50%;
-  opacity: 0;
-}
-
-.cb-10 {
-  width: 4px;
-  height: 4px;
-  background: #60a5fa;
-  top: 75%;
-  right: 40%;
-  opacity: 0;
-}
-
-/* 状态激活后（选择一方后），气泡更多更密更活跃 */
-.choice-meniscus.is-active .choice-bubble {
-  animation-duration: 2s !important;
-}
-
-.choice-meniscus.is-active .cb-7 {
-  animation: bubbleToRight 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite 0.2s;
-}
-
-.choice-meniscus.is-active .cb-8 {
-  animation: bubbleToLeft 2.4s cubic-bezier(0.25, 1, 0.5, 1) infinite 0.6s;
-}
-
-.choice-meniscus.is-active .cb-9 {
-  animation: bubbleToRight 1.9s cubic-bezier(0.25, 1, 0.5, 1) infinite 1.0s;
-}
-
-.choice-meniscus.is-active .cb-10 {
-  animation: bubbleToLeft 2.1s cubic-bezier(0.25, 1, 0.5, 1) infinite 1.4s;
-}
-
-@keyframes bubbleToRight {
-  0% {
-    opacity: 0;
-    transform: translate(0, 4px) scale(0.5);
-  }
-  20% {
-    opacity: 0.95;
-    transform: translate(4px, -1px) scale(1);
-  }
-  75% {
-    opacity: 0.8;
-    transform: translate(16px, -12px) scale(1.15);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(22px, -18px) scale(0.3);
-  }
-}
-
-@keyframes bubbleToLeft {
-  0% {
-    opacity: 0;
-    transform: translate(0, 4px) scale(0.5);
-  }
-  25% {
-    opacity: 0.9;
-    transform: translate(-4px, -2px) scale(1);
-  }
-  75% {
-    opacity: 0.75;
-    transform: translate(-14px, -12px) scale(1.15);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-22px, -18px) scale(0.3);
-  }
-}
-
-/* 内容区域 */
-.choice-body {
+.underlay-declined-wrap {
   width: 100%;
-}
-
-.choice-input-container {
-  position: relative;
-  width: 100%;
-}
-
-.choice-initial-mask {
-  position: absolute;
-  inset: 0;
-  background: rgba(250, 250, 252, 0.85);
-  backdrop-filter: blur(2px);
+  height: 100%;
+  padding-left: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
-  cursor: pointer;
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 500;
-  border: 1px dashed #cbd5e1;
-}
-
-.choice-declined-card {
-  position: relative;
-  padding: 16px 20px;
+  box-sizing: border-box;
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
   animation: bdisFadeIn 0.3s ease;
 }
 
-.hidden-test-input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  height: 0;
-  overflow: hidden;
-}
-
-.declined-content {
+.declined-card-inner {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 6px;
+  padding: 16px;
+  text-align: center;
 }
 
-.declined-badge {
+.declined-pill {
   font-size: 12px;
   font-weight: 600;
   color: #15803d;
   background: #dcfce7;
-  padding: 2px 10px;
+  padding: 2px 12px;
   border-radius: 980px;
-  width: fit-content;
 }
 
-.declined-text {
-  margin: 4px 0 0;
-  font-size: 14px;
+.declined-quote {
+  margin: 2px 0 0;
+  font-size: 15px;
   color: #334155;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-.declined-hint {
+.declined-tip {
   font-size: 12px;
   color: #94a3b8;
+}
+
+/* 顶层液体遮罩交互层 */
+.liquid-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+}
+
+.liquid-side {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: width 0.42s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.35s ease, opacity 0.3s ease, transform 0.2s ease;
+}
+
+/* 蓝色试剂侧 */
+.liquid-side.side-blue {
+  left: 0;
+  width: 50%;
+  background: #e0f2fe;
+  color: #0369a1;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.liquid-side.side-blue:hover:not(.is-dissolved):not(.is-compressed) {
+  background: #bae6fd;
+}
+
+/* 绿色试剂侧 */
+.liquid-side.side-green {
+  right: 0;
+  width: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.liquid-side.side-green:hover:not(.is-dissolved):not(.is-compressed) {
+  background: #bbf7d0;
+}
+
+/* 选中蓝色：蓝色液体消失露出输入框，绿色压缩到最右侧（宽度压缩到现在的一半：约 34px） */
+.reagent-choice-card.state-yes .side-blue {
+  width: calc(100% - 34px);
+  background: transparent !important;
+  pointer-events: none;
+}
+
+.reagent-choice-card.state-yes .side-blue .label-initial {
+  opacity: 0;
+}
+
+.reagent-choice-card.state-yes .side-green {
+  width: 34px;
+  background: #22c55e;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: -2px 0 8px rgba(34, 197, 94, 0.3);
+}
+
+.reagent-choice-card.state-yes .side-green:hover {
+  background: #16a34a;
+}
+
+/* 选中绿色：绿色液体消失露出寄语，蓝色压缩到最左侧（宽度压缩到现在的一半：约 34px） */
+.reagent-choice-card.state-no .side-green {
+  width: calc(100% - 34px);
+  background: transparent !important;
+  pointer-events: none;
+}
+
+.reagent-choice-card.state-no .side-green .label-initial {
+  opacity: 0;
+}
+
+.reagent-choice-card.state-no .side-blue {
+  width: 34px;
+  background: #0284c7;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 2px 0 8px rgba(2, 132, 199, 0.3);
+}
+
+.reagent-choice-card.state-no .side-blue:hover {
+  background: #0369a1;
+}
+
+/* 标签样式 */
+.liquid-label.label-initial {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: opacity 0.25s ease;
+}
+
+.liquid-label.label-compressed {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* 两个液体公用的振动隔断膜（初始状态显示，晃动激烈，无冒泡） */
+.fluid-dividing-membrane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 14px;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: membraneOscillate 1.3s ease-in-out infinite alternate;
+}
+
+.membrane-line {
+  width: 3.5px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.6) 20%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(255, 255, 255, 0.6) 80%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  border-radius: 99px;
+  box-shadow:
+    -2px 0 6px rgba(14, 165, 233, 0.85),
+    2px 0 6px rgba(34, 197, 94, 0.85),
+    0 0 5px #ffffff;
+}
+
+.membrane-glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(14, 165, 233, 0.35) 0%,
+    rgba(255, 255, 255, 0.75) 50%,
+    rgba(34, 197, 94, 0.35) 100%
+  );
+  filter: blur(5px);
+}
+
+.membrane-impact-pulse {
+  position: absolute;
+  width: 100%;
+  height: 44px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, transparent 75%);
+  animation: membraneNodeScan 2.1s ease-in-out infinite alternate;
+}
+
+@keyframes membraneOscillate {
+  0% {
+    transform: translateX(calc(-50% - 4px)) scaleX(0.85) skewX(-2.5deg);
+  }
+  25% {
+    transform: translateX(calc(-50% + 5px)) scaleX(1.35) skewX(3deg);
+  }
+  50% {
+    transform: translateX(calc(-50% - 3px)) scaleX(0.9) skewX(-1.8deg);
+  }
+  75% {
+    transform: translateX(calc(-50% + 4px)) scaleX(1.25) skewX(2.2deg);
+  }
+  100% {
+    transform: translateX(calc(-50% - 5px)) scaleX(1.1) skewX(-2.8deg);
+  }
+}
+
+@keyframes membraneNodeScan {
+  0% { top: 5%; opacity: 0.5; }
+  100% { top: 70%; opacity: 0.9; }
+}
+
+/* 喷射气泡容器 */
+.spray-bubble-chamber {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.s-bubble {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+/* 绿色试剂被挤压时超自己右方喷射的大量气泡 */
+.spray-to-right .gb-1  { width: 4px; height: 4px; background: #86efac; top: 16%; left: 4px; animation: sprayRight 1.3s ease-out infinite 0.1s; }
+.spray-to-right .gb-2  { width: 6px; height: 6px; background: #ffffff; top: 28%; left: 6px; animation: sprayRight 1.6s ease-out infinite 0.4s; }
+.spray-to-right .gb-3  { width: 5px; height: 5px; background: #4ade80; top: 42%; left: 3px; animation: sprayRight 1.4s ease-out infinite 0.2s; }
+.spray-to-right .gb-4  { width: 7px; height: 7px; background: #bbf7d0; top: 58%; left: 5px; animation: sprayRight 1.8s ease-out infinite 0.6s; }
+.spray-to-right .gb-5  { width: 4px; height: 4px; background: #ffffff; top: 74%; left: 8px; animation: sprayRight 1.2s ease-out infinite 0.3s; }
+.spray-to-right .gb-6  { width: 6px; height: 6px; background: #22c55e; top: 22%; left: 2px; animation: sprayRight 1.5s ease-out infinite 0.8s; }
+.spray-to-right .gb-7  { width: 5px; height: 5px; background: #86efac; top: 36%; left: 7px; animation: sprayRight 1.4s ease-out infinite 0.5s; }
+.spray-to-right .gb-8  { width: 7px; height: 7px; background: #ffffff; top: 50%; left: 4px; animation: sprayRight 1.9s ease-out infinite 0.9s; }
+.spray-to-right .gb-9  { width: 4px; height: 4px; background: #4ade80; top: 66%; left: 6px; animation: sprayRight 1.3s ease-out infinite 0.7s; }
+.spray-to-right .gb-10 { width: 5px; height: 5px; background: #bbf7d0; top: 82%; left: 3px; animation: sprayRight 1.6s ease-out infinite 1.1s; }
+.spray-to-right .gb-11 { width: 6px; height: 6px; background: #ffffff; top: 10%; left: 5px; animation: sprayRight 1.4s ease-out infinite 1.0s; }
+.spray-to-right .gb-12 { width: 4px; height: 4px; background: #86efac; top: 90%; left: 7px; animation: sprayRight 1.3s ease-out infinite 1.2s; }
+
+@keyframes sprayRight {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.3);
+  }
+  20% {
+    opacity: 0.95;
+    transform: translate(4px, -3px) scale(1);
+  }
+  60% {
+    opacity: 0.85;
+    transform: translate(12px, -8px) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(20px, -14px) scale(0.2);
+  }
+}
+
+/* 蓝色试剂被挤压时超自己左方喷射的大量气泡 */
+.spray-to-left .bb-1  { width: 4px; height: 4px; background: #7dd3fc; top: 16%; right: 4px; animation: sprayLeft 1.3s ease-out infinite 0.1s; }
+.spray-to-left .bb-2  { width: 6px; height: 6px; background: #ffffff; top: 28%; right: 6px; animation: sprayLeft 1.6s ease-out infinite 0.4s; }
+.spray-to-left .bb-3  { width: 5px; height: 5px; background: #38bdf8; top: 42%; right: 3px; animation: sprayLeft 1.4s ease-out infinite 0.2s; }
+.spray-to-left .bb-4  { width: 7px; height: 7px; background: #bae6fd; top: 58%; right: 5px; animation: sprayLeft 1.8s ease-out infinite 0.6s; }
+.spray-to-left .bb-5  { width: 4px; height: 4px; background: #ffffff; top: 74%; right: 8px; animation: sprayLeft 1.2s ease-out infinite 0.3s; }
+.spray-to-left .bb-6  { width: 6px; height: 6px; background: #0284c7; top: 22%; right: 2px; animation: sprayLeft 1.5s ease-out infinite 0.8s; }
+.spray-to-left .bb-7  { width: 5px; height: 5px; background: #7dd3fc; top: 36%; right: 7px; animation: sprayLeft 1.4s ease-out infinite 0.5s; }
+.spray-to-left .bb-8  { width: 7px; height: 7px; background: #ffffff; top: 50%; right: 4px; animation: sprayLeft 1.9s ease-out infinite 0.9s; }
+.spray-to-left .bb-9  { width: 4px; height: 4px; background: #38bdf8; top: 66%; right: 6px; animation: sprayLeft 1.3s ease-out infinite 0.7s; }
+.spray-to-left .bb-10 { width: 5px; height: 5px; background: #bae6fd; top: 82%; right: 3px; animation: sprayLeft 1.6s ease-out infinite 1.1s; }
+.spray-to-left .bb-11 { width: 6px; height: 6px; background: #ffffff; top: 10%; right: 5px; animation: sprayLeft 1.4s ease-out infinite 1.0s; }
+.spray-to-left .bb-12 { width: 4px; height: 4px; background: #7dd3fc; top: 90%; right: 7px; animation: sprayLeft 1.3s ease-out infinite 1.2s; }
+
+@keyframes sprayLeft {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.3);
+  }
+  20% {
+    opacity: 0.95;
+    transform: translate(-4px, -3px) scale(1);
+  }
+  60% {
+    opacity: 0.85;
+    transform: translate(-12px, -8px) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-20px, -14px) scale(0.2);
+  }
 }
 
 .visually-hidden {
