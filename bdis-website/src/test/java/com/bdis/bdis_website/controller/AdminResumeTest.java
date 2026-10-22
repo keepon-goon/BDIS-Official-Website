@@ -126,4 +126,19 @@ class AdminResumeTest {
                 .andExpect(header().exists("Content-Disposition"))
                 .andExpect(content().bytes(storage.savedFile(record.getWordKey())));
     }
+
+    @Test
+    void manualSendRequiresAdminAndRecordsFailureWithoutDeletingWord() throws Exception {
+        var record = savedRecord();
+        byte[] original = storage.savedFile(record.getWordKey());
+        mvc.perform(post("/api/admin/resumes/" + record.getId() + "/email")).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/admin/resumes/" + record.getId() + "/email").header("Authorization", auth()))
+                .andExpect(status().isServiceUnavailable()).andExpect(jsonPath("$.message").value("邮件服务未配置，管理员可配置后补发"));
+        org.assertj.core.api.Assertions.assertThat(submissions.selectById(record.getId()).getMailStatus()).isEqualTo(3);
+        org.assertj.core.api.Assertions.assertThat(storage.savedFile(record.getWordKey())).isEqualTo(original);
+        record.setMailStatus(1);
+        submissions.updateById(record);
+        mvc.perform(post("/api/admin/resumes/" + record.getId() + "/email").header("Authorization", auth()))
+                .andExpect(status().isConflict());
+    }
 }

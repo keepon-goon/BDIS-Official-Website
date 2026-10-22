@@ -15,6 +15,7 @@ public interface ResumeService {
     PageResult list(int page, int pageSize, String name, String studentNo, Integer mailStatus);
     com.bdis.bdis_website.vo.ResumeAdminVO detail(long id);
     ResumeFile savedFile(long id, boolean pdf);
+    com.bdis.bdis_website.vo.ResumeSubmitVO send(long id);
 
     record PageResult(java.util.List<com.bdis.bdis_website.vo.ResumeAdminVO> list, long total, int page, int pageSize) { }
 

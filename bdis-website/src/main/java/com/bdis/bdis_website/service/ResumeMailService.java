@@ -27,9 +27,9 @@ public class ResumeMailService {
     }
 
     public void send(ResumeSubmission submission, String recipient) throws Exception {
+        byte[] bytes = storage.savedFile(submission.getWordKey());
         if (!configured()) throw new ResumeException(503, "邮件服务未配置，管理员可配置后补发");
         if (recipient == null || recipient.isBlank()) throw new ResumeException(503, "尚未设置目标邮箱，管理员可设置后补发");
-        byte[] bytes = storage.savedFile(submission.getWordKey());
         var mailSender = sender.getObject();
         var message = mailSender.createMimeMessage();
         var helper = new MimeMessageHelper(message, true, "UTF-8");

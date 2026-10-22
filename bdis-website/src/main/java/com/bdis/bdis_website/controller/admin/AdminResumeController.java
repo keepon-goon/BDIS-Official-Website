@@ -52,4 +52,9 @@ public class AdminResumeController {
         var file = service.savedFile(id, false);
         return com.bdis.bdis_website.controller.ResumeController.download(file.bytes(), file.filename(), false);
     }
+
+    @PostMapping("/{id}/email")
+    public Result<com.bdis.bdis_website.vo.ResumeSubmitVO> send(@PathVariable long id) {
+        return Result.success(service.send(id));
+    }
 }

@@ -216,6 +216,20 @@ public class ResumeServiceImpl implements ResumeService {
                 record.getDocumentName() + (pdf ? ".pdf" : ".docx"));
     }
 
+    @Override
+    public ResumeSubmitVO send(long id) {
+        var record = requireRecord(id);
+        if (record.getDocumentName() == null || record.getWordKey() == null)
+            throw new ResumeException(409, "历史记录没有新版Word，无法发送");
+        var rules = settings.selectById(1L);
+        if (rules == null) throw new ResumeException(503, "报名设置尚未初始化");
+        attemptMail(record, rules.getRecipient());
+        var latest = requireRecord(id);
+        if (!Integer.valueOf(2).equals(latest.getMailStatus()))
+            throw new ResumeException(503, latest.getMailLastError() == null ? "发送结果待核实，请稍后查看" : latest.getMailLastError());
+        return submitView(latest);
+    }
+
     @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
     public void recoverUncertainMail() {
         try {
