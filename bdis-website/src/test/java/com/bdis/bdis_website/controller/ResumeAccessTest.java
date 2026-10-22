@@ -61,4 +61,15 @@ class ResumeAccessTest {
         mvc.perform(get("/api/resume/previews/pdf").header("X-Resume-Preview-Token", token))
                 .andExpect(status().isGone()).andExpect(jsonPath("$.code").value(1));
     }
+
+    @Test
+    void wordDownloadsExactPrivateBytesAndRejectsInvalidToken() throws Exception {
+        mvc.perform(get("/api/resume/previews/word")).andExpect(status().isNotFound());
+        mvc.perform(get("/api/resume/previews/word").header("X-Resume-Preview-Token", token))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                .andExpect(content().bytes(new byte[]{80, 75, 3, 4}))
+                .andExpect(header().exists("Content-Disposition"))
+                .andExpect(header().string("Cache-Control", "no-store"));
+    }
 }
