@@ -13,24 +13,25 @@
       </div>
     </transition>
 
-    <!-- Apple 风格分段进度指示条 -->
+    <!-- Apple 风格分段进度指示条 (提交后更新为全部完成) -->
     <div class="resume-step-indicator">
       <div class="step-node is-done">
         <span class="step-badge">✓</span>
         <span>在线填写</span>
       </div>
       <span class="step-sep">›</span>
-      <div class="step-node" :class="{ 'is-active': !resumeDraft.submission, 'is-done': resumeDraft.submission }">
-        <span class="step-badge">{{ resumeDraft.submission ? '✓' : '2' }}</span>
+      <div class="step-node is-done">
+        <span class="step-badge">✓</span>
         <span>排版预览</span>
       </div>
       <span class="step-sep">›</span>
-      <div class="step-node" :class="{ 'is-active': resumeDraft.submission }">
-        <span class="step-badge">3</span>
-        <span>确认提交</span>
+      <div class="step-node" :class="{ 'is-done is-active': resumeDraft.submission, 'is-active': !resumeDraft.submission }">
+        <span class="step-badge">{{ resumeDraft.submission ? '✓' : '3' }}</span>
+        <span>{{ resumeDraft.submission ? '提交完成' : '确认提交' }}</span>
       </div>
     </div>
 
+    <!-- 提交成功展示面板 -->
     <template v-if="resumeDraft.submission">
       <el-result icon="success" title="报名已成功保存" :sub-title="resumeDraft.submission.message">
         <template #extra>
@@ -43,6 +44,8 @@
         </template>
       </el-result>
     </template>
+
+    <!-- 预览与核对面板 -->
     <template v-else-if="preview">
       <h1>核对报名表预览</h1>
       <p class="resume-lead">请核对全部内容与分页效果 你可以下载当前 Word 自行贴照，也可以上传照片合成后再次预览 </p>
@@ -76,10 +79,11 @@
           @ready="renderedUrl = $event" @error="renderFailed" />
       </div>
       <div class="resume-actions">
-        <el-button type="primary" size="large" :loading="operation === 'confirm'" :disabled="!canConfirm" @click="confirm">确认当前版本并提交</el-button>
+        <el-button type="primary" size="large" :loading="operation === 'confirm'" :disabled="!canConfirm" @click="promptConfirm">确认当前版本并提交</el-button>
         <span class="resume-note">预览有效期至 {{ new Date(preview.expiresAt).toLocaleString() }}</span>
       </div>
     </template>
+
     <div v-else class="resume-empty">
       <h1>请先生成报名表预览</h1>
       <p class="resume-note">页面刷新或预览凭证丢失后，需要重新填写生成，或上传已保存的 Word </p>
@@ -88,6 +92,26 @@
         <el-button @click="router.push('/resume/upload')">上传已填写 Word</el-button>
       </div>
     </div>
+
+    <!-- Apple 风格提交二次确认对话框 -->
+    <el-dialog
+      v-model="showConfirmDialog"
+      title="确认提交招新报名表"
+      width="440px"
+      align-center
+      :close-on-click-modal="false"
+      class="apple-confirm-dialog"
+    >
+      <div class="confirm-dialog-content">
+        <p class="confirm-dialog-desc">提交后将正式保存并登记为你的报名记录 提交后将不可修改 确认要现在提交吗 </p>
+      </div>
+      <template #footer>
+        <div class="confirm-dialog-actions">
+          <el-button @click="showConfirmDialog = false">返回检查</el-button>
+          <el-button type="primary" :loading="operation === 'confirm'" @click="executeConfirm">确认提交</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </section>
 </template>
 
@@ -98,6 +122,7 @@ import { WarningFilled, Close } from '@element-plus/icons-vue'
 import ResumePdfPreview from '../components/resume/ResumePdfPreview.vue'
 import { resumeDraft, setResumePreview, resetResumeDraft } from '../utils/resumeDraft'
 import { resumeApi, downloadResumeFile } from '../utils/resumeApi'
+import { launchCelebrationConfetti } from '../utils/confetti'
 import '../assets/resume.css'
 
 const router = useRouter()
@@ -109,6 +134,7 @@ const renderedUrl = ref('')
 const loadingPdf = ref(false)
 const operation = ref('')
 const errorText = ref('')
+const showConfirmDialog = ref(false)
 const busy = computed(() => Boolean(operation.value))
 const canConfirm = computed(() => preview.value && !busy.value && !loadingPdf.value && pdfUrl.value
   && pdfToken.value === preview.value.previewToken
@@ -230,16 +256,26 @@ async function downloadWord() {
   finally { operation.value = '' }
 }
 
-async function confirm() {
+/* 点击提交按钮时先弹出确认询问 */
+function promptConfirm() {
+  if (!canConfirm.value) return
+  showConfirmDialog.value = true
+}
+
+/* 确认后调用提交接口，并触发礼花喷射特效 */
+async function executeConfirm() {
   if (!canConfirm.value) return
   operation.value = 'confirm'
   errorText.value = ''
   try {
     const result = await resumeApi.confirm(preview.value.previewToken)
     if (!active) return
+    showConfirmDialog.value = false
     resumeDraft.submission = result
     resumeDraft.preview = null
     clearPdf()
+    // 触发屏幕下方两侧角落喷射礼花特效
+    launchCelebrationConfetti()
   } catch (error) {
     errorText.value = error.message
     showAlert(error.message)

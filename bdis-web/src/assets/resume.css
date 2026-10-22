@@ -131,7 +131,7 @@
 }
 
 .step-node.is-done .step-badge {
-  background: #0071e3;
+  background: #34c759;
   color: #ffffff;
 }
 
@@ -265,6 +265,10 @@
   margin-bottom: 22px;
 }
 
+.resume-shell .full-row-item {
+  width: 100% !important;
+}
+
 .resume-shell .el-form-item__label {
   font-size: 13px;
   font-weight: 500;
@@ -307,60 +311,229 @@
   display: none;
 }
 
-/* Symmetrical Apple Choice Pills for "是 / 否" (平稳对称、不突兀) */
-.resume-shell .el-radio-group {
-  display: flex !important;
-  gap: 14px !important;
-  align-items: center;
-  background: transparent !important;
-  padding: 0 !important;
-  border: none !important;
+/* ==========================================================================
+   试管试剂交汇动画选择器 (Reagent Tube Fluid Selector)
+   全横排铺满、左右黑白试剂交汇、动感液面波纹与偶发气泡
+   ========================================================================== */
+.reagent-tube-wrapper {
+  width: 100%;
   margin-top: 4px;
 }
 
-.resume-shell .el-radio {
-  margin-right: 0 !important;
-  min-width: 96px;
-  height: 38px;
-  border-radius: 980px !important;
-  border: 1px solid #e5e5ea !important;
-  background-color: #f5f5f7 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 24px !important;
+.reagent-tube {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  border-radius: 980px;
+  background-color: #1d1d1f;
+  border: 1.5px solid #d2d2d7;
+  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.7), inset 0 -2px 5px rgba(0, 0, 0, 0.15), 0 4px 14px rgba(0, 0, 0, 0.06);
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.reagent-side {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
   cursor: pointer;
-  box-sizing: border-box;
-  transition: all 0.22s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  z-index: 2;
+  transition: width 0.45s cubic-bezier(0.25, 1, 0.5, 1), transform 0.15s ease;
 }
 
-.resume-shell .el-radio:hover {
-  background-color: #ebebed !important;
-  border-color: #d2d2d7 !important;
-  transform: translateY(-1px);
+.reagent-side:active {
+  transform: scale(0.98);
 }
 
-.resume-shell .el-radio.is-checked {
-  background-color: #1d1d1f !important;
-  border-color: #1d1d1f !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+/* 左侧：白色试剂 "是" */
+.reagent-side.side-yes {
+  width: 50%;
+  background: #ffffff;
+  color: #1d1d1f;
+  padding-left: 20px;
 }
 
-.resume-shell .el-radio__input {
-  display: none !important;
+/* 右侧：黑色试剂 "否" */
+.reagent-side.side-no {
+  width: 50%;
+  background: #1d1d1f;
+  color: #ffffff;
+  padding-right: 20px;
 }
 
-.resume-shell .el-radio__label {
-  padding-left: 0 !important;
-  font-size: 14px;
-  font-weight: 500;
-  color: #1d1d1f !important;
-  transition: color 0.2s ease;
-}
-
-.resume-shell .el-radio.is-checked .el-radio__label {
-  color: #ffffff !important;
+.reagent-text {
+  font-size: 15px;
   font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.reagent-selected-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 980px;
+  font-weight: 500;
+  animation: bdisFadeIn 0.25s ease;
+}
+
+.side-yes .reagent-selected-badge {
+  background: rgba(0, 0, 0, 0.08);
+  color: #1d1d1f;
+}
+
+.side-no .reagent-selected-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* 选中状态下试剂的流动膨胀 */
+.reagent-tube.is-yes .side-yes {
+  width: 62%;
+}
+.reagent-tube.is-yes .side-no {
+  width: 38%;
+}
+
+.reagent-tube.is-no .side-yes {
+  width: 38%;
+}
+.reagent-tube.is-no .side-no {
+  width: 62%;
+}
+
+/* 中间试剂交汇液面 */
+.reagent-meniscus {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 36px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 5;
+  transition: left 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.reagent-tube.is-yes .reagent-meniscus {
+  left: 62%;
+}
+.reagent-tube.is-no .reagent-meniscus {
+  left: 38%;
+}
+
+/* 动态起伏波纹 */
+.meniscus-wave {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 35%, rgba(29, 29, 31, 0.8) 65%, #1d1d1f 100%);
+  filter: blur(2px);
+  animation: waveUndulate 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes waveUndulate {
+  0% {
+    transform: scaleX(0.85) skewX(-4deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scaleX(1.15) skewX(4deg);
+    opacity: 1;
+  }
+}
+
+/* 偶发冒泡特效 */
+.reagent-bubble {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* 白色小泡向右飘入黑色试剂中 */
+.bubble-white-1 {
+  width: 7px;
+  height: 7px;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+  top: 60%;
+  left: 30%;
+  animation: bubbleToRight 3.4s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+.bubble-white-2 {
+  width: 5px;
+  height: 5px;
+  background: #ffffff;
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
+  top: 30%;
+  left: 35%;
+  animation: bubbleToRight 4.6s cubic-bezier(0.25, 1, 0.5, 1) infinite 1.8s;
+}
+
+@keyframes bubbleToRight {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px) scale(0.5);
+  }
+  20% {
+    opacity: 0.95;
+    transform: translate(4px, -1px) scale(1);
+  }
+  75% {
+    opacity: 0.8;
+    transform: translate(18px, -12px) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(25px, -20px) scale(0.3);
+  }
+}
+
+/* 黑色小泡向左飘入白色试剂中 */
+.bubble-black-1 {
+  width: 6px;
+  height: 6px;
+  background: #1d1d1f;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  top: 55%;
+  right: 30%;
+  animation: bubbleToLeft 4s cubic-bezier(0.25, 1, 0.5, 1) infinite 1s;
+}
+
+.bubble-black-2 {
+  width: 8px;
+  height: 8px;
+  background: #1d1d1f;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+  top: 25%;
+  right: 35%;
+  animation: bubbleToLeft 5.2s cubic-bezier(0.25, 1, 0.5, 1) infinite 2.6s;
+}
+
+@keyframes bubbleToLeft {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px) scale(0.5);
+  }
+  25% {
+    opacity: 0.9;
+    transform: translate(-4px, -2px) scale(1);
+  }
+  75% {
+    opacity: 0.75;
+    transform: translate(-16px, -14px) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-24px, -20px) scale(0.3);
+  }
 }
 
 /* Refined Photo Upload Panel */
@@ -502,6 +675,45 @@
 .tg-alert-leave-to {
   opacity: 0;
   transform: translate(-50%, -18px) scale(0.96);
+}
+
+/* ==========================================================================
+   Apple Style Confirm Modal Dialog
+   ========================================================================== */
+.apple-confirm-dialog {
+  border-radius: 18px !important;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2) !important;
+}
+
+.apple-confirm-dialog .el-dialog__header {
+  margin: 0 !important;
+  padding: 24px 28px 12px !important;
+}
+
+.apple-confirm-dialog .el-dialog__title {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #1d1d1f !important;
+  letter-spacing: -0.01em;
+}
+
+.apple-confirm-dialog .el-dialog__body {
+  padding: 0 28px 24px !important;
+}
+
+.confirm-dialog-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #6e6e73;
+  margin: 0;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 0 28px 24px;
 }
 
 /* PDF Preview Document Stage */
