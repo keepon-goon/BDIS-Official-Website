@@ -55,10 +55,12 @@
         </div>
       </div>
 
-      <!-- 顶层流体试剂交互层：保持元素常驻，完美模仿上方比赛按钮 cubic-bezier(0.25, 1, 0.5, 1) 的果冻质感过渡 -->
+      <!-- 顶层流体试剂交互层：
+           采用 0.72s cubic-bezier(0.34, 1.45, 0.45, 1) 慢速超弹果冻回弹曲线，动作极其明显且 Q 弹饱满
+      -->
       <div class="fluid-interaction-layer">
         <!-- 蓝色试剂侧 (有 / 小露一手)：
-             未选择时占 50% 宽，选有(yes)时柔缓淡出露出输入框，选无(no)时以同款果冻动效压缩至最左侧 52px
+             未选择时占 50% 宽，选有(yes)时柔缓淡出露出输入框，选无(no)时以 Q 弹果冻动效压缩至最左侧 52px
         -->
         <button
           type="button"
@@ -78,7 +80,7 @@
           <!-- 初始状态居中文本 -->
           <span v-if="!choice" class="fluid-label label-initial text-blue">{{ yesLabel }}</span>
 
-          <!-- 压缩在左边缘时的【超柔缓渐进羽化凹形液面】（毛玻璃微澜，彻底消除生硬线条）与竖排标签 -->
+          <!-- 压缩在左边缘时的【Q 弹微澜羽化凹形液面】（附带果冻回弹挤压动效）与竖排标签 -->
           <svg
             v-if="choice === 'no'"
             class="concave-liquid-svg svg-blue"
@@ -89,15 +91,15 @@
             <defs>
               <linearGradient id="softDiffuseBlueGrad" x1="1" y1="0" x2="0" y2="0">
                 <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0" />
-                <stop offset="30%" stop-color="#e0f2fe" stop-opacity="0.18" />
-                <stop offset="60%" stop-color="#e0f2fe" stop-opacity="0.55" />
-                <stop offset="85%" stop-color="#e0f2fe" stop-opacity="0.88" />
-                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.96" />
+                <stop offset="30%" stop-color="#e0f2fe" stop-opacity="0.22" />
+                <stop offset="60%" stop-color="#e0f2fe" stop-opacity="0.6" />
+                <stop offset="85%" stop-color="#e0f2fe" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.98" />
               </linearGradient>
               <linearGradient id="ambientBlueRim" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
-                <stop offset="30%" stop-color="#bae6fd" stop-opacity="0.4" />
-                <stop offset="70%" stop-color="#bae6fd" stop-opacity="0.4" />
+                <stop offset="30%" stop-color="#bae6fd" stop-opacity="0.45" />
+                <stop offset="70%" stop-color="#bae6fd" stop-opacity="0.45" />
                 <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
               </linearGradient>
               <filter id="gentleFluidBlurBlue" x="-40%" y="-15%" width="180%" height="130%">
@@ -148,9 +150,9 @@
           <span v-if="choice === 'no'" class="fluid-label label-compressed text-blue">{{ yesLabel }}</span>
         </button>
 
-        <!-- 试剂交汇液面 (Reagent Meniscus)：
-             模仿比赛按钮的 .reagent-meniscus，随点击沿管体横向平滑滑动 (transition: left 0.48s cubic-bezier(0.25, 1, 0.5, 1))
-             初始居中 50%，选有(yes)时随绿色压缩滑向右端，选无(no)时随蓝色压缩滑向左端
+        <!-- 试剂交汇液面 (Reagent Meniscus Tube Interface)：
+             模仿比赛按钮的 .reagent-meniscus，随点击沿管体横向平滑滑动 (0.72s cubic-bezier(0.34, 1.45, 0.45, 1))
+             整个滑行过程中保持高度清晰可见，滑至目的地后自然交接
              两色共用同一条 S 曲线，0 缝隙，0 白线，悬浮各自全区域完整加深
         -->
         <div
@@ -209,7 +211,7 @@
         </div>
 
         <!-- 绿色试剂侧 (无 / 不告诉你)：
-             未选择时占 50% 宽，选有(yes)时以比赛按钮同款果冻动效压缩至最右侧 52px，选无(no)时展开保留绿色背景
+             未选择时占 50% 宽，选有(yes)时以 Q 弹果冻动效压缩至最右侧 52px，选无(no)时展开保留绿色背景
         -->
         <button
           type="button"
@@ -229,7 +231,7 @@
           <!-- 初始状态居中文本 -->
           <span v-if="!choice" class="fluid-label label-initial text-green">{{ noLabel }}</span>
 
-          <!-- 压缩在右边缘时的【超柔缓渐进羽化凹形液面】（毛玻璃微澜，彻底消除生硬线条）与竖排标签 -->
+          <!-- 压缩在右边缘时的【Q 弹微澜羽化凹形液面】（附带果冻回弹挤压动效）与竖排标签 -->
           <svg
             v-if="choice === 'yes'"
             class="concave-liquid-svg svg-green"
@@ -240,15 +242,15 @@
             <defs>
               <linearGradient id="softDiffuseGreenGrad" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" stop-color="#dcfce7" stop-opacity="0" />
-                <stop offset="30%" stop-color="#dcfce7" stop-opacity="0.18" />
-                <stop offset="60%" stop-color="#dcfce7" stop-opacity="0.55" />
-                <stop offset="85%" stop-color="#dcfce7" stop-opacity="0.88" />
-                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.96" />
+                <stop offset="30%" stop-color="#dcfce7" stop-opacity="0.22" />
+                <stop offset="60%" stop-color="#dcfce7" stop-opacity="0.6" />
+                <stop offset="85%" stop-color="#dcfce7" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.98" />
               </linearGradient>
               <linearGradient id="ambientGreenRim" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
-                <stop offset="30%" stop-color="#bbf7d0" stop-opacity="0.4" />
-                <stop offset="70%" stop-color="#bbf7d0" stop-opacity="0.4" />
+                <stop offset="30%" stop-color="#bbf7d0" stop-opacity="0.45" />
+                <stop offset="70%" stop-color="#bbf7d0" stop-opacity="0.45" />
                 <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
               </linearGradient>
               <filter id="gentleFluidBlurGreen" x="-40%" y="-15%" width="180%" height="130%">
@@ -400,7 +402,7 @@ function reset() {
   height: 100%;
   padding-right: 64px;
   box-sizing: border-box;
-  animation: contentGentleFadeIn 0.48s cubic-bezier(0.25, 1, 0.5, 1) both;
+  animation: contentGentleFadeIn 0.68s cubic-bezier(0.25, 1, 0.5, 1) both;
 }
 
 .chamber-seamless-textarea {
@@ -457,7 +459,7 @@ function reset() {
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  animation: contentGentleFadeIn 0.48s cubic-bezier(0.25, 1, 0.5, 1) both;
+  animation: contentGentleFadeIn 0.68s cubic-bezier(0.25, 1, 0.5, 1) both;
 }
 
 .pure-statement-container {
@@ -479,7 +481,7 @@ function reset() {
   line-height: 1.5;
   border: none !important;
   outline: none !important;
-  animation: statementSoftRise 0.5s cubic-bezier(0.25, 1, 0.5, 1) both;
+  animation: statementSoftRise 0.68s cubic-bezier(0.34, 1.45, 0.45, 1) both;
 }
 
 @keyframes contentGentleFadeIn {
@@ -494,7 +496,7 @@ function reset() {
 @keyframes statementSoftRise {
   0% {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(10px);
   }
   100% {
     opacity: 1;
@@ -504,9 +506,10 @@ function reset() {
 
 /* ==========================================================================
    顶层流体试剂交互层：
-   完全模仿上方比赛按钮动画机制：
-   - 试剂侧采用 width 0.48s cubic-bezier(0.25, 1, 0.5, 1) 结合 active 缩放 (transform: scale(0.985))
-   - 中间交汇液面沿管体横向平滑滑动 (left 0.48s cubic-bezier(0.25, 1, 0.5, 1))
+   完全对齐并强化 Q 弹果冻动效机制：
+   - 采用 0.72s cubic-bezier(0.34, 1.45, 0.45, 1) 慢速回弹曲线，超冲后回弹微晃
+   - 交互按压带有轻微的弹性挤压反馈 (transform: scale(0.975) scaleY(0.96))
+   - 中间交汇液面沿管体全程高度清晰横向滑行
    ========================================================================== */
 .fluid-interaction-layer {
   position: absolute;
@@ -516,7 +519,7 @@ function reset() {
   display: flex;
 }
 
-/* 试剂色块：完全对标比赛按钮的流畅度 (0.48s cubic-bezier(0.25, 1, 0.5, 1)) 与轻微触觉回弹 */
+/* 试剂色块：慢速 Q 弹果冻过渡，超冲缓冲回弹 */
 .fluid-side,
 .fluid-side:focus,
 .fluid-side:focus-visible {
@@ -535,22 +538,22 @@ function reset() {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent !important;
   transition:
-    width 0.48s cubic-bezier(0.25, 1, 0.5, 1),
-    background-color 0.22s ease,
-    opacity 0.42s cubic-bezier(0.25, 1, 0.5, 1),
-    transform 0.15s ease;
+    width 0.72s cubic-bezier(0.34, 1.45, 0.45, 1),
+    background 0.45s ease,
+    opacity 0.52s ease,
+    transform 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
-/* 点击时的即时触觉微缩放响应（与比赛按钮一致） */
+/* 点击时的即时触觉 Q 弹微挤压响应 */
 .fluid-side:active:not(.is-compressed):not(.is-dissolved) {
-  transform: scale(0.985);
+  transform: scale(0.975) scaleY(0.96);
 }
 
 /* 蓝色试剂侧（默认 50% 宽，原色 #e0f2fe） */
 .fluid-side.side-blue {
   left: 0;
   width: 50%;
-  background-color: #e0f2fe;
+  background: #e0f2fe;
   color: #0369a1;
   pointer-events: auto;
   cursor: pointer;
@@ -561,7 +564,7 @@ function reset() {
 .fluid-side.side-green {
   right: 0;
   width: 50%;
-  background-color: #dcfce7;
+  background: #dcfce7;
   color: #15803d;
   pointer-events: auto;
   cursor: pointer;
@@ -573,23 +576,20 @@ function reset() {
 .side-blue:hover:not(.is-dissolved):not(.is-compressed),
 .fluid-interaction-layer:has(.side-blue:hover) .side-blue,
 .fluid-interaction-layer:has(.seam-blue:hover) .side-blue {
-  background-color: #bae6fd;
+  background: #bae6fd;
 }
 
 .side-green.is-hovered,
 .side-green:hover:not(.is-compressed),
 .fluid-interaction-layer:has(.side-green:hover) .side-green,
 .fluid-interaction-layer:has(.seam-green:hover) .side-green {
-  background-color: #bbf7d0;
+  background: #bbf7d0;
 }
 
 /* --------------------------------------------------------------------------
    动态试剂交汇液面 (Reagent Meniscus Tube Interface)
-   对标比赛按钮的 .reagent-meniscus：
-   - 宽度 60px，默认 left: 50%
-   - 随用户选择，以 left 0.48s cubic-bezier(0.25, 1, 0.5, 1) 平滑横向滑行动画
-   - 选有(yes)时随绿色压缩滑向右端 (left: calc(100% - 26px))
-   - 选无(no)时随蓝色压缩滑向左端 (left: 26px)
+   - 随点击沿管体横向平滑滑动 (0.72s cubic-bezier(0.34, 1.45, 0.45, 1))
+   - 在滑动过程中保持全幅高能见度，直至抵达端点后才轻柔消隐交接
    - 蓝绿两色共用同一条 S 曲线边界，0 间隙，0 白线，悬浮各自全区域完整加深
    -------------------------------------------------------------------------- */
 .reagent-meniscus-tube {
@@ -602,8 +602,8 @@ function reset() {
   z-index: 4;
   pointer-events: auto;
   transition:
-    left 0.48s cubic-bezier(0.25, 1, 0.5, 1),
-    opacity 0.45s ease;
+    left 0.72s cubic-bezier(0.34, 1.45, 0.45, 1),
+    opacity 0.28s ease 0.44s;
 }
 
 .reagent-choice-card.state-yes .reagent-meniscus-tube {
@@ -628,7 +628,7 @@ function reset() {
   stroke: none !important;
   outline: none !important;
   cursor: pointer;
-  transition: fill 0.22s ease;
+  transition: fill 0.25s ease;
 }
 
 .seam-blue {
@@ -657,24 +657,24 @@ function reset() {
    状态分支：
    A. 选择蓝色 (state-yes):
       - 蓝色柔缓淡出消失（透明），平滑自然露出输入框
-      - 绿色体积以 0.48s 丝滑果冻动效压缩至 52px
-      - 压缩在右侧的绿色显示柔缓渐进羽化凹形毛玻璃液面
+      - 绿色体积以 0.72s 慢速 Q 弹超冲曲线向右压缩至 52px，并在触壁时产生弹性果冻微震
+      - 绿色块在滑行收缩全程保持鲜活饱满的绿色流体质感
    -------------------------------------------------------------------------- */
 .reagent-choice-card.state-yes .side-blue {
   width: calc(100% - 52px);
-  background-color: transparent !important;
+  background: transparent !important;
   opacity: 0;
   pointer-events: none;
 }
 
 .reagent-choice-card.state-yes .side-blue .label-initial {
   opacity: 0;
-  transform: scale(0.92);
+  transform: scale(0.9);
 }
 
 .reagent-choice-card.state-yes .side-green {
   width: 52px;
-  background-color: transparent !important;
+  background: linear-gradient(to right, transparent 0%, #dcfce7 16px) !important;
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
   cursor: pointer;
@@ -683,29 +683,29 @@ function reset() {
 }
 
 .reagent-choice-card.state-yes .side-green:hover .concave-liquid-svg {
-  filter: brightness(1.05);
+  filter: brightness(1.06);
 }
 
 /* --------------------------------------------------------------------------
    B. 选择绿色 (state-no):
-      - 绿色试剂不消失，舒缓展开铺满右侧（绿色保留），显示温馨寄语
-      - 蓝色以 0.48s 丝滑果冻动效向左边缘压缩至 52px
-      - 压缩在左侧的蓝色显示柔缓渐进羽化凹形毛玻璃液面
+      - 绿色试剂舒缓展开铺满右侧（绿色保留），显示温馨寄语
+      - 蓝色以 0.72s 慢速 Q 弹超冲曲线向左压缩至 52px，并在触壁时产生弹性果冻微震
+      - 蓝色块在滑行收缩全程保持清澈饱满的蓝色流体质感
    -------------------------------------------------------------------------- */
 .reagent-choice-card.state-no .side-green {
   width: calc(100% - 52px);
-  background-color: transparent !important;
+  background: #dcfce7 !important;
   pointer-events: none;
 }
 
 .reagent-choice-card.state-no .side-green .label-initial {
   opacity: 0;
-  transform: scale(0.92);
+  transform: scale(0.9);
 }
 
 .reagent-choice-card.state-no .side-blue {
   width: 52px;
-  background-color: transparent !important;
+  background: linear-gradient(to left, transparent 0%, #e0f2fe 16px) !important;
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
   cursor: pointer;
@@ -714,10 +714,10 @@ function reset() {
 }
 
 .reagent-choice-card.state-no .side-blue:hover .concave-liquid-svg {
-  filter: brightness(1.05);
+  filter: brightness(1.06);
 }
 
-/* 渐进毛玻璃凹形矢量试剂背景（微澜呼吸） */
+/* 渐进毛玻璃凹形矢量试剂背景（微澜呼吸 + 果冻触壁回弹 Squash & Stretch） */
 .concave-liquid-svg {
   position: absolute;
   inset: 0;
@@ -725,17 +725,57 @@ function reset() {
   height: 100%;
   display: block;
   pointer-events: none;
-  animation: concaveFadeIn 0.45s cubic-bezier(0.25, 1, 0.5, 1) both;
 }
 
-@keyframes concaveFadeIn {
+.svg-green {
+  transform-origin: right center;
+  animation: jellyWobbleRight 0.72s cubic-bezier(0.34, 1.45, 0.45, 1) both;
+}
+
+.svg-blue {
+  transform-origin: left center;
+  animation: jellyWobbleLeft 0.72s cubic-bezier(0.34, 1.45, 0.45, 1) both;
+}
+
+@keyframes jellyWobbleRight {
   0% {
-    opacity: 0;
-    transform: scaleX(0.85);
+    transform: scaleX(0.68);
+    opacity: 0.4;
+  }
+  42% {
+    transform: scaleX(1.26);
+    opacity: 1;
+  }
+  68% {
+    transform: scaleX(0.91);
+  }
+  86% {
+    transform: scaleX(1.05);
   }
   100% {
-    opacity: 1;
     transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes jellyWobbleLeft {
+  0% {
+    transform: scaleX(0.68);
+    opacity: 0.4;
+  }
+  42% {
+    transform: scaleX(1.26);
+    opacity: 1;
+  }
+  68% {
+    transform: scaleX(0.91);
+  }
+  86% {
+    transform: scaleX(1.05);
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
   }
 }
 
@@ -744,7 +784,7 @@ function reset() {
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.5px;
-  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.34, 1.45, 0.45, 1);
   pointer-events: none;
 }
 
@@ -759,13 +799,17 @@ function reset() {
   letter-spacing: 2px;
   pointer-events: none;
   z-index: 6;
-  animation: compressedLabelFadeIn 0.45s cubic-bezier(0.25, 1, 0.5, 1) 0.08s both;
+  animation: compressedLabelJellyFadeIn 0.72s cubic-bezier(0.34, 1.45, 0.45, 1) 0.12s both;
 }
 
-@keyframes compressedLabelFadeIn {
+@keyframes compressedLabelJellyFadeIn {
   0% {
     opacity: 0;
-    transform: translateY(-50%) scale(0.85);
+    transform: translateY(-50%) scale(0.7);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateY(-50%) scale(1.15);
   }
   100% {
     opacity: 1;
