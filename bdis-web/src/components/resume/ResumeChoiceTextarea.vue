@@ -1,19 +1,19 @@
 <template>
   <div class="reagent-choice-wrapper" :data-choice="choice || 'pending'">
-    <!-- 破裂外喷气泡群（位于外层 overflow: visible 区域，像试管壁破损向外侧虚空喷发） -->
-    <!-- 状态为“无/不告诉你”时：蓝色被压缩在最左侧，向左外侧区域剧烈喷射 -->
+    <!-- 破裂外喷气泡群（柔缓物理浮力与微气流逸散，像试管壁微破裂后高压气体柔缓涌出） -->
+    <!-- 状态为“无/不告诉你”时：蓝色被压缩在最左侧，向左外侧区域柔缓喷逸 -->
     <div v-if="choice === 'no'" class="rupture-spray spray-left" aria-hidden="true">
       <div class="rupture-fissure fissure-left"></div>
       <span v-for="i in 14" :key="`rb-${i}`" :class="`r-bubble rb-${i}`"></span>
     </div>
 
-    <!-- 状态为“有/小露一手”时：绿色被压缩在最右侧，向右外侧区域剧烈喷射 -->
+    <!-- 状态为“有/小露一手”时：绿色被压缩在最右侧，向右外侧区域柔缓喷逸 -->
     <div v-if="choice === 'yes'" class="rupture-spray spray-right" aria-hidden="true">
       <div class="rupture-fissure fissure-right"></div>
       <span v-for="i in 14" :key="`rg-${i}`" :class="`r-bubble rg-${i}`"></span>
     </div>
 
-    <!-- 试管主容器 -->
+    <!-- 试管主容器（纯净 Apple 灰边框，彻底消除任何蓝色提示框与黑色焦点框） -->
     <div
       class="reagent-choice-card"
       :class="{
@@ -25,7 +25,7 @@
     >
       <!-- 底层内容区：选择蓝色时露出无框输入框 -->
       <div class="underlay-content">
-        <!-- 选择蓝色时呈现的纯净输入区域（无内部多余边框，与右侧绿色试剂自然融为一体） -->
+        <!-- 选择蓝色时呈现的纯净输入区域（无内部边框，柔缓渐隐露出，与右侧绿色凹形试剂自然融为一体） -->
         <div v-show="choice === 'yes' || !choice" class="underlay-input-wrap">
           <el-input
             :id="id"
@@ -42,15 +42,12 @@
           />
         </div>
 
-        <!-- 选择绿色时呈现的纯文本寄语（绿色背景保留不显示白色，无标签，仅保留优雅文字） -->
+        <!-- 选择绿色时呈现的纯文本寄语（绿色背景保留不显示白色，无标签，仅保留优雅文字，无任何黑色框） -->
         <div v-if="choice === 'no'" class="underlay-green-stage">
-          <el-input
+          <input
+            type="hidden"
             :id="id"
-            ref="inputHidden"
-            :model-value="modelValue"
-            type="textarea"
-            class="visually-hidden"
-            @update:model-value="emit('update:modelValue', $event)"
+            :value="modelValue"
           />
           <div class="pure-statement-container">
             <p class="pure-statement-text">{{ declinedText }}</p>
@@ -76,11 +73,65 @@
           <!-- 初始状态居中字样 -->
           <span v-if="!choice" class="fluid-label label-initial">{{ yesLabel }}</span>
 
-          <!-- 压缩在左边缘时呈现的果冻质感竖排标签（颜色依旧保持柔和蓝色，不加深） -->
+          <!-- 压缩在左边缘时的凹形果冻质感液体（微波呼吸动效）与竖排标签 -->
+          <svg
+            v-if="choice === 'no'"
+            class="concave-liquid-svg svg-blue"
+            viewBox="0 0 44 124"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="concaveBlueGrad" x1="1" y1="0" x2="0" y2="0">
+                <stop offset="0%" stop-color="#bae6fd" stop-opacity="0.8" />
+                <stop offset="35%" stop-color="#e0f2fe" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="1" />
+              </linearGradient>
+            </defs>
+            <path
+              class="morphing-concave-path"
+              fill="url(#concaveBlueGrad)"
+            >
+              <animate
+                attributeName="d"
+                dur="2.8s"
+                repeatCount="indefinite"
+                values="
+                  M 44 0 C 26 36, 26 88, 44 124 L 0 124 L 0 0 Z;
+                  M 44 0 C 22 42, 28 82, 44 124 L 0 124 L 0 0 Z;
+                  M 44 0 C 27 38, 24 86, 44 124 L 0 124 L 0 0 Z;
+                  M 44 0 C 26 36, 26 88, 44 124 L 0 124 L 0 0 Z
+                "
+                calcMode="spline"
+                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+              />
+            </path>
+            <path
+              class="morphing-concave-rim"
+              fill="none"
+              stroke="#7dd3fc"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            >
+              <animate
+                attributeName="d"
+                dur="2.8s"
+                repeatCount="indefinite"
+                values="
+                  M 44 0 C 26 36, 26 88, 44 124;
+                  M 44 0 C 22 42, 28 82, 44 124;
+                  M 44 0 C 27 38, 24 86, 44 124;
+                  M 44 0 C 26 36, 26 88, 44 124
+                "
+                calcMode="spline"
+                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+              />
+            </path>
+          </svg>
           <span v-if="choice === 'no'" class="fluid-label label-compressed">{{ yesLabel }}</span>
         </button>
 
-        <!-- 初始状态：双向冲击晃动膜（上下两端均严格固定，中段如弹性琴弦高频振荡，无任何气泡） -->
+        <!-- 初始状态：双向冲击晃动膜（柔缓多频谐波呼吸，上下两端严格锁定锚定，无任何气泡） -->
         <div v-if="!choice" class="fixed-ends-membrane" aria-hidden="true">
           <svg class="membrane-svg" viewBox="0 0 30 124" preserveAspectRatio="none">
             <defs>
@@ -91,32 +142,33 @@
               </linearGradient>
             </defs>
 
-            <!-- 晃动柔光外晕 -->
+            <!-- 晃动柔光外晕（更舒缓的 2.6s 流体张力摆动） -->
             <path
               class="membrane-glow-path"
               fill="none"
               stroke="url(#membraneGrad)"
-              stroke-width="6"
+              stroke-width="6.5"
               stroke-linecap="round"
-              opacity="0.45"
+              opacity="0.4"
             >
               <animate
                 attributeName="d"
-                dur="1.35s"
+                dur="2.6s"
                 repeatCount="indefinite"
                 values="
                   M 15 0 C 8 36, 22 88, 15 124;
+                  M 15 0 C 20 32, 10 92, 15 124;
+                  M 15 0 C 11 40, 19 84, 15 124;
                   M 15 0 C 22 36, 8 88, 15 124;
-                  M 15 0 C 9 36, 21 88, 15 124;
-                  M 15 0 C 21 36, 9 88, 15 124;
+                  M 15 0 C 10 32, 20 92, 15 124;
                   M 15 0 C 8 36, 22 88, 15 124
                 "
                 calcMode="spline"
-                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
               />
             </path>
 
-            <!-- 晃动核心白色冲击膜（上下严格锁定在 15 0 与 15 124） -->
+            <!-- 晃动核心白色冲击膜（上下严格锁定在 15 0 与 15 124，如琴弦柔和振荡） -->
             <path
               class="membrane-core-path"
               fill="none"
@@ -126,17 +178,18 @@
             >
               <animate
                 attributeName="d"
-                dur="1.35s"
+                dur="2.6s"
                 repeatCount="indefinite"
                 values="
                   M 15 0 C 8 36, 22 88, 15 124;
+                  M 15 0 C 20 32, 10 92, 15 124;
+                  M 15 0 C 11 40, 19 84, 15 124;
                   M 15 0 C 22 36, 8 88, 15 124;
-                  M 15 0 C 9 36, 21 88, 15 124;
-                  M 15 0 C 21 36, 9 88, 15 124;
+                  M 15 0 C 10 32, 20 92, 15 124;
                   M 15 0 C 8 36, 22 88, 15 124
                 "
                 calcMode="spline"
-                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
               />
             </path>
 
@@ -163,7 +216,63 @@
           <!-- 初始状态居中字样 -->
           <span v-if="!choice" class="fluid-label label-initial">{{ noLabel }}</span>
 
-          <!-- 压缩在右边缘时呈现的果冻质感竖排标签（颜色依旧保持柔和绿色，不加深） -->
+          <!-- 压缩在右边缘时的【凹形】（凹液面）果冻质感液体与竖排标签（带有呼吸微澜动效，柔和不突兀） -->
+          <svg
+            v-if="choice === 'yes'"
+            class="concave-liquid-svg svg-green"
+            viewBox="0 0 44 124"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="concaveGreenGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#bbf7d0" stop-opacity="0.8" />
+                <stop offset="35%" stop-color="#dcfce7" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#dcfce7" stop-opacity="1" />
+              </linearGradient>
+            </defs>
+            <!-- 凹形液面主体（左侧向右内凹，动态微澜起伏，优雅自然） -->
+            <path
+              class="morphing-concave-path"
+              fill="url(#concaveGreenGrad)"
+            >
+              <animate
+                attributeName="d"
+                dur="2.8s"
+                repeatCount="indefinite"
+                values="
+                  M 0 0 C 18 36, 18 88, 0 124 L 44 124 L 44 0 Z;
+                  M 0 0 C 22 42, 16 82, 0 124 L 44 124 L 44 0 Z;
+                  M 0 0 C 17 38, 20 86, 0 124 L 44 124 L 44 0 Z;
+                  M 0 0 C 18 36, 18 88, 0 124 L 44 124 L 44 0 Z
+                "
+                calcMode="spline"
+                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+              />
+            </path>
+            <!-- 凹形微光边缘线 -->
+            <path
+              class="morphing-concave-rim"
+              fill="none"
+              stroke="#86efac"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            >
+              <animate
+                attributeName="d"
+                dur="2.8s"
+                repeatCount="indefinite"
+                values="
+                  M 0 0 C 18 36, 18 88, 0 124;
+                  M 0 0 C 22 42, 16 82, 0 124;
+                  M 0 0 C 17 38, 20 86, 0 124;
+                  M 0 0 C 18 36, 18 88, 0 124
+                "
+                calcMode="spline"
+                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
+              />
+            </path>
+          </svg>
           <span v-if="choice === 'yes'" class="fluid-label label-compressed">{{ noLabel }}</span>
         </button>
       </div>
@@ -199,7 +308,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'update:choice'])
 const input = ref()
-const inputHidden = ref()
 
 async function onSideClick(side) {
   if (props.disabled) return
@@ -230,28 +338,22 @@ function reset() {
   margin-bottom: 8px;
 }
 
-/* 试管主卡片容器 */
-.reagent-choice-card {
+/* 试管主卡片容器：保持沉静内敛的灰白 Apple 边框，彻底杜绝输入框选中时的蓝色外圈与黑框 */
+.reagent-choice-card,
+.reagent-choice-card.state-yes,
+.reagent-choice-card.state-no,
+.reagent-choice-card:focus,
+.reagent-choice-card:focus-within {
   position: relative;
   width: 100%;
   min-height: 124px;
   border-radius: 14px;
   overflow: hidden;
   background: #ffffff;
-  border: 1.5px solid #d2d2d7;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  transition: border-color 0.28s ease, box-shadow 0.28s ease;
+  border: 1.5px solid #d2d2d7 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+  outline: none !important;
   user-select: none;
-}
-
-.reagent-choice-card.state-yes {
-  border-color: #7dd3fc;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15), 0 4px 14px rgba(0, 0, 0, 0.04);
-}
-
-.reagent-choice-card.state-no {
-  border-color: #86efac;
-  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.15), 0 4px 14px rgba(0, 0, 0, 0.04);
 }
 
 /* 底层内容布局 */
@@ -262,12 +364,13 @@ function reset() {
   display: flex;
 }
 
-/* 输入框无缝集成于左侧画布，右侧留白保证文字与绿色试剂交融而不重叠 */
+/* 输入框无缝集成于左侧画布，右侧留白保证文字与绿色凹面试剂交融而不重叠 */
 .underlay-input-wrap {
   width: 100%;
   height: 100%;
   padding-right: 56px;
   box-sizing: border-box;
+  animation: contentGentleFadeIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .chamber-seamless-textarea {
@@ -275,11 +378,18 @@ function reset() {
   height: 100%;
 }
 
-.chamber-seamless-textarea :deep(.el-textarea__inner) {
+/* 彻底消除输入框被选中时的蓝色提示框、多余阴影与内部内描边 */
+.chamber-seamless-textarea :deep(.el-textarea__inner),
+.chamber-seamless-textarea :deep(.el-textarea__inner:focus),
+.chamber-seamless-textarea :deep(.el-textarea__inner:focus-visible),
+.chamber-seamless-textarea :deep(.el-textarea__inner:hover),
+.chamber-seamless-textarea :deep(.el-textarea__inner:active),
+.chamber-seamless-textarea.is-focus :deep(.el-textarea__inner) {
   height: 100% !important;
   min-height: 120px !important;
   border: none !important;
   border-radius: 0 !important;
+  outline: none !important;
   box-shadow: none !important;
   background: transparent !important;
   resize: none;
@@ -289,14 +399,23 @@ function reset() {
   color: #1e293b;
 }
 
+.chamber-seamless-textarea :deep(textarea:focus),
+.chamber-seamless-textarea :deep(textarea:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
 .chamber-seamless-textarea :deep(.el-input__count) {
   background: transparent !important;
   right: 14px;
   bottom: 8px;
 }
 
-/* 选择绿色时，绿色试剂不消失，背景保持典雅淡绿，中央仅展现高雅纯净文字 */
-.underlay-green-stage {
+/* 选择绿色时，绿色试剂不消失，背景保持典雅淡绿，中央仅展现高雅纯净文字，无任何黑色边框 */
+.underlay-green-stage,
+.underlay-green-stage:focus,
+.underlay-green-stage:focus-visible {
   width: 100%;
   height: 100%;
   padding-left: 54px;
@@ -305,7 +424,10 @@ function reset() {
   justify-content: center;
   box-sizing: border-box;
   background: #dcfce7;
-  animation: bdisFadeIn 0.35s ease;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  animation: contentGentleFadeIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .pure-statement-container {
@@ -314,6 +436,8 @@ function reset() {
   justify-content: center;
   padding: 0 24px;
   text-align: center;
+  border: none !important;
+  outline: none !important;
 }
 
 .pure-statement-text {
@@ -323,6 +447,29 @@ function reset() {
   color: #15803d;
   letter-spacing: 0.8px;
   line-height: 1.5;
+  border: none !important;
+  outline: none !important;
+  animation: statementSoftRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes contentGentleFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes statementSoftRise {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* 顶层流体试剂交互层 */
@@ -334,19 +481,30 @@ function reset() {
   display: flex;
 }
 
-/* 试剂色块：果冻质感弹性过渡 cubic-bezier(0.34, 1.56, 0.64, 1) */
-.fluid-side {
+/* 试剂色块：更柔缓高级的流体惯性过渡 (0.88s cubic-bezier(0.16, 1, 0.3, 1))，动作丝滑柔润，告别干脆单调 */
+.fluid-side,
+.fluid-side:focus,
+.fluid-side:focus-visible,
+.fluid-side:active {
   position: absolute;
   top: 0;
   bottom: 0;
-  border: none;
+  border: none !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
   padding: 0;
   margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.35s ease, opacity 0.3s ease;
+  -webkit-tap-highlight-color: transparent !important;
+  transition:
+    width 0.88s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.65s ease,
+    transform 0.4s ease;
 }
 
 /* 蓝色试剂侧（默认与压缩态均保持 #e0f2fe 原色，颜色不加深） */
@@ -378,76 +536,95 @@ function reset() {
 }
 
 /* 选择蓝色状态：
-   1. 蓝色自身颜色消失（透明），直接露出输入框
-   2. 绿色体积压缩至右边缘（约 42px，果冻弹性过渡）
-   3. 绿色试剂保持原淡绿色（不加深），内侧边缘呈微渐变弯月液面，与输入框自然交融
+   1. 蓝色自身颜色以 0.75s 柔缓淡出消失（透明），平滑自然露出输入框
+   2. 绿色体积柔缓压缩至右边缘（约 44px）
+   3. 绿色试剂呈优雅【凹形】（concave），并在微澜中轻柔呼吸，与输入框自然衔接
+   4. 颜色保持柔和淡绿，不加深
 */
 .reagent-choice-card.state-yes .side-blue {
-  width: calc(100% - 42px);
+  width: calc(100% - 44px);
   background: transparent !important;
   pointer-events: none;
 }
 
 .reagent-choice-card.state-yes .side-blue .label-initial {
   opacity: 0;
+  transform: scale(0.94);
 }
 
 .reagent-choice-card.state-yes .side-green {
   width: 44px;
-  background: linear-gradient(90deg, rgba(220, 252, 231, 0.1) 0%, rgba(220, 252, 231, 0.7) 30%, #dcfce7 65%, #dcfce7 100%);
-  border-left: 1.5px solid rgba(134, 239, 172, 0.5);
-  border-top-left-radius: 20px;
-  border-bottom-left-radius: 20px;
+  background: transparent !important;
   cursor: pointer;
   pointer-events: auto;
-  box-shadow: -3px 0 10px rgba(220, 252, 231, 0.5);
 }
 
-.reagent-choice-card.state-yes .side-green:hover {
-  background: #dcfce7;
-  transform: scaleX(1.03);
+.reagent-choice-card.state-yes .side-green:hover .concave-liquid-svg {
+  filter: brightness(1.04);
 }
 
 /* 选择绿色状态：
-   1. 绿色试剂不消失，展开铺满右侧（绿色保留）
-   2. 蓝色压缩至最左侧（约 42px，果冻弹性过渡）
-   3. 蓝色试剂保持原淡蓝色（不加深），外边缘呈弯月微弧
+   1. 绿色试剂不消失，舒缓展开铺满右侧（绿色保留）
+   2. 蓝色以 0.88s 柔缓压缩至最左侧（约 44px）
+   3. 蓝色试剂呈凹形果冻弹性过渡，颜色保持原淡蓝色不加深
+   4. 彻底消除点击产生的黑色焦点外框
 */
 .reagent-choice-card.state-no .side-green {
-  width: calc(100% - 42px);
+  width: calc(100% - 44px);
   background: transparent !important;
   pointer-events: none;
 }
 
 .reagent-choice-card.state-no .side-green .label-initial {
   opacity: 0;
+  transform: scale(0.94);
 }
 
 .reagent-choice-card.state-no .side-blue {
   width: 44px;
-  background: linear-gradient(270deg, rgba(224, 242, 254, 0.1) 0%, rgba(224, 242, 254, 0.7) 30%, #e0f2fe 65%, #e0f2fe 100%);
-  border-right: 1.5px solid rgba(186, 230, 253, 0.6);
-  border-top-right-radius: 20px;
-  border-bottom-right-radius: 20px;
+  background: transparent !important;
   cursor: pointer;
   pointer-events: auto;
-  box-shadow: 3px 0 10px rgba(224, 242, 254, 0.5);
 }
 
-.reagent-choice-card.state-no .side-blue:hover {
-  background: #e0f2fe;
-  transform: scaleX(1.03);
+.reagent-choice-card.state-no .side-blue:hover .concave-liquid-svg {
+  filter: brightness(1.04);
 }
 
-/* 文字标签样式 */
+/* 凹形矢量试剂背景（呼吸微澜动效，柔和淡入） */
+.concave-liquid-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  animation: concaveSvgFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes concaveSvgFadeIn {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+/* 文字标签样式：带有柔缓缩放与淡出过渡 */
 .fluid-label.label-initial {
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.5px;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .fluid-label.label-compressed {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   writing-mode: vertical-rl;
   text-orientation: upright;
   font-size: 12px;
@@ -455,13 +632,27 @@ function reset() {
   letter-spacing: 2px;
   pointer-events: none;
   z-index: 3;
+  animation: compressedLabelSoftFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+@keyframes compressedLabelSoftFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
 }
 
 .side-blue .label-compressed {
+  left: 10px;
   color: #0369a1;
 }
 
 .side-green .label-compressed {
+  right: 10px;
   color: #15803d;
 }
 
@@ -488,7 +679,7 @@ function reset() {
 
 /* ==========================================================================
    试管外侧破裂喷射气泡特效 (Rupture Leak Spray)
-   在被压缩一侧的外侧虚空区域大量喷出，模拟试管壁破裂高压泄出的真实物理效果
+   在被压缩一侧的外侧虚空区域柔缓喷逸，模拟试管微破后气体受浮力与气流缓缓升腾逸散
    ========================================================================== */
 .rupture-spray {
   position: absolute;
@@ -510,7 +701,7 @@ function reset() {
   right: -2px;
 }
 
-/* 破裂缝隙光斑微动效 */
+/* 破裂缝隙光斑柔和微动效 */
 .rupture-fissure {
   position: absolute;
   top: 50%;
@@ -519,94 +710,100 @@ function reset() {
   height: 48px;
   border-radius: 99px;
   filter: blur(1px);
+  animation: fissurePulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes fissurePulse {
+  0% { opacity: 0.6; transform: translateY(-50%) scaleY(0.9); }
+  100% { opacity: 0.95; transform: translateY(-50%) scaleY(1.08); }
 }
 
 .fissure-left {
   left: 0;
   background: linear-gradient(180deg, transparent, #38bdf8, #ffffff, #38bdf8, transparent);
-  box-shadow: -2px 0 8px rgba(56, 189, 248, 0.8);
+  box-shadow: -2px 0 8px rgba(56, 189, 248, 0.7);
 }
 
 .fissure-right {
   right: 0;
   background: linear-gradient(180deg, transparent, #4ade80, #ffffff, #4ade80, transparent);
-  box-shadow: 2px 0 8px rgba(74, 222, 128, 0.8);
+  box-shadow: 2px 0 8px rgba(74, 222, 128, 0.7);
 }
 
-/* 破损气泡基础样式 */
+/* 破损气泡基础样式：长周期（2.2s ~ 3.4s）柔缓上升飘散 */
 .r-bubble {
   position: absolute;
   border-radius: 50%;
   opacity: 0;
 }
 
-/* 蓝色气泡向左侧外部虚空狂喷 */
-.spray-left .rb-1  { width: 5px; height: 5px; background: #38bdf8; top: 22%; left: 0; animation: ruptureShootLeft 1.4s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.1s; }
-.spray-left .rb-2  { width: 7px; height: 7px; background: #ffffff; top: 34%; left: 0; animation: ruptureShootLeft 1.7s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.3s; }
-.spray-left .rb-3  { width: 4px; height: 4px; background: #7dd3fc; top: 46%; left: 0; animation: ruptureShootLeft 1.3s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.15s; }
-.spray-left .rb-4  { width: 8px; height: 8px; background: #0284c7; top: 58%; left: 0; animation: ruptureShootLeft 1.9s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.5s; }
-.spray-left .rb-5  { width: 5px; height: 5px; background: #ffffff; top: 70%; left: 0; animation: ruptureShootLeft 1.5s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.25s; }
-.spray-left .rb-6  { width: 6px; height: 6px; background: #38bdf8; top: 28%; left: 0; animation: ruptureShootLeft 1.6s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.7s; }
-.spray-left .rb-7  { width: 4px; height: 4px; background: #bae6fd; top: 40%; left: 0; animation: ruptureShootLeft 1.3s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.4s; }
-.spray-left .rb-8  { width: 7px; height: 7px; background: #ffffff; top: 52%; left: 0; animation: ruptureShootLeft 1.8s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.8s; }
-.spray-left .rb-9  { width: 5px; height: 5px; background: #7dd3fc; top: 64%; left: 0; animation: ruptureShootLeft 1.4s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.6s; }
-.spray-left .rb-10 { width: 6px; height: 6px; background: #0ea5e9; top: 76%; left: 0; animation: ruptureShootLeft 1.7s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 1.0s; }
-.spray-left .rb-11 { width: 4px; height: 4px; background: #ffffff; top: 18%; left: 0; animation: ruptureShootLeft 1.2s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.9s; }
-.spray-left .rb-12 { width: 6px; height: 6px; background: #38bdf8; top: 82%; left: 0; animation: ruptureShootLeft 1.6s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 1.1s; }
-.spray-left .rb-13 { width: 3px; height: 3px; background: #7dd3fc; top: 38%; left: 0; animation: ruptureShootLeft 1.1s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.35s; }
-.spray-left .rb-14 { width: 5px; height: 5px; background: #ffffff; top: 60%; left: 0; animation: ruptureShootLeft 1.5s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.65s; }
+/* 蓝色气泡向左侧外部虚空柔缓逸出 */
+.spray-left .rb-1  { width: 5px; height: 5px; background: #38bdf8; top: 22%; left: 0; animation: ruptureFloatLeft 2.5s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.1s; }
+.spray-left .rb-2  { width: 7px; height: 7px; background: #ffffff; top: 34%; left: 0; animation: ruptureFloatLeft 3.0s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.4s; }
+.spray-left .rb-3  { width: 4px; height: 4px; background: #7dd3fc; top: 46%; left: 0; animation: ruptureFloatLeft 2.3s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.2s; }
+.spray-left .rb-4  { width: 8px; height: 8px; background: #0284c7; top: 58%; left: 0; animation: ruptureFloatLeft 3.3s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.7s; }
+.spray-left .rb-5  { width: 5px; height: 5px; background: #ffffff; top: 70%; left: 0; animation: ruptureFloatLeft 2.6s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.3s; }
+.spray-left .rb-6  { width: 6px; height: 6px; background: #38bdf8; top: 28%; left: 0; animation: ruptureFloatLeft 2.8s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.9s; }
+.spray-left .rb-7  { width: 4px; height: 4px; background: #bae6fd; top: 40%; left: 0; animation: ruptureFloatLeft 2.4s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.5s; }
+.spray-left .rb-8  { width: 7px; height: 7px; background: #ffffff; top: 52%; left: 0; animation: ruptureFloatLeft 3.1s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.1s; }
+.spray-left .rb-9  { width: 5px; height: 5px; background: #7dd3fc; top: 64%; left: 0; animation: ruptureFloatLeft 2.5s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.8s; }
+.spray-left .rb-10 { width: 6px; height: 6px; background: #0ea5e9; top: 76%; left: 0; animation: ruptureFloatLeft 2.9s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.3s; }
+.spray-left .rb-11 { width: 4px; height: 4px; background: #ffffff; top: 18%; left: 0; animation: ruptureFloatLeft 2.2s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.0s; }
+.spray-left .rb-12 { width: 6px; height: 6px; background: #38bdf8; top: 82%; left: 0; animation: ruptureFloatLeft 2.8s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.5s; }
+.spray-left .rb-13 { width: 3px; height: 3px; background: #7dd3fc; top: 38%; left: 0; animation: ruptureFloatLeft 2.1s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.45s; }
+.spray-left .rb-14 { width: 5px; height: 5px; background: #ffffff; top: 60%; left: 0; animation: ruptureFloatLeft 2.7s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.85s; }
 
-@keyframes ruptureShootLeft {
+@keyframes ruptureFloatLeft {
   0% {
     opacity: 0;
     transform: translate(0, 0) scale(0.3);
   }
-  20% {
+  25% {
     opacity: 0.95;
-    transform: translate(-10px, -6px) scale(1.1);
+    transform: translate(-12px, -8px) scale(1.05);
   }
-  65% {
-    opacity: 0.8;
-    transform: translate(-26px, -18px) scale(1);
+  70% {
+    opacity: 0.75;
+    transform: translate(-28px, -24px) scale(1.15);
   }
   100% {
     opacity: 0;
-    transform: translate(-42px, -32px) scale(0.2);
+    transform: translate(-42px, -38px) scale(0.2);
   }
 }
 
-/* 绿色气泡向右侧外部虚空狂喷 */
-.spray-right .rg-1  { width: 5px; height: 5px; background: #4ade80; top: 22%; right: 0; animation: ruptureShootRight 1.4s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.1s; }
-.spray-right .rg-2  { width: 7px; height: 7px; background: #ffffff; top: 34%; right: 0; animation: ruptureShootRight 1.7s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.3s; }
-.spray-right .rg-3  { width: 4px; height: 4px; background: #86efac; top: 46%; right: 0; animation: ruptureShootRight 1.3s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.15s; }
-.spray-right .rg-4  { width: 8px; height: 8px; background: #16a34a; top: 58%; right: 0; animation: ruptureShootRight 1.9s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.5s; }
-.spray-right .rg-5  { width: 5px; height: 5px; background: #ffffff; top: 70%; right: 0; animation: ruptureShootRight 1.5s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.25s; }
-.spray-right .rg-6  { width: 6px; height: 6px; background: #4ade80; top: 28%; right: 0; animation: ruptureShootRight 1.6s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.7s; }
-.spray-right .rg-7  { width: 4px; height: 4px; background: #bbf7d0; top: 40%; right: 0; animation: ruptureShootRight 1.3s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.4s; }
-.spray-right .rg-8  { width: 7px; height: 7px; background: #ffffff; top: 52%; right: 0; animation: ruptureShootRight 1.8s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.8s; }
-.spray-right .rg-9  { width: 5px; height: 5px; background: #86efac; top: 64%; right: 0; animation: ruptureShootRight 1.4s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.6s; }
-.spray-right .rg-10 { width: 6px; height: 6px; background: #22c55e; top: 76%; right: 0; animation: ruptureShootRight 1.7s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 1.0s; }
-.spray-right .rg-11 { width: 4px; height: 4px; background: #ffffff; top: 18%; right: 0; animation: ruptureShootRight 1.2s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.9s; }
-.spray-right .rg-12 { width: 6px; height: 6px; background: #4ade80; top: 82%; right: 0; animation: ruptureShootRight 1.6s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 1.1s; }
-.spray-right .rg-13 { width: 3px; height: 3px; background: #86efac; top: 38%; right: 0; animation: ruptureShootRight 1.1s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.35s; }
-.spray-right .rg-14 { width: 5px; height: 5px; background: #ffffff; top: 60%; right: 0; animation: ruptureShootRight 1.5s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.65s; }
+/* 绿色气泡向右侧外部虚空柔缓逸出 */
+.spray-right .rg-1  { width: 5px; height: 5px; background: #4ade80; top: 22%; right: 0; animation: ruptureFloatRight 2.5s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.1s; }
+.spray-right .rg-2  { width: 7px; height: 7px; background: #ffffff; top: 34%; right: 0; animation: ruptureFloatRight 3.0s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.4s; }
+.spray-right .rg-3  { width: 4px; height: 4px; background: #86efac; top: 46%; right: 0; animation: ruptureFloatRight 2.3s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.2s; }
+.spray-right .rg-4  { width: 8px; height: 8px; background: #16a34a; top: 58%; right: 0; animation: ruptureFloatRight 3.3s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.7s; }
+.spray-right .rg-5  { width: 5px; height: 5px; background: #ffffff; top: 70%; right: 0; animation: ruptureFloatRight 2.6s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.3s; }
+.spray-right .rg-6  { width: 6px; height: 6px; background: #4ade80; top: 28%; right: 0; animation: ruptureFloatRight 2.8s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.9s; }
+.spray-right .rg-7  { width: 4px; height: 4px; background: #bbf7d0; top: 40%; right: 0; animation: ruptureFloatRight 2.4s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.5s; }
+.spray-right .rg-8  { width: 7px; height: 7px; background: #ffffff; top: 52%; right: 0; animation: ruptureFloatRight 3.1s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.1s; }
+.spray-right .rg-9  { width: 5px; height: 5px; background: #86efac; top: 64%; right: 0; animation: ruptureFloatRight 2.5s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.8s; }
+.spray-right .rg-10 { width: 6px; height: 6px; background: #22c55e; top: 76%; right: 0; animation: ruptureFloatRight 2.9s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.3s; }
+.spray-right .rg-11 { width: 4px; height: 4px; background: #ffffff; top: 18%; right: 0; animation: ruptureFloatRight 2.2s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.0s; }
+.spray-right .rg-12 { width: 6px; height: 6px; background: #4ade80; top: 82%; right: 0; animation: ruptureFloatRight 2.8s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.5s; }
+.spray-right .rg-13 { width: 3px; height: 3px; background: #86efac; top: 38%; right: 0; animation: ruptureFloatRight 2.1s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.45s; }
+.spray-right .rg-14 { width: 5px; height: 5px; background: #ffffff; top: 60%; right: 0; animation: ruptureFloatRight 2.7s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.85s; }
 
-@keyframes ruptureShootRight {
+@keyframes ruptureFloatRight {
   0% {
     opacity: 0;
     transform: translate(0, 0) scale(0.3);
   }
-  20% {
+  25% {
     opacity: 0.95;
-    transform: translate(10px, -6px) scale(1.1);
+    transform: translate(12px, -8px) scale(1.05);
   }
-  65% {
-    opacity: 0.8;
-    transform: translate(26px, -18px) scale(1);
+  70% {
+    opacity: 0.75;
+    transform: translate(28px, -24px) scale(1.15);
   }
   100% {
     opacity: 0;
-    transform: translate(42px, -32px) scale(0.2);
+    transform: translate(42px, -38px) scale(0.2);
   }
 }
 
