@@ -16,6 +16,11 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import com.bdis.bdis_website.dto.ResumeFormDTO;
+import org.apache.poi.xwpf.usermodel.*;
+import org.apache.poi.util.Units;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Service
 public class ResumeDocumentService {
@@ -74,6 +79,60 @@ public class ResumeDocumentService {
         } catch (IOException e) {
             throw new ResumeException(503, "简历模板暂不可用，请稍后重试");
         }
+    }
+
+    public void generate(ResumeFormDTO form, String year, byte[] photo, Path output) throws IOException {
+        try (var input = resources.getResource(properties.getTemplate()).getInputStream();
+             var doc = new XWPFDocument(input)) {
+            replaceTitle(doc, year);
+            XWPFTable first = doc.getTables().get(0);
+            first.getRow(6).setHeight(9000);
+            setCell(first, 1, 1, form.getName(), false);
+            setCell(first, 1, 3, form.getGender(), false);
+            setCell(first, 1, 5, form.getEthnicity(), false);
+            setCell(first, 2, 1, form.getCollege(), false);
+            setCell(first, 2, 3, form.getStudentNo(), false);
+            setCell(first, 2, 5, form.getBirthMonth(), false);
+            setCell(first, 3, 1, form.getMajor(), false);
+            setCell(first, 3, 3, form.getPhone(), false);
+            setCell(first, 4, 1, form.getSpecialties(), false);
+            setCell(first, 4, 3, form.getGpa(), false);
+            setCell(first, 5, 1, Boolean.TRUE.equals(form.getHasCompetitionExperience()) ? "是" : "否", false);
+            setCell(first, 6, 1, form.getIntro(), true);
+            setCell(doc.getTables().get(1), 0, 1, form.getAwards(), true);
+            setCell(doc.getTables().get(1), 1, 1, form.getShowcase(), true);
+            if (photo != null) {
+                XWPFTableCell cell = first.getRow(1).getCell(6);
+                XWPFParagraph paragraph = cell.getParagraphs().get(0);
+                paragraph.setAlignment(ParagraphAlignment.CENTER);
+                XWPFRun run = paragraph.createRun();
+                try {
+                    run.addPicture(new java.io.ByteArrayInputStream(photo), Document.PICTURE_TYPE_PNG,
+                            "证件照.png", Units.toEMU(66), Units.toEMU(99));
+                } catch (org.apache.poi.openxml4j.exceptions.InvalidFormatException e) {
+                    throw new ResumeException(400, "照片无法合成，请更换图片");
+                }
+            }
+            try (var stream = Files.newOutputStream(output)) { doc.write(stream); }
+        }
+    }
+
+    private void setCell(XWPFTable table, int row, int column, String text, boolean narrative) {
+        XWPFTableCell cell = table.getRow(row).getCell(column);
+        while (cell.getParagraphs().size() > 1) cell.removeParagraph(1);
+        XWPFParagraph paragraph = cell.getParagraphs().get(0);
+        while (!paragraph.getRuns().isEmpty()) paragraph.removeRun(0);
+        paragraph.setAlignment(ParagraphAlignment.LEFT);
+        XWPFRun run = paragraph.createRun();
+        run.setFontFamily("Noto Serif CJK SC");
+        run.setFontFamily("Noto Serif CJK SC", XWPFRun.FontCharRange.eastAsia);
+        run.setFontSize(12);
+        String[] lines = (text == null ? "" : text.strip()).split("\\R", -1);
+        for (int i = 0; i < lines.length; i++) {
+            if (i > 0) run.addBreak();
+            run.setText(lines[i]);
+        }
+        if (narrative) cell.setVerticalAlignment(XWPFTableCell.XWPFVertAlign.TOP);
     }
 
     private void replaceTitle(XWPFDocument doc, String year) {

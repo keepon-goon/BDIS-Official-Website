@@ -26,6 +26,19 @@ class ResumeDocumentServiceTest {
     }
 
     @Test
+    void generatesFilledTemplateForLayoutVerification() throws Exception {
+        var form = new com.fasterxml.jackson.databind.ObjectMapper().readValue(
+                new org.springframework.core.io.ClassPathResource("resume-form.json").getInputStream(),
+                com.bdis.bdis_website.dto.ResumeFormDTO.class);
+        java.nio.file.Path output = java.nio.file.Path.of("target/test-artifacts/filled-layout.docx");
+        java.nio.file.Files.createDirectories(output.getParent());
+        service.generate(form, "2026-2027", null, output);
+        try (var document = new XWPFDocument(java.nio.file.Files.newInputStream(output)); var extractor = new XWPFWordExtractor(document)) {
+            assertThat(extractor.getText()).contains("000020260001", "A&B、<测试>", "测试学院");
+        }
+    }
+
+    @Test
     void blankTemplateContainsActualYearAndPreservesTwoTables() throws Exception {
         try (var doc = new XWPFDocument(new ByteArrayInputStream(service.blankTemplate()));
              var extractor = new XWPFWordExtractor(doc)) {
