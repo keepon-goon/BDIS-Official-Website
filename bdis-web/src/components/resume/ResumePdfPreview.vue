@@ -20,7 +20,7 @@ import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist'
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
 GlobalWorkerOptions.workerSrc = workerUrl
-const props = defineProps({ url: { type: String, default: '' }, filename: { type: String, default: '报名表.pdf' } })
+const props = defineProps({ url: { type: String, default: '' }, filename: { type: String, default: '报名表.pdf' }, maxPages: { type: Number, default: 6 } })
 const emit = defineEmits(['ready', 'error'])
 const container = ref()
 const pageCount = ref(0)
@@ -54,7 +54,7 @@ async function render() {
     loadingTask = task
     const pdf = await task.promise
     if (version !== generation) return
-    if (pdf.numPages < 1 || pdf.numPages > 2) throw new Error('预览页数异常')
+    if (pdf.numPages < 1 || pdf.numPages > props.maxPages) throw new Error('预览页数异常')
     pageCount.value = pdf.numPages
     await nextTick()
     const width = Math.max(200, Math.min(850, container.value.clientWidth - 36))

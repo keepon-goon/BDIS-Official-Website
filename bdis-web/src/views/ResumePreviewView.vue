@@ -14,13 +14,14 @@
     </template>
     <template v-else-if="preview">
       <h1>核对报名表预览</h1>
-      <p class="resume-lead">请核对两页内容与分页效果。你可以下载当前 Word 自行贴照，也可以上传证件照合成后再次预览。</p>
+      <p class="resume-lead">请核对全部内容与分页效果。你可以下载当前 Word 自行贴照，也可以上传照片合成后再次预览。</p>
+      <el-alert title="如果无法显示,请检查是否开启了IDM插件,关掉它" type="info" :closable="false" show-icon />
       <p class="resume-filename">{{ preview.wordFilename }}</p>
       <el-tag>{{ preview.sourceType === 'UPLOAD' ? '上传的 Word 原件' : preview.hasPhoto ? '已合成照片' : '照片留白' }}</el-tag>
       <el-alert v-if="errorText" :title="errorText" type="error" :closable="false" show-icon />
       <div class="resume-card resume-photo-panel" v-if="preview.sourceType === 'FORM'">
         <h2>证件照（可选）</h2>
-        <p class="resume-note">请上传竖版证件照，建议宽高比 <strong>2:3</strong>、<strong>600×900 像素</strong>，支持 JPG/JPEG、PNG，单张不超过 <strong>5 MB</strong>、不超过1200万像素。比例明显不符时会拒绝；合格照片等比缩放、居中留白，不自动裁切。</p>
+        <p class="resume-note">支持 JPG/JPEG、PNG，单张不超过 <strong>10 MB</strong>。不限照片比例，照片会等比缩放、居中留白，不拉伸或裁切；竖版照片更适合当前照片框。</p>
         <div class="resume-actions">
           <el-button type="primary" :loading="operation === 'photo'" :disabled="busy || loadingPdf" @click="photoInput.click()">
             {{ preview.hasPhoto ? '更换照片并重新预览' : '上传照片合成预览' }}
@@ -38,7 +39,8 @@
       </div>
       <p class="resume-note">下载后在本地修改不会自动同步。自行贴照后，请上传修改后的 Word，再预览并确认提交。</p>
       <div v-loading="loadingPdf || operation === 'photo'" element-loading-text="正在生成或读取预览，请稍候">
-        <ResumePdfPreview :url="pdfUrl" :filename="preview.pdfFilename" @ready="renderedUrl = $event" @error="renderFailed" />
+        <ResumePdfPreview :url="pdfUrl" :filename="preview.pdfFilename" :max-pages="preview.sourceType === 'UPLOAD' ? 6 : 2"
+          @ready="renderedUrl = $event" @error="renderFailed" />
       </div>
       <div class="resume-actions">
         <el-button type="primary" size="large" :loading="operation === 'confirm'" :disabled="!canConfirm" @click="confirm">确认当前版本并提交</el-button>
@@ -107,7 +109,7 @@ async function loadPdf() {
 }
 
 async function validatePhoto(file) {
-  if (file.size > 5 * 1024 * 1024) throw new Error('单张照片不能超过5MB')
+  if (file.size > 10 * 1024 * 1024) throw new Error('单张照片不能超过10MB')
   if (file.type && !['image/jpeg', 'image/png'].includes(file.type)) throw new Error('照片仅支持JPG/JPEG或PNG')
   const url = URL.createObjectURL(file)
   try {
@@ -117,9 +119,6 @@ async function validatePhoto(file) {
       image.onerror = () => reject(new Error('照片无法读取，请更换图片'))
       image.src = url
     })
-    if (image.naturalWidth * image.naturalHeight > 12000000) throw new Error('照片不能超过1200万像素，请缩小后上传')
-    if (Math.abs((image.naturalWidth / image.naturalHeight) / (2 / 3) - 1) > 0.1500001)
-      throw new Error('照片比例不符合要求，请使用接近2:3的竖版照片，建议600×900像素')
   } finally { URL.revokeObjectURL(url) }
 }
 

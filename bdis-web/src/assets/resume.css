@@ -14,6 +14,8 @@
 .resume-note { font-size: 14px; line-height: 1.8; color: #617184; margin: 12px 0; }
 .resume-filename { overflow-wrap: anywhere; font-size: 14px; color: #617184; }
 .resume-shell .el-date-editor { width: 100%; }
+.resume-shell .el-select { width: 100%; }
+.resume-shell .resume-other { margin-top: 8px; }
 .resume-shell .el-alert { margin: 16px 0; }
 .resume-file-input { display: none; }
 .resume-back { color: #0c3d70; text-decoration: none; font-size: 14px; }

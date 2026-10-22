@@ -10,8 +10,18 @@
         <div class="resume-grid">
           <el-form-item v-for="field in fields" :key="field.key" :label="field.label" :prop="field.key">
             <el-date-picker v-if="field.key === 'birthMonth'" id="resume-birthMonth" v-model="form.birthMonth"
-              type="month" value-format="YYYY-MM" placeholder="请选择出生年月" />
-            <el-input v-else :id="`resume-${field.key}`" v-model="form[field.key]" :maxlength="field.max"
+              type="month" value-format="YYYY-MM" :default-value="birthCalendarDefault" placeholder="请选择出生年月" />
+            <template v-else-if="['gender', 'ethnicity', 'college', 'major'].includes(field.key)">
+              <el-select :id="`resume-${field.key}`" :model-value="selections[field.key]" filterable clearable
+                :placeholder="field.key === 'major' && !form.college ? '请先选择学院' : `请选择${field.label}`"
+                :no-data-text="field.key === 'major' && !form.college ? '请先选择学院' : '没有匹配的选项'"
+                @update:model-value="changeSelection(field.key, $event)" @visible-change="visible => menuOpened(field.key, visible)">
+                <el-option v-for="option in fieldOptions(field.key)" :key="option" :label="option" :value="option" />
+              </el-select>
+              <el-input v-if="selections[field.key] === '其他'" :id="`resume-${field.key}-other`"
+                v-model.trim="form[field.key]" class="resume-other" :maxlength="field.max" :placeholder="`请填写具体${field.label}`" />
+            </template>
+            <el-input v-else :id="`resume-${field.key}`" v-model.trim="form[field.key]" :maxlength="field.max"
               :placeholder="field.placeholder || `请填写${field.label}`" />
           </el-form-item>
         </div>
@@ -26,13 +36,16 @@
         <h2>个人介绍</h2>
         <el-form-item label="个人简历" prop="intro">
           <el-input id="resume-intro" v-model="form.intro" type="textarea" :rows="7" maxlength="800" show-word-limit
-            placeholder="介绍你的学习经历、技能与项目经历，可分行填写。" />
+            placeholder="让我们听听你的故事" />
         </el-form-item>
         <el-form-item label="本学年获奖情况" prop="awards">
-          <el-input id="resume-awards" v-model="form.awards" type="textarea" :rows="4" maxlength="500" show-word-limit placeholder="没有可填写“无”" />
+          <ResumeChoiceTextarea id="resume-awards" v-model="form.awards" v-model:choice="resumeDraft.narrativeChoices.awards"
+            yes-label="有" no-label="无" placeholder="让我们欣赏你的事迹" declined-text="让我们一起谱写自己的篇章"
+            negative-value="无" :disabled="busy" />
         </el-form-item>
         <el-form-item label="个人风采展示" prop="showcase">
-          <el-input id="resume-showcase" v-model="form.showcase" type="textarea" :rows="4" maxlength="500" show-word-limit placeholder="填写作品介绍、作品名称或网址。" />
+          <ResumeChoiceTextarea id="resume-showcase" v-model="form.showcase" v-model:choice="resumeDraft.narrativeChoices.showcase"
+            yes-label="小露一手" no-label="不告诉你" placeholder="can can need" declined-text="伤心了...(ㄒoㄒ)" :disabled="busy" />
         </el-form-item>
       </div>
       <p class="resume-note">最终文档须为一到两页。内容较多无法完整排版时，可下载空白 Word，调整后通过“上传已填写 Word”提交。</p>
@@ -46,8 +59,12 @@
 </template>
 
 <script setup>
-import { ref, watch, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, watch, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import ResumeChoiceTextarea from '../components/resume/ResumeChoiceTextarea.vue'
+import resumeOptions from '../data/resumeOptions.json'
+import { resumePhonePattern, resumePhoneMessage } from '../utils/resumeValidation'
 import { resumeDraft, setResumePreview } from '../utils/resumeDraft'
 import { resumeApi, downloadResumeFile } from '../utils/resumeApi'
 import '../assets/resume.css'
@@ -58,6 +75,17 @@ const formRef = ref()
 const busy = ref(false)
 const downloading = ref(false)
 const errorText = ref('')
+const today = new Date()
+const birthCalendarDefault = new Date(today.getFullYear() - 18, today.getMonth(), 1)
+const genders = ['男', '女', '沃尔玛购物袋', '武装直升机']
+const colleges = [...resumeOptions.colleges.map(college => college.name), '其他']
+const ethnicities = [...resumeOptions.ethnicities, '其他']
+const majors = computed(() => !form.college ? [] : [...(resumeOptions.colleges.find(college => college.name === form.college)?.majors || []), '其他'])
+const selectionFor = (value, options) => !value ? '' : options.includes(value) ? value : '其他'
+const selections = reactive({
+  gender: form.gender, ethnicity: selectionFor(form.ethnicity, ethnicities),
+  college: selectionFor(form.college, colleges), major: selectionFor(form.major, majors.value)
+})
 let active = true
 onBeforeUnmount(() => { active = false })
 
@@ -65,16 +93,33 @@ const fields = [
   { key: 'name', label: '姓名', max: 30 }, { key: 'gender', label: '性别', max: 10 },
   { key: 'ethnicity', label: '民族', max: 30 }, { key: 'college', label: '学院', max: 80 },
   { key: 'studentNo', label: '学号', max: 40 }, { key: 'birthMonth', label: '出生年月' },
-  { key: 'major', label: '专业', max: 80 }, { key: 'phone', label: '联系电话', max: 30 },
+  { key: 'major', label: '专业', max: 80 }, { key: 'phone', label: '联系电话', max: 30, placeholder: '手机号或带区号的固定电话' },
   { key: 'specialties', label: '特点特长', max: 120 },
   { key: 'gpa', label: '平均学分绩点', max: 20, placeholder: '例如3.60，也可填写暂无' }
 ]
 const required = message => [{ required: true, whitespace: true, message, trigger: 'blur' }]
 const rules = {
   name: required('请填写姓名'), college: required('请填写学院'), studentNo: required('请填写学号'),
-  major: required('请填写专业'), phone: required('请填写联系电话'), intro: required('请填写个人简历'),
+  major: required('请填写专业'), phone: [...required('请填写联系电话'), { pattern: resumePhonePattern, message: resumePhoneMessage, trigger: 'blur' }],
+  intro: required('请填写个人简历'),
+  ethnicity: [{ validator: (_rule, value, callback) => callback(selections.ethnicity === '其他' && !value.trim() ? new Error('请填写具体民族') : undefined), trigger: 'blur' }],
   hasCompetitionExperience: [{ required: true, type: 'boolean', message: '请选择是否参加过相关比赛', trigger: 'change' }]
 }
+
+function fieldOptions(key) {
+  return { gender: genders, ethnicity: ethnicities, college: colleges, major: majors.value }[key]
+}
+
+function changeSelection(key, value) {
+  selections[key] = value
+  form[key] = value === '其他' ? '' : value
+}
+
+function menuOpened(key, visible) {
+  if (key === 'major' && visible && !form.college) ElMessage.info('请先选择学院')
+}
+
+watch(() => form.college, () => { form.major = ''; selections.major = '' })
 
 watch(form, () => {
   resumeDraft.version++

@@ -2,7 +2,7 @@
   <section class="resume-shell">
     <RouterLink class="resume-back" to="/resume/apply">返回在线填表</RouterLink>
     <h1>上传已填写的 Word</h1>
-    <p class="resume-lead">上传你已填写或贴好照片的 DOCX，先预览，再确认提交。文件须为一到两页、不超过10 MB。</p>
+    <p class="resume-lead">上传你已填写或贴好照片的 DOCX，先预览，再确认提交。文件最多6页、不超过50 MB。</p>
     <el-alert v-if="errorText" :title="errorText" type="error" :closable="false" show-icon />
     <el-form ref="formRef" :model="index" :rules="rules" label-position="top" :disabled="busy" @submit.prevent="upload">
       <div class="resume-card">
@@ -10,7 +10,7 @@
         <div class="resume-grid">
           <el-form-item label="姓名" prop="name"><el-input id="upload-name" v-model="index.name" maxlength="30" /></el-form-item>
           <el-form-item label="学号" prop="studentNo"><el-input id="upload-studentNo" v-model="index.studentNo" maxlength="40" /></el-form-item>
-          <el-form-item label="联系电话" prop="phone"><el-input id="upload-phone" v-model="index.phone" maxlength="30" /></el-form-item>
+          <el-form-item label="联系电话" prop="phone"><el-input id="upload-phone" v-model.trim="index.phone" maxlength="30" placeholder="手机号或带区号的固定电话" /></el-form-item>
         </div>
         <el-form-item label="已填写的 Word 文件">
           <input data-testid="resume-word-input" type="file" accept=".docx" :disabled="busy" @change="selectWord" />
@@ -30,6 +30,7 @@ import { ref, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { resumeDraft, setResumePreview } from '../utils/resumeDraft'
 import { resumeApi, downloadResumeFile } from '../utils/resumeApi'
+import { resumePhonePattern, resumePhoneMessage } from '../utils/resumeValidation'
 import '../assets/resume.css'
 
 const router = useRouter()
@@ -40,7 +41,8 @@ for (const key of ['name', 'studentNo', 'phone']) {
 const rules = {
   name: [{ required: true, whitespace: true, message: '请填写姓名', trigger: 'blur' }],
   studentNo: [{ required: true, whitespace: true, message: '请填写学号', trigger: 'blur' }],
-  phone: [{ required: true, whitespace: true, message: '请填写联系电话', trigger: 'blur' }]
+  phone: [{ required: true, whitespace: true, message: '请填写联系电话', trigger: 'blur' },
+    { pattern: resumePhonePattern, message: resumePhoneMessage, trigger: 'blur' }]
 }
 const formRef = ref()
 const file = ref(null)
@@ -54,7 +56,7 @@ function selectWord(event) {
   const selected = event.target.files?.[0]
   if (!selected) return
   if (!selected.name.toLowerCase().endsWith('.docx')) errorText.value = '仅支持.docx文件'
-  else if (selected.size > 10 * 1024 * 1024) errorText.value = 'Word文档不能超过10MB'
+  else if (selected.size > 50 * 1024 * 1024) errorText.value = 'Word文档不能超过50MB'
   else { file.value = selected; errorText.value = '' }
 }
 
