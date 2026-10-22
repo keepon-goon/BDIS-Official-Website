@@ -56,6 +56,12 @@ public class ResumeController {
         return Result.success(service.upload(form, resume, token));
     }
 
+    @PostMapping("/confirm")
+    public Result<com.bdis.bdis_website.vo.ResumeSubmitVO> confirm(
+            @RequestHeader(value = "X-Resume-Preview-Token", required = false) String token) {
+        return Result.success(service.confirm(token));
+    }
+
     public static ResponseEntity<byte[]> download(byte[] bytes, String filename, boolean pdf) {
         return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .header(HttpHeaders.CONTENT_DISPOSITION, (pdf ? ContentDisposition.inline() : ContentDisposition.attachment())

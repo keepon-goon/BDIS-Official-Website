@@ -102,6 +102,19 @@ public class ResumeStorageService {
         Files.move(work, directory("previews", snapshot.getTokenHash()));
     }
 
+    public byte[] savedFile(String key) {
+        if (key == null || !key.matches("[a-f0-9]{64}/[^/\\\\]+"))
+            throw new ResumeException(409, "历史记录或正式文件未就绪，无法读取新版简历");
+        int separator = key.indexOf('/');
+        Path path = file(directory("submissions", key.substring(0, separator)), key.substring(separator + 1));
+        try {
+            if (!Files.isRegularFile(path)) throw new ResumeException(409, "正式文件缺失，请联系管理员核实");
+            return Files.readAllBytes(path);
+        } catch (IOException e) {
+            throw new ResumeException(503, "正式文件暂不可读，请稍后重试");
+        }
+    }
+
     public void deleteTemporary(Path directory) {
         if (directory == null || !(directory.startsWith(root.resolve("work"))
                 || directory.startsWith(root.resolve("previews")))) return;

@@ -12,6 +12,14 @@ import java.nio.file.Path;
 import java.time.Clock;
 import com.bdis.bdis_website.exception.ResumeException;
 import java.io.IOException;
+import com.bdis.bdis_website.entity.ResumeSubmission;
+import com.bdis.bdis_website.mapper.ResumeSubmissionMapper;
+import com.bdis.bdis_website.mapper.ResumeSettingsMapper;
+import com.bdis.bdis_website.vo.ResumeSubmitVO;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import org.springframework.transaction.support.TransactionTemplate;
+import java.time.LocalDateTime;
 
 @Service
 public class ResumeServiceImpl implements ResumeService {
@@ -23,16 +31,25 @@ public class ResumeServiceImpl implements ResumeService {
     private final ResumePhotoService photos;
     private final Object stateLock = new Object();
     private final java.util.Set<String> replacing = new java.util.HashSet<>();
+    private final ResumeSubmissionMapper submissions;
+    private final ResumeSettingsMapper settings;
+    private final TransactionTemplate transactions;
+    private final ResumeMailService mail;
 
     public ResumeServiceImpl(ResumeStorageService storage, ResumeDocumentService documents,
                              ResumeConversionService conversions, ResumeProperties properties, Clock resumeClock,
-                             ResumePhotoService photos) {
+                             ResumePhotoService photos, ResumeSubmissionMapper submissions,
+                             ResumeSettingsMapper settings, TransactionTemplate transactions, ResumeMailService mail) {
         this.storage = storage;
         this.documents = documents;
         this.conversions = conversions;
         this.properties = properties;
         this.clock = resumeClock;
         this.photos = photos;
+        this.submissions = submissions;
+        this.settings = settings;
+        this.transactions = transactions;
+        this.mail = mail;
     }
 
     @Override
@@ -64,6 +81,7 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     public ResumeFile previewFile(String token, boolean pdf) {
+        if (confirmed(storage.hash(token)) != null) throw new ResumeException(410, "该预览已确认保存，不能继续读取或修改临时文件");
         var snapshot = storage.load(token);
         String filename = snapshot.getDocumentName() + (pdf ? ".pdf" : ".docx");
         try {
@@ -83,6 +101,7 @@ public class ResumeServiceImpl implements ResumeService {
         ResumePreviewSnapshot original;
         synchronized (stateLock) {
             original = storage.load(token);
+            if (confirmed(oldHash) != null) throw new ResumeException(410, "该预览已确认保存，不能修改正式文件");
             if (!"FORM".equals(original.getSourceType())) throw new ResumeException(400, "请在本地修改上传的Word后重新上传");
             if (!replacing.add(oldHash)) throw new ResumeException(409, "正在更新照片，请稍后操作");
         }
@@ -131,6 +150,115 @@ public class ResumeServiceImpl implements ResumeService {
         return new ResumePreviewVO(token, snapshot.getExpiresAt(), snapshot.getTemplateVersion(), snapshot.getSourceType(),
                 "FORM".equals(snapshot.getSourceType()) ? snapshot.isHasPhoto() : null,
                 snapshot.getDocumentName() + ".docx", snapshot.getDocumentName() + ".pdf");
+    }
+
+    private ResumeSubmission confirmed(String hash) {
+        return submissions.selectOne(new QueryWrapper<ResumeSubmission>().eq("submission_key", hash));
+    }
+
+    @Override
+    public ResumeSubmitVO confirm(String token) {
+        String hash = storage.hash(token);
+        ResumeSubmission submission;
+        String recipient;
+        synchronized (stateLock) {
+            submission = confirmed(hash);
+            if (submission != null) return submitView(submission);
+            if (replacing.contains(hash)) throw new ResumeException(409, "正在更新照片，请预览完成后再确认");
+            var snapshot = storage.load(token);
+            var rules = settings.selectById(1L);
+            if (rules == null) throw new ResumeException(503, "报名设置尚未初始化，请联系管理员");
+            String directoryKey = storage.hash(storage.newToken());
+            Path destination = storage.directory("submissions", directoryKey);
+            try {
+                Path source = storage.directory("previews", hash);
+                Path word = storage.file(source, snapshot.getDocumentName() + ".docx");
+                Path pdf = storage.file(source, snapshot.getDocumentName() + ".pdf");
+                if (!Files.isRegularFile(word)) throw new ResumeException(409, "预览文件不完整，请重新生成");
+                conversions.validatePdf(pdf);
+                Files.createDirectory(destination);
+                Files.copy(word, storage.file(destination, snapshot.getDocumentName() + ".docx"));
+                Files.copy(pdf, storage.file(destination, snapshot.getDocumentName() + ".pdf"));
+                var record = new ResumeSubmission();
+                org.springframework.beans.BeanUtils.copyProperties(snapshot.getForm(), record);
+                record.setName(record.getName().strip());
+                record.setStudentNo(record.getStudentNo().strip());
+                record.setPhone(record.getPhone().strip());
+                record.setAcademicYear(snapshot.getAcademicYear());
+                record.setDocumentName(snapshot.getDocumentName());
+                record.setTemplateVersion(snapshot.getTemplateVersion());
+                record.setSubmissionSource(snapshot.getSourceType());
+                record.setSubmissionKey(hash);
+                record.setWordKey(directoryKey + "/" + snapshot.getDocumentName() + ".docx");
+                record.setPdfKey(directoryKey + "/" + snapshot.getDocumentName() + ".pdf");
+                record.setStatus(0);
+                record.setMailStatus(0);
+                record.setSubmitMailMode(rules.getSendMode());
+                record.setCreatedAt(LocalDateTime.now(clock));
+                transactions.executeWithoutResult(status -> {
+                    if (submissions.insert(record) != 1) throw new ResumeException(500, "保存失败，请重试");
+                });
+                submission = record;
+                recipient = rules.getRecipient();
+            } catch (Exception e) {
+                ResumeSubmission persisted;
+                try {
+                    persisted = confirmed(hash);
+                } catch (org.springframework.dao.DataAccessException unavailable) {
+                    throw new ResumeException(503, "保存结果暂待核实，请稍后使用同一预览重试，勿重新填写");
+                }
+                if (persisted == null) {
+                    storage.deleteUncommittedSubmission(destination);
+                    if (e instanceof ResumeException failure) throw failure;
+                    throw new ResumeException(500, "报名保存失败，请稍后重试，原预览仍可继续使用");
+                }
+                submission = persisted;
+                recipient = rules.getRecipient();
+            }
+        }
+        if ("AUTO".equals(submission.getSubmitMailMode())) {
+            try {
+                attemptMail(submission, recipient);
+            } catch (RuntimeException e) {
+                submission.setMailStatus(3);
+            }
+        }
+        try {
+            return submitView(submissions.selectById(submission.getId()));
+        } catch (org.springframework.dao.DataAccessException unavailable) {
+            return submitView(submission);
+        }
+    }
+
+    private void attemptMail(ResumeSubmission record, String recipient) {
+        if (submissions.claimMail(record.getId(), recipient) != 1) throw new ResumeException(409, "该简历正在发送，请勿重复操作");
+        int result = 2;
+        String error = null;
+        try {
+            mail.send(record, recipient);
+        } catch (Exception e) {
+            result = 3;
+            error = e instanceof ResumeException ? e.getMessage() : "邮件未发送成功，请检查发件配置后补发";
+        }
+        record.setMailStatus(result);
+        try {
+            submissions.update(null, new UpdateWrapper<ResumeSubmission>().eq("id", record.getId()).eq("mail_status", 1)
+                    .set("mail_status", result).set("mail_last_error", error)
+                    .set("mail_sent_at", result == 2 ? LocalDateTime.now(clock) : null));
+        } catch (org.springframework.dao.DataAccessException e) {
+            org.slf4j.LoggerFactory.getLogger(getClass()).error("邮件结果写入失败，请管理员核实后补发");
+        }
+    }
+
+    private ResumeSubmitVO submitView(ResumeSubmission record) {
+        int status = record.getMailStatus() == null ? 0 : record.getMailStatus();
+        String message = switch (status) {
+            case 2 -> "报名已保存，邮件服务器已接受发送";
+            case 1 -> "报名已保存，邮件处理中或结果待核实，请勿重复提交";
+            case 3 -> "报名已保存，邮件暂未成功，管理员可稍后补发";
+            default -> "报名已保存，等待管理员发送";
+        };
+        return new ResumeSubmitVO(record.getId().toString(), record.getCreatedAt().atZone(clock.getZone()).toOffsetDateTime(), status, message);
     }
 
     @Override
