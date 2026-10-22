@@ -46,4 +46,10 @@ public class AdminResumeController {
         var file = service.savedFile(id, true);
         return com.bdis.bdis_website.controller.ResumeController.download(file.bytes(), file.filename(), true);
     }
+
+    @GetMapping("/{id}/word")
+    public org.springframework.http.ResponseEntity<byte[]> word(@PathVariable long id) {
+        var file = service.savedFile(id, false);
+        return com.bdis.bdis_website.controller.ResumeController.download(file.bytes(), file.filename(), false);
+    }
 }

@@ -115,4 +115,15 @@ class AdminResumeTest {
                 .andExpect(status().isOk()).andExpect(content().contentType("application/pdf"))
                 .andExpect(content().bytes(storage.savedFile(record.getPdfKey())));
     }
+
+    @Test
+    void savedWordRequiresAdminAndUsesPersistentFile() throws Exception {
+        var record = savedRecord();
+        mvc.perform(get("/api/admin/resumes/" + record.getId() + "/word")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/admin/resumes/" + record.getId() + "/word").header("Authorization", auth()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                .andExpect(header().exists("Content-Disposition"))
+                .andExpect(content().bytes(storage.savedFile(record.getWordKey())));
+    }
 }
