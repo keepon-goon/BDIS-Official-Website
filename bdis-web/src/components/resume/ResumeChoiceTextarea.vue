@@ -151,67 +151,109 @@
           <span v-if="choice === 'no'" class="fluid-label label-compressed">{{ yesLabel }}</span>
         </button>
 
-        <!-- 初始状态：双向冲击隔断膜（长线贯通全高、严格 1.0px 细线、动作极其缓和呼吸、无气泡） -->
-        <div v-if="!choice" class="fixed-ends-membrane" aria-hidden="true">
-          <svg class="membrane-svg" viewBox="0 0 24 130" preserveAspectRatio="none">
+        <!-- 初始状态：双向流体交汇 S 形隔断膜（清晰明显的 S 形曲线、蓝绿试剂沿 S 曲线无缝咬合、纯白微光立体分隔线、缓和呼吸微澜） -->
+        <div v-if="!choice" class="s-membrane-container" aria-hidden="true">
+          <svg class="s-membrane-svg" viewBox="0 0 60 124" preserveAspectRatio="none">
             <defs>
-              <linearGradient id="membraneGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.35" />
-                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.9" />
-                <stop offset="100%" stop-color="#22c55e" stop-opacity="0.35" />
+              <linearGradient id="sMembraneGlow" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#0284c7" stop-opacity="0.45" />
+                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#16a34a" stop-opacity="0.45" />
               </linearGradient>
+              <filter id="sDropShadow" x="-30%" y="-15%" width="160%" height="130%">
+                <feDropShadow dx="-1" dy="0" stdDeviation="1.5" flood-color="rgba(3, 105, 161, 0.3)" />
+                <feDropShadow dx="1" dy="0" stdDeviation="1.5" flood-color="rgba(21, 128, 61, 0.3)" />
+              </filter>
             </defs>
 
-            <!-- 极细微柔光晕（仅 2.0px，动作放缓至 4.8s 优雅微澜） -->
+            <!-- 蓝色液体沿 S 曲线向右侧伸展（平滑覆盖中间直切缝，形成原生 S 形液体分界） -->
             <path
-              class="membrane-glow-path"
-              fill="none"
-              stroke="url(#membraneGrad)"
-              stroke-width="2.0"
-              stroke-linecap="round"
-              opacity="0.22"
+              class="s-fluid-blue"
+              fill="#e0f2fe"
             >
               <animate
                 attributeName="d"
-                dur="4.8s"
+                dur="4.5s"
                 repeatCount="indefinite"
                 values="
-                  M 12 0 C 10 38, 14 92, 12 130;
-                  M 12 0 C 13.5 35, 10.5 95, 12 130;
-                  M 12 0 C 11 42, 13 88, 12 130;
-                  M 12 0 C 14 38, 10 92, 12 130;
-                  M 12 0 C 10.5 35, 13.5 95, 12 130;
-                  M 12 0 C 12 42, 12 88, 12 130;
-                  M 12 0 C 10 38, 14 92, 12 130
+                  M 0 0 L 30 0 C 44 34, 16 90, 30 124 L 0 124 Z;
+                  M 0 0 L 30 0 C 48 36, 12 88, 30 124 L 0 124 Z;
+                  M 0 0 L 30 0 C 41 32, 19 92, 30 124 L 0 124 Z;
+                  M 0 0 L 30 0 C 45 35, 15 89, 30 124 L 0 124 Z;
+                  M 0 0 L 30 0 C 44 34, 16 90, 30 124 L 0 124 Z
                 "
                 calcMode="spline"
-                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
               />
             </path>
 
-            <!-- 核心纤细长线（严格 1.0px，顶天立地贯穿全高，无圆点阻断，修长连贯） -->
+            <!-- 绿色液体沿 S 曲线向左侧伸展 -->
             <path
-              class="membrane-core-path"
-              fill="none"
-              stroke="#ffffff"
-              stroke-width="1.0"
-              stroke-linecap="square"
+              class="s-fluid-green"
+              fill="#dcfce7"
             >
               <animate
                 attributeName="d"
-                dur="4.8s"
+                dur="4.5s"
                 repeatCount="indefinite"
                 values="
-                  M 12 0 C 10 38, 14 92, 12 130;
-                  M 12 0 C 13.5 35, 10.5 95, 12 130;
-                  M 12 0 C 11 42, 13 88, 12 130;
-                  M 12 0 C 14 38, 10 92, 12 130;
-                  M 12 0 C 10.5 35, 13.5 95, 12 130;
-                  M 12 0 C 12 42, 12 88, 12 130;
-                  M 12 0 C 10 38, 14 92, 12 130
+                  M 60 0 L 30 0 C 44 34, 16 90, 30 124 L 60 124 Z;
+                  M 60 0 L 30 0 C 48 36, 12 88, 30 124 L 60 124 Z;
+                  M 60 0 L 30 0 C 41 32, 19 92, 30 124 L 60 124 Z;
+                  M 60 0 L 30 0 C 45 35, 15 89, 30 124 L 60 124 Z;
+                  M 60 0 L 30 0 C 44 34, 16 90, 30 124 L 60 124 Z
                 "
                 calcMode="spline"
-                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+              />
+            </path>
+
+            <!-- 明显可见的 S 形环境微光晕 -->
+            <path
+              class="s-line-halo"
+              fill="none"
+              stroke="url(#sMembraneGlow)"
+              stroke-width="5"
+              opacity="0.45"
+            >
+              <animate
+                attributeName="d"
+                dur="4.5s"
+                repeatCount="indefinite"
+                values="
+                  M 30 0 C 44 34, 16 90, 30 124;
+                  M 30 0 C 48 36, 12 88, 30 124;
+                  M 30 0 C 41 32, 19 92, 30 124;
+                  M 30 0 C 45 35, 15 89, 30 124;
+                  M 30 0 C 44 34, 16 90, 30 124
+                "
+                calcMode="spline"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
+              />
+            </path>
+
+            <!-- 核心明显清晰的纯白立体 S 形隔断线条（明显可见、S形曲率优雅、立体微阴影、缓和呼吸微澜） -->
+            <path
+              class="s-line-core"
+              fill="none"
+              stroke="#ffffff"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              filter="url(#sDropShadow)"
+            >
+              <animate
+                attributeName="d"
+                dur="4.5s"
+                repeatCount="indefinite"
+                values="
+                  M 30 0 C 44 34, 16 90, 30 124;
+                  M 30 0 C 48 36, 12 88, 30 124;
+                  M 30 0 C 41 32, 19 92, 30 124;
+                  M 30 0 C 45 35, 15 89, 30 124;
+                  M 30 0 C 44 34, 16 90, 30 124
+                "
+                calcMode="spline"
+                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
               />
             </path>
           </svg>
@@ -695,13 +737,13 @@ function reset() {
   color: #15803d;
 }
 
-/* 初始状态：贯穿全高更长且极细的动态冲击隔断膜（长线、严格 1px 细线、动作缓和至 4.8s、无气泡） */
-.fixed-ends-membrane {
+/* 初始状态：明显的 S 形流体交汇隔断膜（显著可见 S 曲线、纯白高光、柔和呼吸张力） */
+.s-membrane-container {
   position: absolute;
-  top: -1px;
-  bottom: -1px;
+  top: 0;
+  bottom: 0;
   left: 50%;
-  width: 24px;
+  width: 60px;
   transform: translateX(-50%);
   z-index: 5;
   pointer-events: none;
@@ -710,7 +752,7 @@ function reset() {
   justify-content: center;
 }
 
-.membrane-svg {
+.s-membrane-svg {
   width: 100%;
   height: 100%;
   display: block;
@@ -789,7 +831,7 @@ function reset() {
 .spray-left .rb-10 { width: 6px; height: 6px; background: #0ea5e9; top: 76%; left: 0; animation: ruptureFloatLeft 2.9s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.3s; }
 .spray-left .rb-11 { width: 4px; height: 4px; background: #ffffff; top: 18%; left: 0; animation: ruptureFloatLeft 2.2s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.0s; }
 .spray-left .rb-12 { width: 6px; height: 6px; background: #38bdf8; top: 82%; left: 0; animation: ruptureFloatLeft 2.8s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.5s; }
-.spray-left .rb-13 { width: 3px; height: 3px; background: #7dd3fc; top: 38%; left: 0; animation: ruptureFloatLeft 2.1s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.45s; }
+.spray-left .rb-13 { width: 3px; height: 3px; background: #7dd3fc; top: 38%; left: 0; animation: ruptureFloatLeft 2.1s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.45s; }
 .spray-left .rb-14 { width: 5px; height: 5px; background: #ffffff; top: 60%; left: 0; animation: ruptureFloatLeft 2.7s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.85s; }
 
 @keyframes ruptureFloatLeft {
