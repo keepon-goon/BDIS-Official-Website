@@ -208,6 +208,14 @@ public class ResumeServiceImpl implements ResumeService {
         return adminView(requireRecord(id));
     }
 
+    @Override
+    public ResumeFile savedFile(long id, boolean pdf) {
+        var record = requireRecord(id);
+        if (record.getDocumentName() == null) throw new ResumeException(409, "历史记录没有新版文件");
+        return new ResumeFile(storage.savedFile(pdf ? record.getPdfKey() : record.getWordKey()),
+                record.getDocumentName() + (pdf ? ".pdf" : ".docx"));
+    }
+
     @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
     public void recoverUncertainMail() {
         try {

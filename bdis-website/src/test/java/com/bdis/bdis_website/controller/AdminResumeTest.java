@@ -16,6 +16,8 @@ class AdminResumeTest {
     @Autowired private MockMvc mvc;
     @Autowired private JwtUtil jwt;
     @Autowired private com.bdis.bdis_website.mapper.ResumeSubmissionMapper submissions;
+    @Autowired private com.bdis.bdis_website.service.ResumeStorageService storage;
+    @Autowired private com.bdis.bdis_website.service.ResumeDocumentService documents;
 
     private String auth() { return "Bearer " + jwt.generateToken(1L, "resume-test"); }
 
@@ -80,5 +82,37 @@ class AdminResumeTest {
                 .andExpect(jsonPath("$.data.submissionKey").doesNotExist())
                 .andExpect(jsonPath("$.data.wordKey").doesNotExist());
         mvc.perform(get("/api/admin/resumes/99999999").header("Authorization", auth())).andExpect(status().isNotFound());
+    }
+
+    private com.bdis.bdis_website.entity.ResumeSubmission savedRecord() throws Exception {
+        String hash = storage.hash(storage.newToken());
+        var record = new com.bdis.bdis_website.entity.ResumeSubmission();
+        record.setName("后台测试");
+        record.setStudentNo("000010");
+        record.setAcademicYear(documents.currentAcademicYear());
+        record.setDocumentName(documents.documentName(record.getName(), record.getStudentNo(), record.getAcademicYear()));
+        record.setSubmissionKey(hash);
+        record.setMailStatus(0);
+        record.setCreatedAt(java.time.LocalDateTime.now());
+        var directory = storage.directory("submissions", hash);
+        java.nio.file.Files.createDirectory(directory);
+        java.nio.file.Files.write(directory.resolve(record.getDocumentName() + ".docx"), documents.blankTemplate());
+        try (var pdf = new org.apache.pdfbox.pdmodel.PDDocument()) {
+            pdf.addPage(new org.apache.pdfbox.pdmodel.PDPage());
+            pdf.save(directory.resolve(record.getDocumentName() + ".pdf").toFile());
+        }
+        record.setWordKey(hash + "/" + record.getDocumentName() + ".docx");
+        record.setPdfKey(hash + "/" + record.getDocumentName() + ".pdf");
+        submissions.insert(record);
+        return record;
+    }
+
+    @Test
+    void savedPdfRequiresAdminAndUsesPersistentFile() throws Exception {
+        var record = savedRecord();
+        mvc.perform(get("/api/admin/resumes/" + record.getId() + "/pdf")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/admin/resumes/" + record.getId() + "/pdf").header("Authorization", auth()))
+                .andExpect(status().isOk()).andExpect(content().contentType("application/pdf"))
+                .andExpect(content().bytes(storage.savedFile(record.getPdfKey())));
     }
 }

@@ -40,4 +40,10 @@ public class AdminResumeController {
     public Result<com.bdis.bdis_website.vo.ResumeAdminVO> detail(@PathVariable long id) {
         return Result.success(service.detail(id));
     }
+
+    @GetMapping("/{id}/pdf")
+    public org.springframework.http.ResponseEntity<byte[]> pdf(@PathVariable long id) {
+        var file = service.savedFile(id, true);
+        return com.bdis.bdis_website.controller.ResumeController.download(file.bytes(), file.filename(), true);
+    }
 }
