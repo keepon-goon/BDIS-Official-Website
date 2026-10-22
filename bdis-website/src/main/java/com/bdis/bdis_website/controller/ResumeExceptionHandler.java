@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 
-@RestControllerAdvice(assignableTypes = ResumeController.class)
+@RestControllerAdvice(assignableTypes = {ResumeController.class, com.bdis.bdis_website.controller.admin.AdminResumeController.class})
 public class ResumeExceptionHandler {
     @ExceptionHandler(ResumeException.class)
     public ResponseEntity<Result<Void>> business(ResumeException e) {

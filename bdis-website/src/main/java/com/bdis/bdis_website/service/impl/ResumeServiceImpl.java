@@ -157,6 +157,23 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
+    public com.bdis.bdis_website.vo.ResumeSettingsVO settings() {
+        var rules = settings.selectById(1L);
+        if (rules == null) throw new ResumeException(503, "报名设置尚未初始化，请联系管理员");
+        return new com.bdis.bdis_website.vo.ResumeSettingsVO(rules.getSendMode(), rules.getRecipient(), mail.configured());
+    }
+
+    @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+    public void recoverUncertainMail() {
+        try {
+            submissions.update(null, new UpdateWrapper<ResumeSubmission>().eq("mail_status", 1).set("mail_status", 3)
+                    .set("mail_last_error", "上次发送结果待核实，请管理员确认后补发"));
+        } catch (org.springframework.dao.DataAccessException e) {
+            org.slf4j.LoggerFactory.getLogger(getClass()).warn("尚未完成简历表初始化，邮件结果恢复检查暂未执行");
+        }
+    }
+
+    @Override
     public ResumeSubmitVO confirm(String token) {
         String hash = storage.hash(token);
         ResumeSubmission submission;

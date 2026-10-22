@@ -21,6 +21,11 @@ public class ResumeController {
         this.service = service;
     }
 
+    @ModelAttribute
+    public void noCache(jakarta.servlet.http.HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-store");
+    }
+
     @GetMapping("/template")
     public ResponseEntity<byte[]> template() {
         return download(documents.blankTemplate(), documents.blankFilename(), false);
