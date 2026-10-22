@@ -95,10 +95,10 @@
             <defs>
               <linearGradient id="softDiffuseBlueGrad" x1="1" y1="0" x2="0" y2="0">
                 <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0" />
-                <stop offset="30%" stop-color="#e0f2fe" stop-opacity="0.22" />
-                <stop offset="60%" stop-color="#e0f2fe" stop-opacity="0.6" />
-                <stop offset="85%" stop-color="#e0f2fe" stop-opacity="0.9" />
-                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.98" />
+                <stop offset="30%" stop-color="#e0f2fe" stop-opacity="0.35" />
+                <stop offset="60%" stop-color="#e0f2fe" stop-opacity="0.8" />
+                <stop offset="85%" stop-color="#e0f2fe" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="1" />
               </linearGradient>
               <linearGradient id="ambientBlueRim" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
@@ -518,7 +518,7 @@ function reset() {
 .fluid-interaction-layer {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 10;
   pointer-events: none;
   display: flex;
 }
@@ -668,7 +668,7 @@ function reset() {
   width: calc(100% - 52px);
   background: transparent !important;
   opacity: 0;
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
 .reagent-choice-card.state-yes .side-blue .label-initial {
@@ -682,12 +682,24 @@ function reset() {
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
   cursor: pointer;
-  pointer-events: auto;
-  z-index: 5;
+  pointer-events: auto !important;
+  z-index: 12;
+}
+
+.reagent-choice-card.state-yes .side-green:hover {
+  background: linear-gradient(to right, transparent 0%, #bbf7d0 16px) !important;
 }
 
 .reagent-choice-card.state-yes .side-green:hover .concave-liquid-svg {
   filter: brightness(1.06);
+}
+
+.reagent-choice-card.state-yes .side-green:active {
+  transform: scale(0.96);
+}
+
+.reagent-choice-card.state-yes .reagent-meniscus-tube * {
+  pointer-events: none !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -700,7 +712,7 @@ function reset() {
   width: calc(100% - 52px);
   background: transparent !important;
   opacity: 0;
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
 .reagent-choice-card.state-no .side-green .label-initial {
@@ -708,23 +720,30 @@ function reset() {
   transform: scale(0.9);
 }
 
-.reagent-choice-card.state-no .underlay-content,
-.reagent-choice-card.state-yes .underlay-content {
-  z-index: 3;
-}
-
 .reagent-choice-card.state-no .side-blue {
   width: 52px;
-  background: linear-gradient(to left, transparent 0%, #e0f2fe 16px) !important;
+  background: linear-gradient(to right, #e0f2fe 0%, #e0f2fe 36px, transparent 52px) !important;
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
   cursor: pointer;
-  pointer-events: auto;
-  z-index: 5;
+  pointer-events: auto !important;
+  z-index: 12;
+}
+
+.reagent-choice-card.state-no .side-blue:hover {
+  background: linear-gradient(to right, #bae6fd 0%, #bae6fd 36px, transparent 52px) !important;
 }
 
 .reagent-choice-card.state-no .side-blue:hover .concave-liquid-svg {
   filter: brightness(1.06);
+}
+
+.reagent-choice-card.state-no .side-blue:active {
+  transform: scale(0.96);
+}
+
+.reagent-choice-card.state-no .reagent-meniscus-tube * {
+  pointer-events: none !important;
 }
 
 /* 渐进毛玻璃凹形矢量试剂背景（微澜呼吸 + 果冻触壁回弹 Squash & Stretch） */
