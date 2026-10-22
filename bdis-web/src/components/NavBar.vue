@@ -1,105 +1,50 @@
 <!-- src/components/NavBar.vue -->
 <template>
-  <header class="nav-wrapper" :class="{ 'is-scrolled': isScrolled }">
-    <div class="nav-container">
-      <!-- 左：Logo 与工作室名称 -->
-      <div class="nav-left" @click="goHome">
-        <img class="nav-logo" :src="logoImg" alt="BDIS 大数据智能工作室" />
-      </div>
-
-      <!-- 右侧：上层快捷链接 + 下层主菜单与搜索 -->
-      <div class="nav-right">
-        <!-- 顶部快捷导航与外部入口 -->
-        <div class="nav-right-top">
-          <a class="quick-chip" href="https://www.cqut.edu.cn/" target="_blank" rel="noopener noreferrer">
-            <span>University</span>
-          </a>
-          <a class="quick-chip" href="https://cs.cqut.edu.cn/" target="_blank" rel="noopener noreferrer">
-            <span>School</span>
-          </a>
-          <a class="quick-chip" href="https://www.tipdm.com/" target="_blank" rel="noopener noreferrer">
-            <span>Partners</span>
-          </a>
-          <RouterLink class="quick-chip" to="/wip">
-            <span>Members</span>
-          </RouterLink>
-          <RouterLink class="quick-chip lang-btn" to="/wip">
-            <span>EN</span>
-          </RouterLink>
-          <button class="quick-chip admin-btn" @click="router.push('/admin/login')">
-            <el-icon class="admin-icon"><User /></el-icon>
-            <span>Admin</span>
-          </button>
-        </div>
-
-        <!-- 底部主菜单与检索 -->
-        <div class="nav-right-bottom">
-          <nav class="nav-menu">
-            <div
-              v-for="item in mainMenus"
-              :key="item.index"
-              class="nav-item"
-              :class="{ 'is-active': activeMain === item.index }"
-              @click="handleMenuClick(item)"
-            >
-              <span class="nav-item-text">{{ item.label }}</span>
-              <span class="nav-item-indicator"></span>
-            </div>
-          </nav>
-
-          <!-- 搜索按钮 -->
-          <button class="nav-search-btn" title="全站检索" @click="handleSearch">
-            <el-icon class="search-icon"><Search /></el-icon>
-          </button>
-
-          <!-- 移动端汉堡菜单触发器 -->
-          <button class="nav-mobile-toggle" @click="mobileMenuVisible = !mobileMenuVisible">
-            <el-icon><Menu /></el-icon>
-          </button>
-        </div>
-      </div>
+  <header class="nav">
+    <!-- 左：logo -->
+    <div class="nav-left">
+      <img class="nav-logo" :src="logoImg" alt="BDIS 大数据智能工作室" />
     </div>
 
-    <!-- 移动端抽屉导航 -->
-    <el-drawer
-      v-model="mobileMenuVisible"
-      title="BDIS 导航菜单"
-      direction="rtl"
-      size="280px"
-      :with-header="true"
-    >
-      <div class="mobile-menu-list">
-        <div
-          v-for="item in mainMenus"
-          :key="item.index"
-          class="mobile-menu-item"
-          :class="{ 'is-active': activeMain === item.index }"
-          @click="handleMenuClick(item); mobileMenuVisible = false"
-        >
-          {{ item.label }}
-        </div>
-        <div class="mobile-menu-divider"></div>
-        <div class="mobile-menu-item" @click="router.push('/search'); mobileMenuVisible = false">
-          <el-icon><Search /></el-icon> 全站检索
-        </div>
-        <div class="mobile-menu-item" @click="router.push('/admin/login'); mobileMenuVisible = false">
-          <el-icon><User /></el-icon> 管理后台
-        </div>
+    <!-- 中：占位空白 -->
+    <div class="nav-center"></div>
+
+    <!-- 右：主菜单 + 搜索按钮 -->
+    <div class="nav-right">
+      <div class="nav-right-top">
+        <button><a href="https://www.cqut.edu.cn/">University</a></button>
+        <button><a href="https://cs.cqut.edu.cn/">School</a></button>
+        <button><a href="https://www.tipdm.com/">Partners</a></button>
+        <button><a href="/wip">Members</a></button>
+        <button class="lang-btn"><a href="/wip">EN</a></button>
+        <button class="admin-btn" @click="$router.push('/admin/login')"><a>Admin</a></button>
       </div>
-    </el-drawer>
+      <div class="nav-right-foot">
+        <el-menu mode="horizontal" :default-active="activeMain" class="nav-menu-right" :ellipsis="false"
+          @select="handleMainSelect">
+          <el-menu-item v-for="item in mainMenus" :key="item.index" :index="item.index">
+            {{ item.label }}
+          </el-menu-item>
+        </el-menu>
+        <el-button circle class="nav-search-btn" @click="handleSearch">
+          <el-icon>
+            <Search />
+          </el-icon>
+        </el-button>
+      </div>
+
+    </div>
   </header>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { Search, User, Menu } from '@element-plus/icons-vue'
+import { ref, computed, watch } from 'vue'
+import { Search } from '@element-plus/icons-vue'
 import logoImg from '../assets/logo.jpg'
-import { useRouter, useRoute, RouterLink } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
-const mobileMenuVisible = ref(false)
-const isScrolled = ref(false)
 
 const mainMenus = [
   { index: 'home', label: '首页', path: "/" },
@@ -118,310 +63,133 @@ const activeMain = computed(() => {
   return matched ? matched.index : 'home'
 })
 
-const handleMenuClick = (item) => {
-  router.push(item.path)
-}
-
-const goHome = () => {
-  router.push('/')
+const handleMainSelect = (key) => {
+  const target = mainMenus.find(item => item.index === key)
+  if (target) router.push(target.path)
 }
 
 const handleSearch = () => {
   router.push('/search')
 }
-
-const handleScroll = () => {
-  isScrolled.value = window.scrollY > 20
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll, { passive: true })
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
 </script>
 
 <style scoped>
-.nav-wrapper {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.nav-wrapper.is-scrolled {
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 4px 20px -2px rgba(12, 61, 112, 0.08);
-  border-bottom-color: rgba(203, 213, 225, 0.9);
-}
-
-.nav-container {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 10px 32px;
+/* 整体一行：左 logo，中间空白，右侧菜单+搜索 */
+.nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  height: 135px;
+  width: 100%;
+  padding: 0 32px;
   box-sizing: border-box;
+  background-color: #ffffff;
 }
 
-/* 左侧 Logo */
+/* 左边固定宽度内容（logo） */
 .nav-left {
   flex: 0 0 auto;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: transform 0.25s ease;
 }
 
-.nav-left:hover {
-  transform: translateY(-1px);
+/* 中间吃掉剩余空间，形成“空白”效果 */
+.nav-center {
+  flex: 1 1 auto;
 }
 
-.nav-logo {
-  height: 52px;
-  width: auto;
-  object-fit: contain;
-}
-
-/* 右侧菜单与快捷栏 */
+/* 右边：菜单 + 搜索 */
 .nav-right {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 12px;
+  gap: 30px;
+  /* 菜单和搜索按钮之间的间距 */
 }
 
-/* 顶部快捷条 */
-.nav-right-top {
+/* logo 等比缩放 */
+.nav-logo {
+  max-height: 66px;
+  height: auto;
+  width: auto;
+}
+
+.nav-right-foot {
   display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
-.quick-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #475569;
-  background-color: #F1F5F9;
-  border-radius: 6px;
-  text-decoration: none;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  line-height: 1.4;
+/* .nav-right-top {
+  
+} */
+
+.nav-right-top button {
+  background-color: #F1F1F1;
+  border-radius: 0px;
+  height: 37px;
+  margin: 1px;
 }
 
-.quick-chip:hover {
-  background-color: #E2E8F0;
-  color: #0C3D70;
-  transform: translateY(-1px);
+.nav-right-top button a {
+  color: #23415A;
 }
 
-.quick-chip.lang-btn {
-  background: #0C3D70;
-  color: #FFFFFF;
+.nav-right-top .lang-btn {
+  background-color: #0C3D70;
 }
 
-.quick-chip.lang-btn:hover {
-  background: #16569A;
-  color: #FFFFFF;
+.nav-right-top .lang-btn a {
+  color: white;
 }
 
-.quick-chip.admin-btn {
-  background: rgba(12, 61, 112, 0.08);
-  color: #0C3D70;
-  border: 1px solid rgba(12, 61, 112, 0.15);
+.nav-right-top .admin-btn {
+  background-color: rgba(12, 61, 112, 0.2);
 }
 
-.quick-chip.admin-btn:hover {
-  background: rgba(12, 61, 112, 0.16);
-  border-color: rgba(12, 61, 112, 0.3);
-}
-
-.admin-icon {
-  font-size: 13px;
-}
-
-/* 底部主导航 */
-.nav-right-bottom {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.nav-menu {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.nav-item {
-  position: relative;
-  padding: 8px 16px;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.nav-item-text {
-  font-size: 16px;
-  font-weight: 500;
-  color: #334155;
-  transition: color 0.25s ease;
-}
-
-.nav-item-indicator {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%) scaleX(0);
-  width: 24px;
-  height: 3px;
-  background: linear-gradient(90deg, #0C3D70 0%, #0284C7 100%);
-  border-radius: 2px;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.nav-item:hover {
-  background-color: rgba(12, 61, 112, 0.04);
-}
-
-.nav-item:hover .nav-item-text {
+.nav-right-top .admin-btn a {
   color: #0C3D70;
 }
 
-.nav-item.is-active .nav-item-text {
+:deep(.el-button.is-circle) {
+  padding: 20px;
+  margin: -10px 2px -10px 5px;
+  background-color: #F1F1F1;
+}
+
+/* 右侧菜单：去掉默认下划线 */
+:deep(.nav-menu-right.el-menu--horizontal) {
+  border-bottom: none;
+}
+
+/* 右侧菜单的所有项：去掉默认下划线 */
+:deep(.nav-menu-right .el-menu-item) {
+  display: block;
+  border-bottom: none;
+  font-size: 18px;
+  font-weight: 550 !important;
+  padding: 0px 5px 0px 0px;
+  margin: 0 30px;
+  transition: border-bottom 0.3s ease;
   color: #0C3D70;
-  font-weight: 600;
 }
 
-.nav-item.is-active .nav-item-indicator {
-  transform: translateX(-50%) scaleX(1);
+/* 右侧菜单的激活项：去掉默认下划线 */
+:deep(.nav-menu-right .el-menu-item.is-active) {
+  border-bottom: none;
+  color: #0C3D70 !important;
+  background: transparent !important;
 }
 
-/* 搜索按钮 */
+/* 右侧菜单的点击项：去掉默认下划线 */
+:deep(.nav-menu-right .el-menu-item:hover) {
+  border-bottom: 3px solid black;
+  color: #0C3D70 !important;
+  background: transparent !important;
+}
+
+/* 搜索圆形按钮 */
 .nav-search-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
   border-radius: 50%;
-  border: 1px solid #E2E8F0;
-  background: #F8FAFC;
-  color: #475569;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.nav-search-btn:hover {
-  background: #0C3D70;
-  color: #FFFFFF;
-  border-color: #0C3D70;
-  transform: translateY(-1px) scale(1.04);
-  box-shadow: 0 4px 12px rgba(12, 61, 112, 0.2);
-}
-
-.search-icon {
-  font-size: 17px;
-}
-
-/* 移动端菜单控制 */
-.nav-mobile-toggle {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
-  border: 1px solid #E2E8F0;
-  background: #F8FAFC;
-  font-size: 20px;
-  color: #334155;
-  cursor: pointer;
-}
-
-.mobile-menu-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.mobile-menu-item {
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #334155;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.2s ease;
-}
-
-.mobile-menu-item:hover,
-.mobile-menu-item.is-active {
-  background: rgba(12, 61, 112, 0.08);
-  color: #0C3D70;
-  font-weight: 600;
-}
-
-.mobile-menu-divider {
-  height: 1px;
-  background: #E2E8F0;
-  margin: 10px 0;
-}
-
-/* 响应式断点 */
-@media (max-width: 1024px) {
-  .nav-menu {
-    gap: 2px;
-  }
-
-  .nav-item {
-    padding: 8px 10px;
-  }
-
-  .nav-item-text {
-    font-size: 15px;
-  }
-}
-
-@media (max-width: 860px) {
-  .nav-right-top {
-    display: none;
-  }
-
-  .nav-menu {
-    display: none;
-  }
-
-  .nav-mobile-toggle {
-    display: flex;
-  }
-
-  .nav-logo {
-    height: 44px;
-  }
-
-  .nav-container {
-    padding: 12px 20px;
-  }
+:deep(.el-menu) {
+  margin: -18px 0px 10px 0px;
 }
 </style>

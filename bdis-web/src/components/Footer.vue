@@ -5,21 +5,18 @@
       <div class="footer-content">
         <!-- 左侧：工作室信息 -->
         <div class="footer-section footer-about">
-          <div class="footer-brand">
-            <h3 class="footer-title">大数据智能工作室</h3>
-            <span class="footer-tag">BDIS 创新实验室</span>
-          </div>
-          <p class="footer-subtitle">Big Data Intelligence Studio · CQUT</p>
+          <h3 class="footer-title">大数据智能工作室</h3>
+          <p class="footer-subtitle">Big Data Intelligence Studio · BDIS</p>
           <p class="footer-desc">
-            依托大数据管理与应用专业，由泰迪·重理工大数据智能工作室与重庆理工大学创新实验室联合组建，聚焦创新创业、企业级工程开发与前沿大模型技术实践。
+            依托大数据管理与应用专业，由泰迪·重理工大数据智能工作室与重庆理工大学创新实验室联合组建，聚焦创新创业、系统开发与大模型训练。
           </p>
         </div>
 
         <!-- 中间：快速链接 -->
         <div class="footer-section footer-links">
-          <h3 class="footer-title">站点导航</h3>
+          <h3 class="footer-title">快速链接</h3>
           <ul class="footer-link-list">
-            <li><router-link to="/" class="footer-link">首页门户</router-link></li>
+            <li><router-link to="/" class="footer-link">首页</router-link></li>
             <li><router-link to="/info/about" class="footer-link">关于我们</router-link></li>
             <li><router-link to="/info/research" class="footer-link">项目进展</router-link></li>
             <li><router-link to="/info/news" class="footer-link">动态公告</router-link></li>
@@ -33,22 +30,28 @@
         <div class="footer-section footer-contact">
           <h3 class="footer-title">联系我们</h3>
           <div class="contact-item">
-            <el-icon class="contact-icon"><Location /></el-icon>
-            <span class="contact-text">重庆理工大学 花溪校区 博园4号楼305</span>
+            <el-icon class="contact-icon">
+              <Location />
+            </el-icon>
+            <span class="contact-text">重庆理工大学 博园4号楼305</span>
           </div>
           <div class="contact-item">
-            <el-icon class="contact-icon"><Message /></el-icon>
+            <el-icon class="contact-icon">
+              <Message />
+            </el-icon>
             <span class="contact-text">18862028557@163.com</span>
           </div>
           <div class="contact-item">
-            <el-icon class="contact-icon"><ChatDotRound /></el-icon>
-            <span class="contact-text">招新交流群：935982021</span>
+            <el-icon class="contact-icon">
+              <ChatDotRound />
+            </el-icon>
+            <span class="contact-text">QQ群：935982021</span>
           </div>
         </div>
 
         <!-- 右侧：友情链接 -->
         <div class="footer-section footer-partners">
-          <h3 class="footer-title">合作单位</h3>
+          <h3 class="footer-title">友情链接</h3>
           <ul class="footer-link-list">
             <li>
               <a href="https://www.cqut.edu.cn/" target="_blank" rel="noopener noreferrer" class="footer-link">
@@ -62,7 +65,7 @@
             </li>
             <li>
               <a href="https://www.tipdm.com/" target="_blank" rel="noopener noreferrer" class="footer-link">
-                广州泰迪智能科技
+                泰迪智能科技
               </a>
             </li>
           </ul>
@@ -72,10 +75,8 @@
       <!-- 底部版权信息 -->
       <div class="footer-bottom">
         <div class="footer-copyright">
-          <p>© {{ currentYear }} 大数据智能工作室 (BDIS) · 保留所有权利</p>
-          <a class="footer-beian" href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="noopener noreferrer">
-            苏ICP备2026001180号-1
-          </a>
+          <p>© {{ currentYear }} 大数据智能工作室 (BDIS) 版权所有</p>
+          <a class="footer-beian btn" href="https://beian.miit.gov.cn/#/Integrated/index">苏ICP备2026001180号-1</a>
         </div>
       </div>
     </div>
@@ -92,24 +93,22 @@ const currentYear = computed(() => new Date().getFullYear())
 <style scoped>
 .footer {
   width: 100%;
-  background: linear-gradient(180deg, #0C3D70 0%, #061B33 100%);
-  color: #FFFFFF;
+  background-color: #0C3D70;
+  color: #ffffff;
   margin-top: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .footer-container {
-  max-width: 1440px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 50px 32px 24px;
-  box-sizing: border-box;
+  padding: 60px 32px 20px;
 }
 
 .footer-content {
   display: grid;
-  grid-template-columns: 2.2fr 1.2fr 1.8fr 1.2fr;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr;
   gap: 40px;
-  margin-bottom: 36px;
+  margin-bottom: 40px;
 }
 
 .footer-section {
@@ -117,46 +116,25 @@ const currentYear = computed(() => new Date().getFullYear())
   flex-direction: column;
 }
 
-.footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
 .footer-title {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
   margin: 0 0 16px 0;
-  color: #FFFFFF;
-  letter-spacing: 0.5px;
-}
-
-.footer-brand .footer-title {
-  margin: 0;
-}
-
-.footer-tag {
-  font-size: 11px;
-  padding: 2px 8px;
-  background: rgba(2, 132, 199, 0.3);
-  border: 1px solid rgba(56, 189, 248, 0.4);
-  color: #38BDF8;
-  border-radius: 4px;
+  color: #ffffff;
+  font-family: "MiSans", sans-serif;
 }
 
 .footer-subtitle {
-  font-size: 13px;
-  color: #94A3B8;
-  margin: 6px 0 14px 0;
+  font-size: 14px;
+  color: #b0c4de;
+  margin: 0 0 12px 0;
   font-weight: 400;
-  letter-spacing: 0.5px;
 }
 
 .footer-desc {
   font-size: 14px;
   line-height: 1.8;
-  color: #CBD5E1;
+  color: #d0d8e8;
   margin: 0;
 }
 
@@ -167,72 +145,63 @@ const currentYear = computed(() => new Date().getFullYear())
 }
 
 .footer-link-list li {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .footer-link {
-  color: #94A3B8;
+  color: #d0d8e8;
   text-decoration: none;
   font-size: 14px;
-  transition: all 0.25s ease;
-  display: inline-flex;
-  align-items: center;
+  transition: color 0.3s ease;
+  display: inline-block;
 }
 
 .footer-link:hover {
-  color: #38BDF8;
-  transform: translateX(4px);
+  color: #ffffff;
+  text-decoration: underline;
 }
 
 .contact-item {
   display: flex;
-  align-items: flex-start;
-  margin-bottom: 14px;
+  align-items: center;
+  margin-bottom: 16px;
   font-size: 14px;
-  gap: 10px;
 }
 
 .contact-icon {
-  font-size: 17px;
-  color: #38BDF8;
+  font-size: 18px;
+  margin-right: 10px;
+  color: #b0c4de;
   flex-shrink: 0;
-  margin-top: 3px;
 }
 
 .contact-text {
-  color: #CBD5E1;
+  color: #d0d8e8;
   line-height: 1.6;
 }
 
 .footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 24px;
+  margin-top: 20px;
 }
 
 .footer-copyright {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
+  text-align: center;
 }
 
 .footer-copyright p {
-  margin: 0;
+  margin: 4px 0;
   font-size: 13px;
-  color: #94A3B8;
+  color: #b0c4de;
 }
 
 .footer-beian {
   font-size: 12px;
-  color: #64748B;
-  transition: color 0.2s ease;
+  color: #9bb3d3;
 }
 
-.footer-beian:hover {
-  color: #94A3B8;
-}
-
+/* 响应式设计 */
 @media (max-width: 1024px) {
   .footer-content {
     grid-template-columns: 1fr 1fr;
@@ -240,20 +209,18 @@ const currentYear = computed(() => new Date().getFullYear())
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .footer-container {
-    padding: 36px 20px 20px;
+    padding: 40px 20px 20px;
   }
 
   .footer-content {
     grid-template-columns: 1fr;
-    gap: 26px;
+    gap: 30px;
   }
 
-  .footer-copyright {
-    flex-direction: column;
-    text-align: center;
-    gap: 8px;
+  .footer-section {
+    text-align: left;
   }
 }
 </style>
