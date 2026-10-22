@@ -694,17 +694,23 @@ function reset() {
    B. 选择绿色 (state-no):
       - 绿色试剂舒缓展开铺满右侧（绿色保留），显示温馨寄语
       - 蓝色以 0.72s 慢速 Q 弹超冲曲线向左压缩至 52px，并在触壁时产生弹性果冻微震
-      - 蓝色块在滑行收缩全程保持清澈饱满的蓝色流体质感
+      - side-green 设为透明以完全透出并突显 underlay-green-stage 中的纯净寄语
    -------------------------------------------------------------------------- */
 .reagent-choice-card.state-no .side-green {
   width: calc(100% - 52px);
-  background: #dcfce7 !important;
+  background: transparent !important;
+  opacity: 0;
   pointer-events: none;
 }
 
 .reagent-choice-card.state-no .side-green .label-initial {
   opacity: 0;
   transform: scale(0.9);
+}
+
+.reagent-choice-card.state-no .underlay-content,
+.reagent-choice-card.state-yes .underlay-content {
+  z-index: 3;
 }
 
 .reagent-choice-card.state-no .side-blue {
