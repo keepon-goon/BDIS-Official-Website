@@ -8,6 +8,7 @@ public class ResumeFormDTO {
     @NotBlank(message = "请填写姓名") @Size(max = 30, message = "姓名最多30字")
     private String name;
     @Size(max = 10, message = "性别最多10字")
+    @Pattern(regexp = "^(男|女|沃尔玛购物袋|武装直升机)?$", message = "请选择列表中的性别选项")
     private String gender;
     @Size(max = 30, message = "民族最多30字")
     private String ethnicity;
@@ -20,6 +21,7 @@ public class ResumeFormDTO {
     @NotBlank(message = "请填写专业") @Size(max = 80, message = "专业最多80字")
     private String major;
     @NotBlank(message = "请填写联系电话") @Size(max = 30, message = "联系电话最多30字")
+    @Pattern(regexp = "^(?:\\+?86[- ]?)?1[3-9]\\d{9}$|^0\\d{2,3}-?\\d{7,8}(?:-\\d{1,6})?$", message = "请填写有效的手机号或带区号的固定电话")
     private String phone;
     @Size(max = 120, message = "特点特长最多120字")
     private String specialties;
