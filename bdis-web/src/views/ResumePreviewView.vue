@@ -1,9 +1,36 @@
 <template>
   <section class="resume-shell">
+    <!-- 流程步骤条 -->
+    <div class="resume-step-bar">
+      <div class="step-item is-done">
+        <div class="step-number">✓</div>
+        <div class="step-text">
+          <div class="step-title">在线填写信息</div>
+          <div class="step-desc">基本信息与个人陈述</div>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" :class="{ 'is-active': !resumeDraft.submission, 'is-done': resumeDraft.submission }">
+        <div class="step-number">{{ resumeDraft.submission ? '✓' : '2' }}</div>
+        <div class="step-text">
+          <div class="step-title">排版预览与核对</div>
+          <div class="step-desc">两页标准核验与照片合成</div>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" :class="{ 'is-active': resumeDraft.submission }">
+        <div class="step-number">3</div>
+        <div class="step-text">
+          <div class="step-title">正式确认提交</div>
+          <div class="step-desc">文档归档与投递登记</div>
+        </div>
+      </div>
+    </div>
+
     <template v-if="resumeDraft.submission">
-      <el-result icon="success" title="报名已保存" :sub-title="resumeDraft.submission.message">
+      <el-result icon="success" title="报名已成功保存" :sub-title="resumeDraft.submission.message">
         <template #extra>
-          <p>提交编号：{{ resumeDraft.submission.submissionId }}</p>
+          <p>提交编号：<strong>{{ resumeDraft.submission.submissionId }}</strong></p>
           <p class="resume-note">无需重复提交。邮件尚未成功时，可由管理员后续补发。</p>
           <div class="resume-actions">
             <el-button @click="router.push('/info/join')">返回加入我们</el-button>
@@ -15,9 +42,9 @@
     <template v-else-if="preview">
       <h1>核对报名表预览</h1>
       <p class="resume-lead">请核对全部内容与分页效果。你可以下载当前 Word 自行贴照，也可以上传照片合成后再次预览。</p>
-      <el-alert title="如果无法显示,请检查是否开启了IDM插件,关掉它" type="info" :closable="false" show-icon />
+      <el-alert title="如果无法显示，请检查是否开启了第三方下载插件（如IDM），建议将其暂时关闭" type="info" :closable="false" show-icon />
       <p class="resume-filename">{{ preview.wordFilename }}</p>
-      <el-tag>{{ preview.sourceType === 'UPLOAD' ? '上传的 Word 原件' : preview.hasPhoto ? '已合成照片' : '照片留白' }}</el-tag>
+      <el-tag effect="plain" type="primary">{{ preview.sourceType === 'UPLOAD' ? '上传的 Word 原件' : preview.hasPhoto ? '已合成照片' : '照片留白' }}</el-tag>
       <el-alert v-if="errorText" :title="errorText" type="error" :closable="false" show-icon />
       <div class="resume-card resume-photo-panel" v-if="preview.sourceType === 'FORM'">
         <h2>证件照（可选）</h2>

@@ -1,8 +1,38 @@
 <template>
   <section class="resume-shell">
-    <RouterLink class="resume-back" to="/info/join">返回加入我们</RouterLink>
+    <RouterLink class="resume-back" to="/info/join">
+      <span>← 返回加入我们</span>
+    </RouterLink>
+
+    <!-- 流程步骤条 -->
+    <div class="resume-step-bar">
+      <div class="step-item is-active">
+        <div class="step-number">1</div>
+        <div class="step-text">
+          <div class="step-title">在线填写信息</div>
+          <div class="step-desc">基本信息与个人陈述</div>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item">
+        <div class="step-number">2</div>
+        <div class="step-text">
+          <div class="step-title">排版预览与核对</div>
+          <div class="step-desc">两页标准核验与照片合成</div>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item">
+        <div class="step-number">3</div>
+        <div class="step-text">
+          <div class="step-title">正式确认提交</div>
+          <div class="step-desc">文档归档与投递登记</div>
+        </div>
+      </div>
+    </div>
+
     <h1>在线填写招新报名表</h1>
-    <p class="resume-lead">填写后生成两页报名表，下一步可核对 PDF、下载 Word，或上传证件照。照片可以留空。</p>
+    <p class="resume-lead">填写后生成两页标准报名表，下一步可核对 PDF、下载 Word，或上传证件照。照片可以留空。</p>
     <el-alert v-if="errorText" :title="errorText" type="error" :closable="false" show-icon />
     <el-form ref="formRef" :model="form" :rules="rules" label-position="top" :disabled="busy" @submit.prevent="generate">
       <div class="resume-card">

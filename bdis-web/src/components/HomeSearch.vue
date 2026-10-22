@@ -1,25 +1,40 @@
 <template>
   <div class="search-main">
     <!-- 输入框部分 -->
-    <div class="search-input">
-      <el-input v-model="input" placeholder="输入关键词检索相关内容">
-        <template #suffix>
-          <el-button :icon="Search" @click="SearchClick" class="search-el-button">搜索</el-button>
-        </template>
-      </el-input>
+    <div class="search-input-wrapper">
+      <div class="search-box">
+        <el-input
+          v-model="input"
+          placeholder="输入关键词检索新闻、项目、科研成果或资料..."
+          class="custom-search-input"
+          @keyup.enter="SearchClick"
+        >
+          <template #prefix>
+            <el-icon class="search-prefix-icon"><Search /></el-icon>
+          </template>
+        </el-input>
+        <button class="search-submit-btn" @click="SearchClick">
+          <span>搜索</span>
+          <el-icon><Right /></el-icon>
+        </button>
+      </div>
     </div>
+
     <!-- 热门搜索部分 -->
     <div class="search-hot">
-      <div class="search-hot-left">
-        <h5>热门搜索：</h5>
+      <div class="search-hot-label">
+        <el-icon class="hot-flame-icon"><Compass /></el-icon>
+        <span>热门检索</span>
       </div>
-      <div class="search-hot-right-list">
-        <div class="search-hot-right-item" v-for="item in hotSearch" :key="item.index"
-          @click="hotWordClick(item.label)">
-          <span class="search-hot-text">{{ item.label }}</span>
-          <el-icon class="search-hot-icon">
-            <TopRight />
-          </el-icon>
+      <div class="search-hot-tags">
+        <div
+          v-for="item in hotSearch"
+          :key="item.index"
+          class="hot-tag-chip"
+          @click="hotWordClick(item.label)"
+        >
+          <span class="hot-tag-text">{{ item.label }}</span>
+          <el-icon class="hot-tag-arrow"><TopRight /></el-icon>
         </div>
       </div>
     </div>
@@ -28,11 +43,12 @@
 
 <script setup>
 import { ref } from 'vue'
-import { Search, TopRight } from '@element-plus/icons-vue'
+import { Search, TopRight, Right, Compass } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 
 const input = ref('')
-// 热门搜索部分
+const router = useRouter()
+
 const hotSearch = [
   { index: 1, label: '加入我们' },
   { index: 2, label: '项目招募' },
@@ -44,13 +60,10 @@ const hotSearch = [
   { index: 8, label: '常见问题' },
 ]
 
-// 搜索逻辑
-const router = useRouter()
 const SearchClick = () => {
   if (input.value.trim()) {
     router.push({ path: '/search', query: { q: input.value.trim() } })
   }
-  console.log('search:', input.value)
 }
 
 const hotWordClick = (label) => {
@@ -62,134 +75,169 @@ const hotWordClick = (label) => {
 <style scoped>
 .search-main {
   height: 100%;
-  min-height: 186px;
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-
-.search-input {
-  display: flex;
-  flex: 0 0 clamp(78px, 38%, 88px);
-  padding: 12px;
-  margin: 0 0 0 clamp(18px, 2.4vw, 30px);
+  padding: 16px 24px;
   box-sizing: border-box;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
 }
 
-:deep(.el-input__inner) {
-  height: 65px;
-  padding: 20px;
-  background-color: rgb(249, 249, 250);
+.search-input-wrapper {
+  margin-bottom: 14px;
 }
 
-:deep(.el-input__inner::placeholder) {
-  font-size: 16px;
-  color: #554a4a76;
-}
-
-:deep(.el-icon) {
-  font-size: 20px;
-}
-
-:deep(.search-el-button) {
-  background-color: #0C3D70;
-  color: #FFFF;
-  font-size: 16px;
-  height: 65px;
-  width: clamp(118px, 11vw, 140px);
-  padding: 0 !important;
-  margin: 0 !important;
-  border-radius: 0px;
-}
-
-:deep(.el-input__wrapper) {
-  padding: 0 !important;
-  border-radius: 0px;
-}
-
-/* 热门搜索部分 */
-.search-hot {
-  flex: 1 1 auto;
-  width: 100%;
-  display: flex;
-  min-height: 96px;
-  box-sizing: border-box;
-  padding-right: clamp(18px, 2.4vw, 30px);
-}
-
-.search-hot-left {
-  flex: 0 0 126px;
-  margin-left: clamp(18px, 2.4vw, 28px);
-}
-
-.search-hot-left h5 {
-  width: 100px;
-  color: #0C3D70;
-  margin: 10px 0 0 0;
-}
-
-
-.search-hot-right-list {
-  flex: 1 1 auto;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(96px, 1fr));
-  align-content: start;
-  min-width: 0;
-}
-
-.search-hot-right-item {
-  min-width: 0;
-  height: 24px;
-  font-size: 14px;
-  font-weight: 400;
-  margin-top: 11px;
-  color: #554a4a76;
+.search-box {
   display: flex;
   align-items: center;
+  background: #FFFFFF;
+  border-radius: 12px;
+  border: 1.5px solid #E2E8F0;
+  box-shadow: 0 4px 14px rgba(12, 61, 112, 0.05);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  padding: 4px;
+}
+
+.search-box:focus-within {
+  border-color: #0C3D70;
+  box-shadow: 0 0 0 4px rgba(12, 61, 112, 0.1), 0 6px 18px rgba(12, 61, 112, 0.08);
+}
+
+.custom-search-input {
+  flex: 1;
+}
+
+:deep(.custom-search-input .el-input__wrapper) {
+  box-shadow: none !important;
+  background: transparent;
+  padding: 8px 12px;
+}
+
+:deep(.custom-search-input .el-input__inner) {
+  font-size: 15px;
+  color: #1E293B;
+  height: 38px;
+}
+
+:deep(.custom-search-input .el-input__inner::placeholder) {
+  color: #94A3B8;
+  font-size: 14px;
+}
+
+.search-prefix-icon {
+  font-size: 18px;
+  color: #94A3B8;
+  margin-right: 4px;
+}
+
+.search-submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0C3D70 0%, #0284C7 100%);
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(12, 61, 112, 0.25);
+  flex-shrink: 0;
 }
 
-.search-hot-right-item:hover {
-  color: #0C3D70;
+.search-submit-btn:hover {
+  background: linear-gradient(135deg, #104e8d 0%, #0396e0 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(12, 61, 112, 0.35);
 }
 
-.search-hot-right-item .search-hot-icon {
-  font-size: 14px;
+.search-submit-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* 热门搜索区域 */
+.search-hot {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.search-hot-label {
   display: flex;
   align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
   color: #0C3D70;
-  font-weight: 800;
+  white-space: nowrap;
+  padding-top: 6px;
 }
 
-@media (max-width: 1180px) {
-  .search-hot-right-list {
-    grid-template-columns: repeat(4, minmax(96px, 1fr));
-  }
+.hot-flame-icon {
+  font-size: 15px;
+  color: #0284C7;
+}
+
+.search-hot-tags {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hot-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 11px;
+  background: #F1F5F9;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #475569;
+  cursor: pointer;
+  border: 1px solid #E2E8F0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hot-tag-arrow {
+  font-size: 12px;
+  color: #94A3B8;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.hot-tag-chip:hover {
+  background: #FFFFFF;
+  color: #0C3D70;
+  border-color: #0C3D70;
+  box-shadow: 0 2px 6px rgba(12, 61, 112, 0.1);
+  transform: translateY(-1px);
+}
+
+.hot-tag-chip:hover .hot-tag-arrow {
+  color: #0284C7;
+  transform: translate(1px, -1px);
 }
 
 @media (max-width: 768px) {
   .search-main {
-    justify-content: flex-start;
+    padding: 12px 14px;
   }
 
-  .search-input {
-    margin-left: 0;
+  .search-submit-btn span {
+    display: none;
+  }
+
+  .search-submit-btn {
+    padding: 10px 14px;
   }
 
   .search-hot {
     flex-direction: column;
-    padding: 0 12px 14px;
-  }
-
-  .search-hot-left {
-    flex: none;
-    margin-left: 0;
-  }
-
-  .search-hot-right-list {
-    grid-template-columns: repeat(2, minmax(120px, 1fr));
-    row-gap: 4px;
+    gap: 6px;
   }
 }
 </style>

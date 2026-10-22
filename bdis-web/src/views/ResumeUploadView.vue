@@ -1,6 +1,36 @@
 <template>
   <section class="resume-shell">
-    <RouterLink class="resume-back" to="/resume/apply">返回在线填表</RouterLink>
+    <RouterLink class="resume-back" to="/resume/apply">
+      <span>← 返回在线填表</span>
+    </RouterLink>
+
+    <!-- 流程步骤条 -->
+    <div class="resume-step-bar">
+      <div class="step-item is-active">
+        <div class="step-number">1</div>
+        <div class="step-text">
+          <div class="step-title">上传 Word 原件</div>
+          <div class="step-desc">基本信息与本地排版原件</div>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item">
+        <div class="step-number">2</div>
+        <div class="step-text">
+          <div class="step-title">排版预览与核对</div>
+          <div class="step-desc">格式核验与效果预览</div>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item">
+        <div class="step-number">3</div>
+        <div class="step-text">
+          <div class="step-title">正式确认提交</div>
+          <div class="step-desc">文档归档与投递登记</div>
+        </div>
+      </div>
+    </div>
+
     <h1>上传已填写的 Word</h1>
     <p class="resume-lead">上传你已填写或贴好照片的 DOCX，先预览，再确认提交。文件最多6页、不超过50 MB。</p>
     <el-alert v-if="errorText" :title="errorText" type="error" :closable="false" show-icon />
@@ -38,43 +68,52 @@ const index = resumeDraft.uploadIndex
 for (const key of ['name', 'studentNo', 'phone']) {
   if (!index[key] || resumeDraft.preview?.sourceType === 'FORM') index[key] = resumeDraft.form[key]
 }
-const rules = {
-  name: [{ required: true, whitespace: true, message: '请填写姓名', trigger: 'blur' }],
-  studentNo: [{ required: true, whitespace: true, message: '请填写学号', trigger: 'blur' }],
-  phone: [{ required: true, whitespace: true, message: '请填写联系电话', trigger: 'blur' },
-    { pattern: resumePhonePattern, message: resumePhoneMessage, trigger: 'blur' }]
-}
 const formRef = ref()
-const file = ref(null)
-const errorText = ref('')
 const busy = ref(false)
+const errorText = ref('')
+const file = ref(null)
 let active = true
 onBeforeUnmount(() => { active = false })
 
+const rules = {
+  name: [{ required: true, whitespace: true, message: '请填写姓名', trigger: 'blur' }],
+  studentNo: [{ required: true, whitespace: true, message: '请填写学号', trigger: 'blur' }],
+  phone: [
+    { required: true, whitespace: true, message: '请填写联系电话', trigger: 'blur' },
+    { pattern: resumePhonePattern, message: resumePhoneMessage, trigger: 'blur' }
+  ]
+}
+
 function selectWord(event) {
-  file.value = null
-  const selected = event.target.files?.[0]
-  if (!selected) return
-  if (!selected.name.toLowerCase().endsWith('.docx')) errorText.value = '仅支持.docx文件'
-  else if (selected.size > 50 * 1024 * 1024) errorText.value = 'Word文档不能超过50MB'
-  else { file.value = selected; errorText.value = '' }
+  file.value = event.target.files?.[0] || null
 }
 
 async function upload() {
   if (busy.value || !await formRef.value.validate().catch(() => false)) return
-  if (!file.value) { errorText.value = '请选择已填写的Word文档'; return }
-  busy.value = true
+  if (!file.value) {
+    errorText.value = '请选择需要上传的 Word 文件'
+    return
+  }
   errorText.value = ''
+  busy.value = true
+  const version = ++resumeDraft.version
   try {
-    const result = await resumeApi.upload({ ...index }, file.value, resumeDraft.preview?.previewToken)
-    if (!active) return
-    setResumePreview(result)
+    const preview = await resumeApi.upload(file.value, index)
+    if (!active || version !== resumeDraft.version) return
+    setResumePreview(preview)
     await router.push('/resume/preview')
-  } catch (error) { errorText.value = error.message }
-  finally { busy.value = false }
+  } catch (error) {
+    errorText.value = error.message
+  } finally {
+    busy.value = false
+  }
 }
 
 async function downloadTemplate() {
-  try { downloadResumeFile(await resumeApi.template()) } catch (error) { errorText.value = error.message }
+  try {
+    downloadResumeFile(await resumeApi.template())
+  } catch (error) {
+    errorText.value = error.message
+  }
 }
 </script>
