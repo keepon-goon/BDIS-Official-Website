@@ -96,7 +96,7 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public ResumePreviewVO photo(String token, org.springframework.web.multipart.MultipartFile photo) {
         if (photo.isEmpty()) throw new ResumeException(400, "请选择照片");
-        if (photo.getSize() > ResumePhotoService.MAX_BYTES) throw new ResumeException(413, "单张照片不能超过5MB");
+        if (photo.getSize() > ResumePhotoService.MAX_BYTES) throw new ResumeException(413, "单张照片不能超过10MB");
         String oldHash = storage.hash(token);
         ResumePreviewSnapshot original;
         synchronized (stateLock) {

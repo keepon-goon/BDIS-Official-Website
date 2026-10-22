@@ -14,11 +14,11 @@ import java.io.*;
 
 @Service
 public class ResumePhotoService {
-    public static final long MAX_BYTES = 5L * 1024 * 1024;
+    public static final long MAX_BYTES = 10L * 1024 * 1024;
 
     public byte[] normalize(MultipartFile file) {
         if (file == null || file.isEmpty()) throw new ResumeException(400, "请选择照片");
-        if (file.getSize() > MAX_BYTES) throw new ResumeException(413, "单张照片不能超过5MB");
+        if (file.getSize() > MAX_BYTES) throw new ResumeException(413, "单张照片不能超过10MB");
         try {
             byte[] bytes = file.getBytes();
             try (var input = ImageIO.createImageInputStream(new ByteArrayInputStream(bytes))) {
@@ -32,15 +32,16 @@ public class ResumePhotoService {
                     reader.setInput(input, false, true);
                     int width = reader.getWidth(0);
                     int height = reader.getHeight(0);
-                    if (width <= 0 || height <= 0 || (long) width * height > 12000000)
-                        throw new ResumeException(400, "照片像素不能超过1200万，请缩小后上传");
+                    if (width <= 0 || height <= 0) throw new ResumeException(400, "照片尺寸无效，请更换图片");
+                    var parameters = reader.getDefaultReadParam();
+                    int sample = (int) Math.max(1L, ((long) Math.max(width, height) + 1799) / 1800);
+                    parameters.setSourceSubsampling(sample, sample, 0, 0);
+                    BufferedImage image = reader.read(0, parameters);
+                    width = image.getWidth();
+                    height = image.getHeight();
                     int orientation = orientation(bytes);
                     int displayWidth = orientation >= 5 ? height : width;
                     int displayHeight = orientation >= 5 ? width : height;
-                    double deviation = Math.abs(((double) displayWidth / displayHeight) / (2.0 / 3) - 1);
-                    if (deviation > 0.15 + 0.0000001)
-                        throw new ResumeException(400, "照片比例不符合要求，请使用接近2:3的竖版照片，建议600×900像素");
-                    BufferedImage image = reader.read(0);
                     AffineTransform transform = switch (orientation) {
                         case 2 -> new AffineTransform(-1, 0, 0, 1, width, 0);
                         case 3 -> new AffineTransform(-1, 0, 0, -1, width, height);

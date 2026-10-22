@@ -67,11 +67,11 @@ class ResumePreviewIntegrationTest {
                 .andReturn().getResponse().getContentAsString();
         String nextToken = json.readTree(withPhoto).at("/data/previewToken").asText();
         mvc.perform(get("/api/resume/previews/pdf").header("X-Resume-Preview-Token", token)).andExpect(status().isGone());
-        mvc.perform(multipart("/api/resume/previews/photo").file(picture(400, 400, Color.BLUE))
+        mvc.perform(multipart("/api/resume/previews/photo").file(new MockMultipartFile("photo", new byte[]{1, 2, 3}))
                 .header("X-Resume-Preview-Token", nextToken)).andExpect(status().isBadRequest());
         mvc.perform(get("/api/resume/previews/pdf").header("X-Resume-Preview-Token", nextToken)).andExpect(status().isOk());
         String replaced = mvc.perform(multipart("/api/resume/previews/photo")
-                        .file(picture(400, 600, Color.BLUE)).header("X-Resume-Preview-Token", nextToken))
+                        .file(picture(400, 400, Color.BLUE)).header("X-Resume-Preview-Token", nextToken))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         String finalToken = json.readTree(replaced).at("/data/previewToken").asText();
         var finalSnapshot = storage.load(finalToken);
