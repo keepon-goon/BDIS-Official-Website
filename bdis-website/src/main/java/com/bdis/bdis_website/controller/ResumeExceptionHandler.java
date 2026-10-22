@@ -30,6 +30,6 @@ public class ResumeExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Result<Void>> tooLarge() {
-        return ResponseEntity.status(413).body(Result.fail("上传文件过大：照片最多5MB，Word最多10MB"));
+        return ResponseEntity.status(413).body(Result.fail("上传文件过大：照片最多10MB，Word最多50MB"));
     }
 }

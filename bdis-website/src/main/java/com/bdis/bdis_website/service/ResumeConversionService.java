@@ -44,6 +44,10 @@ public class ResumeConversionService {
     }
 
     public Path convert(Path word) {
+        return convert(word, 2);
+    }
+
+    public Path convert(Path word, int maxPages) {
         Path directory = word.getParent();
         Path profile = directory.resolve("profile");
         String container = "bdis-resume-" + UUID.randomUUID();
@@ -88,7 +92,7 @@ public class ResumeConversionService {
             }
             String filename = word.getFileName().toString();
             Path pdf = directory.resolve(filename.substring(0, filename.length() - 5) + ".pdf");
-            validatePdf(pdf);
+            validatePdf(pdf, maxPages);
             return pdf;
         } catch (IOException e) {
             throw new ResumeException(503, "转换工具不可用或文件无法读取，请稍后重试");
@@ -99,11 +103,16 @@ public class ResumeConversionService {
     }
 
     public void validatePdf(Path pdf) {
+        validatePdf(pdf, 2);
+    }
+
+    public void validatePdf(Path pdf, int maxPages) {
         try {
             if (!Files.isRegularFile(pdf) || Files.size(pdf) == 0) throw new IOException();
             try (var document = Loader.loadPDF(pdf.toFile())) {
-                if (document.getNumberOfPages() < 1 || document.getNumberOfPages() > 2)
-                    throw new ResumeException(422, "简历必须为一到两页，请精简内容或下载模板调整后上传Word");
+                if (document.getNumberOfPages() < 1 || document.getNumberOfPages() > maxPages)
+                    throw new ResumeException(422, maxPages == 2 ? "在线简历必须为一到两页，请精简内容或下载模板调整后上传Word"
+                            : "上传的Word必须为1到6页，请调整后重新上传");
             }
         } catch (IOException e) {
             throw new ResumeException(503, "未生成可读取的PDF，请重试或下载模板手工填写");

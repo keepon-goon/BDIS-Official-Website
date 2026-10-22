@@ -83,4 +83,23 @@ class ResumeConversionServiceTest {
             assertThat(Files.exists(temporary.resolve("resume.pdf"))).isFalse();
         } finally { pool.shutdownNow(); }
     }
+
+    @Test
+    void uploadedPdfAllowsSixPagesButOnlineAndSevenPagesAreRejected() throws Exception {
+        var pool = executor();
+        try {
+            var service = new ResumeConversionService(new ResumeProperties(), pool);
+            Path pdf = temporary.resolve("uploaded.pdf");
+            try (var document = new PDDocument()) {
+                for (int i = 0; i < 6; i++) document.addPage(new PDPage());
+                document.save(pdf.toFile());
+                assertThatCode(() -> service.validatePdf(pdf, 6)).doesNotThrowAnyException();
+                assertThatThrownBy(() -> service.validatePdf(pdf)).isInstanceOf(ResumeException.class);
+                document.addPage(new PDPage());
+                document.save(pdf.toFile());
+                assertThatThrownBy(() -> service.validatePdf(pdf, 6)).isInstanceOfSatisfying(ResumeException.class,
+                        e -> assertThat(e.getStatus()).isEqualTo(422));
+            }
+        } finally { pool.shutdownNow(); }
+    }
 }

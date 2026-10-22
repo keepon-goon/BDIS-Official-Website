@@ -261,7 +261,7 @@ public class ResumeServiceImpl implements ResumeService {
                 Path word = storage.file(source, snapshot.getDocumentName() + ".docx");
                 Path pdf = storage.file(source, snapshot.getDocumentName() + ".pdf");
                 if (!Files.isRegularFile(word)) throw new ResumeException(409, "预览文件不完整，请重新生成");
-                conversions.validatePdf(pdf);
+                conversions.validatePdf(pdf, "UPLOAD".equals(snapshot.getSourceType()) ? 6 : 2);
                 Files.createDirectory(destination);
                 Files.copy(word, storage.file(destination, snapshot.getDocumentName() + ".docx"));
                 Files.copy(pdf, storage.file(destination, snapshot.getDocumentName() + ".pdf"));
@@ -350,7 +350,7 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public ResumePreviewVO upload(com.bdis.bdis_website.dto.ResumeUploadDTO index,
                                   org.springframework.web.multipart.MultipartFile upload, String sourceToken) {
-        if (upload.getSize() > 10L * 1024 * 1024) throw new ResumeException(413, "Word文档不能超过10MB");
+        if (upload.getSize() > ResumeDocumentService.MAX_UPLOAD_BYTES) throw new ResumeException(413, "Word文档不能超过50MB");
         String inheritedYear = documents.currentAcademicYear();
         if (sourceToken != null && !sourceToken.isBlank()) {
             try {
@@ -381,7 +381,7 @@ public class ResumeServiceImpl implements ResumeService {
                 snapshot.setExpiresAt(clock.instant().plusSeconds(properties.getPreviewMinutes() * 60L));
                 Path word = storage.file(work, snapshot.getDocumentName() + ".docx");
                 Files.write(word, bytes);
-                conversions.convert(word);
+                conversions.convert(word, 6);
                 storage.publish(work, snapshot);
                 return view(token, snapshot);
             } finally {

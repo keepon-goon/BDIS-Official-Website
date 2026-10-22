@@ -24,6 +24,7 @@ import java.nio.file.Path;
 
 @Service
 public class ResumeDocumentService {
+    public static final long MAX_UPLOAD_BYTES = 50L * 1024 * 1024;
     private final ResumeProperties properties;
     private final ResourceLoader resources;
     private final Clock clock;
@@ -119,7 +120,7 @@ public class ResumeDocumentService {
 
     public byte[] validateUpload(org.springframework.web.multipart.MultipartFile upload) {
         if (upload == null || upload.isEmpty()) throw new ResumeException(400, "请选择已填写的Word文档");
-        if (upload.getSize() > 10L * 1024 * 1024) throw new ResumeException(413, "Word文档不能超过10MB");
+        if (upload.getSize() > MAX_UPLOAD_BYTES) throw new ResumeException(413, "Word文档不能超过50MB");
         String name = upload.getOriginalFilename();
         if (name == null || !name.toLowerCase(java.util.Locale.ROOT).endsWith(".docx"))
             throw new ResumeException(400, "仅支持DOCX文件，请使用Word或WPS另存为.docx");
@@ -136,9 +137,9 @@ public class ResumeDocumentService {
                     if (++entries > 1000 || part.contains("../") || part.contains("\\") || part.startsWith("/")
                             || part.contains("vbaproject") || part.contains("/activex/") || part.contains("/embeddings/"))
                         throw new ResumeException(400, "Word包含不支持的嵌入对象、宏或异常结构，请另存为普通DOCX");
-                    byte[] data = zip.readNBytes(20 * 1024 * 1024 + 1);
+                    byte[] data = zip.readNBytes(60 * 1024 * 1024 + 1);
                     total += data.length;
-                    if (data.length > 20 * 1024 * 1024 || total > 60L * 1024 * 1024)
+                    if (data.length > 60 * 1024 * 1024 || total > 150L * 1024 * 1024)
                         throw new ResumeException(400, "Word解压后过大，请压缩图片并减少内容后上传");
                     if (part.equals("word/document.xml")) documentFound = true;
                     if (part.equals("[content_types].xml")) {

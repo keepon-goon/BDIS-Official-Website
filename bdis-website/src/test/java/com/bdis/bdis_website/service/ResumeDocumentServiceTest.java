@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ResumeDocumentServiceTest {
     private final ResumeDocumentService service = new ResumeDocumentService(new ResumeProperties(),
@@ -55,5 +56,19 @@ class ResumeDocumentServiceTest {
         }
         assertThat(service.documentName("张三", "000123", "2026-2027"))
                 .isEqualTo("张三-000123-2026学年-2027学年大数据智能工作室招新报名表");
+    }
+
+    @Test
+    void uploadedWordChecksFiftyMegabyteBoundary() {
+        byte[] bytes = service.blankTemplate();
+        var exact = new org.springframework.mock.web.MockMultipartFile("resume", "手工.docx", "application/octet-stream", bytes) {
+            @Override public long getSize() { return ResumeDocumentService.MAX_UPLOAD_BYTES; }
+        };
+        assertThat(service.validateUpload(exact)).isEqualTo(bytes);
+        var tooLarge = new org.springframework.mock.web.MockMultipartFile("resume", "手工.docx", "application/octet-stream", bytes) {
+            @Override public long getSize() { return ResumeDocumentService.MAX_UPLOAD_BYTES + 1; }
+        };
+        assertThatThrownBy(() -> service.validateUpload(tooLarge)).isInstanceOfSatisfying(
+                com.bdis.bdis_website.exception.ResumeException.class, e -> assertThat(e.getStatus()).isEqualTo(413));
     }
 }

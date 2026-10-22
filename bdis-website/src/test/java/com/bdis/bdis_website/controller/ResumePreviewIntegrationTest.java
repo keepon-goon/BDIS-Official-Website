@@ -94,7 +94,7 @@ class ResumePreviewIntegrationTest {
     }
 
     @Test
-    void uploadsOriginalWordAndRejectsInvalidOrThreePageFiles() throws Exception {
+    void uploadsOriginalWordAndEnforcesSixPageLimit() throws Exception {
         byte[] original = documents.blankTemplate();
         String response = mvc.perform(multipart("/api/resume/submit")
                         .file(new MockMultipartFile("resume", "../原始文件名.docx", "application/octet-stream", original))
@@ -111,15 +111,29 @@ class ResumePreviewIntegrationTest {
                         .file(new MockMultipartFile("resume", "假文件.docx", "application/octet-stream", new byte[]{1, 2, 3}))
                         .param("name", "测试").param("studentNo", "001").param("phone", "13800000000"))
                 .andExpect(status().isBadRequest());
-        try (var document = new XWPFDocument(new java.io.ByteArrayInputStream(original)); var out = new ByteArrayOutputStream()) {
-            var run = document.createParagraph().createRun();
-            run.addBreak(org.apache.poi.xwpf.usermodel.BreakType.PAGE);
-            run.setText("超出的第三页");
-            document.write(out);
-            mvc.perform(multipart("/api/resume/submit")
-                            .file(new MockMultipartFile("resume", "三页.docx", "application/octet-stream", out.toByteArray()))
-                            .param("name", "测试").param("studentNo", "001").param("phone", "13800000000"))
-                    .andExpect(status().isUnprocessableEntity());
+        for (int pages : new int[]{6, 7}) {
+            try (var document = new XWPFDocument(); var out = new ByteArrayOutputStream()) {
+                for (int page = 1; page <= pages; page++) {
+                    var paragraph = document.createParagraph();
+                    if (page > 1) paragraph.setPageBreak(true);
+                    paragraph.createRun().setText("手工简历第" + page + "页");
+                }
+                document.write(out);
+                Files.createDirectories(Path.of("target/test-artifacts"));
+                Files.write(Path.of("target/test-artifacts/uploaded-" + pages + "-pages.docx"), out.toByteArray());
+                var result = mvc.perform(multipart("/api/resume/submit")
+                                .file(new MockMultipartFile("resume", pages + "页.docx", "application/octet-stream", out.toByteArray()))
+                                .param("name", "测试").param("studentNo", "001").param("phone", "13800000000"));
+                if (pages == 6) {
+                    String uploaded = result.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+                    String uploadedToken = json.readTree(uploaded).at("/data/previewToken").asText();
+                    byte[] pdf = mvc.perform(get("/api/resume/previews/pdf").header("X-Resume-Preview-Token", uploadedToken))
+                            .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
+                    try (var parsed = Loader.loadPDF(pdf)) { assertThat(parsed.getNumberOfPages()).isEqualTo(6); }
+                    mvc.perform(post("/api/resume/confirm").header("X-Resume-Preview-Token", uploadedToken))
+                            .andExpect(status().isOk()).andExpect(jsonPath("$.data.submissionId").isString());
+                } else result.andExpect(status().isUnprocessableEntity());
+            }
         }
     }
 
@@ -134,6 +148,32 @@ class ResumePreviewIntegrationTest {
         ((com.fasterxml.jackson.databind.node.ObjectNode) form).put("intro", "测试内容\n".repeat(100));
         mvc.perform(post("/api/resume/previews").contentType("application/json").content(json.writeValueAsBytes(form)))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void acceptsRealWordLargerThanOldTenMegabyteLimit() throws Exception {
+        var image = new BufferedImage(2100, 2100, BufferedImage.TYPE_3BYTE_BGR);
+        new java.util.Random(79).nextBytes(((java.awt.image.DataBufferByte) image.getRaster().getDataBuffer()).getData());
+        var pictureBytes = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", pictureBytes);
+        byte[] original;
+        try (var document = new XWPFDocument(); var output = new ByteArrayOutputStream()) {
+            document.createParagraph().createRun().addPicture(new java.io.ByteArrayInputStream(pictureBytes.toByteArray()),
+                    org.apache.poi.xwpf.usermodel.Document.PICTURE_TYPE_PNG, "测试图片.png",
+                    org.apache.poi.util.Units.toEMU(100), org.apache.poi.util.Units.toEMU(100));
+            document.write(output);
+            original = output.toByteArray();
+        }
+        assertThat(original.length).isGreaterThan(10 * 1024 * 1024).isLessThan(50 * 1024 * 1024);
+        Files.createDirectories(Path.of("target/test-artifacts"));
+        Files.write(Path.of("target/test-artifacts/uploaded-large.docx"), original);
+        String result = mvc.perform(multipart("/api/resume/submit")
+                        .file(new MockMultipartFile("resume", "大文件.docx", "application/octet-stream", original))
+                        .param("name", "大小测试").param("studentNo", "001").param("phone", "13800000000"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String token = json.readTree(result).at("/data/previewToken").asText();
+        assertThat(mvc.perform(get("/api/resume/previews/word").header("X-Resume-Preview-Token", token))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray()).isEqualTo(original);
     }
 
     private MockMultipartFile picture(int width, int height, Color color) throws Exception {
