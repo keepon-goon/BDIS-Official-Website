@@ -1,17 +1,19 @@
 <template>
   <section class="resume-shell">
-    <!-- 显眼顶部倒计时警示弹窗（细长红底白框三角感叹号） -->
-    <transition name="tg-alert">
-      <div v-if="alertState.visible" class="custom-warning-toast" role="alert">
-        <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
-        <span class="warning-text">{{ alertState.message }}</span>
-        <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
-        <button type="button" class="warning-close-btn" title="关闭提示" @click="closeAlert">
-          <el-icon><Close /></el-icon>
-        </button>
-        <div class="warning-progress-line" :key="alertState.key" @animationend="onAlertTimeout"></div>
-      </div>
-    </transition>
+    <!-- 显眼顶部倒计时警示弹窗（Teleport到body，确保无论滚动到屏幕何处均固定在当前可视顶端） -->
+    <Teleport to="body">
+      <transition name="tg-alert">
+        <div v-if="alertState.visible" class="custom-warning-toast" role="alert">
+          <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
+          <span class="warning-text">{{ alertState.message }}</span>
+          <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
+          <button type="button" class="warning-close-btn" title="关闭提示" @click="closeAlert">
+            <el-icon><Close /></el-icon>
+          </button>
+          <div class="warning-progress-line" :key="alertState.key" @animationend="onAlertTimeout"></div>
+        </div>
+      </transition>
+    </Teleport>
 
     <RouterLink class="resume-back" to="/info/join">
       <span>← 返回加入我们</span>
@@ -198,6 +200,9 @@ function selectCompetition(val) {
 
 let active = true
 onMounted(() => {
+  document.body.style.overflow = ''
+  document.documentElement.style.overflow = ''
+  document.body.classList.remove('el-popup-parent--hidden')
   window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
 })
 onBeforeUnmount(() => {

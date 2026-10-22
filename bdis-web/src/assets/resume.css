@@ -678,42 +678,98 @@
 }
 
 /* ==========================================================================
-   Apple Style Confirm Modal Dialog
+   Apple Style Confirm Modal Dialog (Teleported to Body, Zero Scroll Lock Bug)
    ========================================================================== */
-.apple-confirm-dialog {
-  border-radius: 18px !important;
-  overflow: hidden;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2) !important;
+.apple-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.apple-confirm-dialog .el-dialog__header {
-  margin: 0 !important;
-  padding: 24px 28px 12px !important;
+.apple-modal-card {
+  width: 440px;
+  max-width: 100%;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px 32px 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  animation: modalScaleIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.apple-confirm-dialog .el-dialog__title {
-  font-size: 18px !important;
-  font-weight: 600 !important;
-  color: #1d1d1f !important;
-  letter-spacing: -0.01em;
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.apple-confirm-dialog .el-dialog__body {
-  padding: 0 28px 24px !important;
+.apple-modal-title {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.015em;
 }
 
-.confirm-dialog-desc {
+.apple-modal-desc {
   font-size: 14px;
   line-height: 1.6;
   color: #6e6e73;
-  margin: 0;
+  margin: 0 0 28px;
 }
 
-.confirm-dialog-actions {
+.apple-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding: 0 28px 24px;
+}
+
+.modal-btn {
+  padding: 10px 22px;
+  border-radius: 980px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  border: 1px solid transparent;
+}
+
+.btn-cancel {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border-color: #e5e5ea;
+}
+
+.btn-cancel:hover {
+  background: #e8e8ed;
+  border-color: #d2d2d7;
+}
+
+.btn-confirm {
+  background: #1d1d1f;
+  color: #ffffff;
+}
+
+.btn-confirm:hover:not(:disabled) {
+  background: #333336;
+  transform: scale(1.02);
+}
+
+.btn-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* PDF Preview Document Stage */

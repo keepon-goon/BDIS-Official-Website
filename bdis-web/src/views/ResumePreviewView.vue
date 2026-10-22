@@ -1,17 +1,19 @@
 <template>
   <section class="resume-shell">
-    <!-- 显眼顶部倒计时警示弹窗（细长红底白框三角感叹号） -->
-    <transition name="tg-alert">
-      <div v-if="alertState.visible" class="custom-warning-toast" role="alert">
-        <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
-        <span class="warning-text">{{ alertState.message }}</span>
-        <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
-        <button type="button" class="warning-close-btn" title="关闭提示" @click="closeAlert">
-          <el-icon><Close /></el-icon>
-        </button>
-        <div class="warning-progress-line" :key="alertState.key" @animationend="onAlertTimeout"></div>
-      </div>
-    </transition>
+    <!-- 显眼顶部倒计时警示弹窗（Teleport到body，固定在屏幕当前视口正上方） -->
+    <Teleport to="body">
+      <transition name="tg-alert">
+        <div v-if="alertState.visible" class="custom-warning-toast" role="alert">
+          <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
+          <span class="warning-text">{{ alertState.message }}</span>
+          <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
+          <button type="button" class="warning-close-btn" title="关闭提示" @click="closeAlert">
+            <el-icon><Close /></el-icon>
+          </button>
+          <div class="warning-progress-line" :key="alertState.key" @animationend="onAlertTimeout"></div>
+        </div>
+      </transition>
+    </Teleport>
 
     <!-- Apple 风格分段进度指示条 (提交后更新为全部完成) -->
     <div class="resume-step-indicator">
@@ -93,25 +95,19 @@
       </div>
     </div>
 
-    <!-- Apple 风格提交二次确认对话框 -->
-    <el-dialog
-      v-model="showConfirmDialog"
-      title="确认提交招新报名表"
-      width="440px"
-      align-center
-      :close-on-click-modal="false"
-      class="apple-confirm-dialog"
-    >
-      <div class="confirm-dialog-content">
-        <p class="confirm-dialog-desc">提交后将正式保存并登记为你的报名记录 提交后将不可修改 确认要现在提交吗 </p>
-      </div>
-      <template #footer>
-        <div class="confirm-dialog-actions">
-          <el-button @click="showConfirmDialog = false">返回检查</el-button>
-          <el-button type="primary" :loading="operation === 'confirm'" @click="executeConfirm">确认提交</el-button>
+    <!-- Apple 风格提交二次确认对话框 (独立轻量遮罩，不篡改页面滚动锁，彻底杜绝死锁) -->
+    <Teleport to="body">
+      <div v-if="showConfirmDialog" class="apple-modal-backdrop" @click.self="showConfirmDialog = false">
+        <div class="apple-modal-card">
+          <h3 class="apple-modal-title">确认提交招新报名表？</h3>
+          <p class="apple-modal-desc">提交后将正式保存并登记为你的报名记录 提交后将不可修改 确认要现在提交吗 </p>
+          <div class="apple-modal-actions">
+            <button type="button" class="modal-btn btn-cancel" @click="showConfirmDialog = false">返回检查</button>
+            <button type="button" class="modal-btn btn-confirm" :disabled="busy" @click="executeConfirm">确认提交</button>
+          </div>
         </div>
-      </template>
-    </el-dialog>
+      </div>
+    </Teleport>
   </section>
 </template>
 
@@ -192,6 +188,9 @@ onBeforeUnmount(() => {
 })
 
 onMounted(() => {
+  document.body.style.overflow = ''
+  document.documentElement.style.overflow = ''
+  document.body.classList.remove('el-popup-parent--hidden')
   window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   if (preview.value) loadPdf()
 })
@@ -271,6 +270,9 @@ async function executeConfirm() {
     const result = await resumeApi.confirm(preview.value.previewToken)
     if (!active) return
     showConfirmDialog.value = false
+    document.body.style.overflow = ''
+    document.documentElement.style.overflow = ''
+    document.body.classList.remove('el-popup-parent--hidden')
     resumeDraft.submission = result
     resumeDraft.preview = null
     clearPdf()
@@ -283,5 +285,11 @@ async function executeConfirm() {
   finally { operation.value = '' }
 }
 
-function newApplication() { resetResumeDraft(); router.push('/resume/apply') }
+function newApplication() {
+  document.body.style.overflow = ''
+  document.documentElement.style.overflow = ''
+  document.body.classList.remove('el-popup-parent--hidden')
+  resetResumeDraft()
+  router.push('/resume/apply')
+}
 </script>
