@@ -73,96 +73,75 @@
           <!-- 初始状态居中字样 -->
           <span v-if="!choice" class="fluid-label label-initial">{{ yesLabel }}</span>
 
-          <!-- 点击后压缩在左边缘时呈现的【更渐进的毛玻璃凹形液面】（微波呼吸动效）与竖排标签 -->
+          <!-- 点击后压缩在左边缘时呈现的【超柔缓渐进羽化凹形液面】（彻底去除生硬线条，柔和漫射）与竖排标签 -->
           <svg
             v-if="choice === 'no'"
             class="concave-liquid-svg svg-blue"
-            viewBox="0 0 46 124"
+            viewBox="0 0 52 124"
             preserveAspectRatio="none"
             aria-hidden="true"
           >
             <defs>
-              <!-- 渐进毛玻璃蓝调渐变（从透明自然过渡至柔蓝） -->
-              <linearGradient id="frostedBlueGrad" x1="1" y1="0" x2="0" y2="0">
-                <stop offset="0%" stop-color="#bae6fd" stop-opacity="0" />
-                <stop offset="25%" stop-color="#bae6fd" stop-opacity="0.32" />
-                <stop offset="60%" stop-color="#e0f2fe" stop-opacity="0.75" />
-                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.95" />
+              <!-- 超柔缓无断阶渐变：从右侧完全透明平滑过渡至柔蓝，与右侧绿底如水彩般无痕晕染 -->
+              <linearGradient id="softDiffuseBlueGrad" x1="1" y1="0" x2="0" y2="0">
+                <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0" />
+                <stop offset="30%" stop-color="#e0f2fe" stop-opacity="0.18" />
+                <stop offset="60%" stop-color="#e0f2fe" stop-opacity="0.55" />
+                <stop offset="85%" stop-color="#e0f2fe" stop-opacity="0.88" />
+                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.96" />
               </linearGradient>
-              <!-- 毛玻璃曲面微光边缘 -->
-              <linearGradient id="frostedBlueRimGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25" />
-                <stop offset="25%" stop-color="#7dd3fc" stop-opacity="0.8" />
-                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.9" />
-                <stop offset="75%" stop-color="#7dd3fc" stop-opacity="0.8" />
-                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.25" />
+
+              <!-- 极柔和环境弥散光晕（无锐利描边线） -->
+              <linearGradient id="ambientBlueRim" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+                <stop offset="30%" stop-color="#bae6fd" stop-opacity="0.4" />
+                <stop offset="70%" stop-color="#bae6fd" stop-opacity="0.4" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
               </linearGradient>
-              <filter id="softGlowBlue" x="-20%" y="-10%" width="140%" height="120%">
-                <feGaussianBlur stdDeviation="1" />
+
+              <filter id="gentleFluidBlurBlue" x="-40%" y="-15%" width="180%" height="130%">
+                <feGaussianBlur stdDeviation="3" />
               </filter>
             </defs>
 
-            <!-- 毛玻璃渐进光晕 -->
-            <path
-              class="morphing-concave-halo"
-              fill="none"
-              stroke="url(#frostedBlueRimGrad)"
-              stroke-width="3"
-              filter="url(#softGlowBlue)"
-              opacity="0.35"
-            >
-              <animate
-                attributeName="d"
-                dur="3.8s"
-                repeatCount="indefinite"
-                values="
-                  M 46 0 C 30 38, 30 86, 46 124;
-                  M 46 0 C 27 42, 32 82, 46 124;
-                  M 46 0 C 31 36, 29 88, 46 124;
-                  M 46 0 C 30 38, 30 86, 46 124
-                "
-                calcMode="spline"
-                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-              />
-            </path>
-
-            <!-- 凹形渐进毛玻璃主体 -->
+            <!-- 凹形微澜羽化主体（彻底去除硬边，极度柔和自然） -->
             <path
               class="morphing-concave-path"
-              fill="url(#frostedBlueGrad)"
+              fill="url(#softDiffuseBlueGrad)"
             >
               <animate
                 attributeName="d"
-                dur="3.8s"
+                dur="4.2s"
                 repeatCount="indefinite"
                 values="
-                  M 46 0 C 30 38, 30 86, 46 124 L 0 124 L 0 0 Z;
-                  M 46 0 C 27 42, 32 82, 46 124 L 0 124 L 0 0 Z;
-                  M 46 0 C 31 36, 29 88, 46 124 L 0 124 L 0 0 Z;
-                  M 46 0 C 30 38, 30 86, 46 124 L 0 124 L 0 0 Z
+                  M 52 0 C 34 38, 34 86, 52 124 L 0 124 L 0 0 Z;
+                  M 52 0 C 30 42, 37 82, 52 124 L 0 124 L 0 0 Z;
+                  M 52 0 C 35 37, 32 87, 52 124 L 0 124 L 0 0 Z;
+                  M 52 0 C 34 38, 34 86, 52 124 L 0 124 L 0 0 Z
                 "
                 calcMode="spline"
                 keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
               />
             </path>
 
-            <!-- 柔和毛玻璃曲面高光棱线（仅 1.1px 纤细高光） -->
+            <!-- 极轻柔的虚化漫射柔光（高斯模糊弥散，绝非生硬描边线） -->
             <path
-              class="morphing-concave-rim"
+              class="morphing-concave-feather"
               fill="none"
-              stroke="url(#frostedBlueRimGrad)"
-              stroke-width="1.1"
-              stroke-linecap="round"
+              stroke="url(#ambientBlueRim)"
+              stroke-width="3"
+              filter="url(#gentleFluidBlurBlue)"
+              opacity="0.5"
             >
               <animate
                 attributeName="d"
-                dur="3.8s"
+                dur="4.2s"
                 repeatCount="indefinite"
                 values="
-                  M 46 0 C 30 38, 30 86, 46 124;
-                  M 46 0 C 27 42, 32 82, 46 124;
-                  M 46 0 C 31 36, 29 88, 46 124;
-                  M 46 0 C 30 38, 30 86, 46 124
+                  M 52 0 C 34 38, 34 86, 52 124;
+                  M 52 0 C 30 42, 37 82, 52 124;
+                  M 52 0 C 35 37, 32 87, 52 124;
+                  M 52 0 C 34 38, 34 86, 52 124
                 "
                 calcMode="spline"
                 keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
@@ -172,7 +151,7 @@
           <span v-if="choice === 'no'" class="fluid-label label-compressed">{{ yesLabel }}</span>
         </button>
 
-        <!-- 初始状态：双向冲击隔断膜（换成更长且贯通全高的细线，严格 1px 细线，不粗糙，动作极其缓和呼吸） -->
+        <!-- 初始状态：双向冲击隔断膜（长线贯通全高、严格 1.0px 细线、动作极其缓和呼吸、无气泡） -->
         <div v-if="!choice" class="fixed-ends-membrane" aria-hidden="true">
           <svg class="membrane-svg" viewBox="0 0 24 130" preserveAspectRatio="none">
             <defs>
@@ -183,14 +162,14 @@
               </linearGradient>
             </defs>
 
-            <!-- 极细微柔光晕（仅 2.2px，动作放缓至 4.8s 优雅微澜） -->
+            <!-- 极细微柔光晕（仅 2.0px，动作放缓至 4.8s 优雅微澜） -->
             <path
               class="membrane-glow-path"
               fill="none"
               stroke="url(#membraneGrad)"
-              stroke-width="2.2"
+              stroke-width="2.0"
               stroke-linecap="round"
-              opacity="0.25"
+              opacity="0.22"
             >
               <animate
                 attributeName="d"
@@ -210,7 +189,7 @@
               />
             </path>
 
-            <!-- 核心纤细长线（严格 1.0px，顶天立地贯穿全高，去除两端圆圈阻断，线条更修长连贯） -->
+            <!-- 核心纤细长线（严格 1.0px，顶天立地贯穿全高，无圆点阻断，修长连贯） -->
             <path
               class="membrane-core-path"
               fill="none"
@@ -254,96 +233,75 @@
           <!-- 初始状态居中字样 -->
           <span v-if="!choice" class="fluid-label label-initial">{{ noLabel }}</span>
 
-          <!-- 点击后压缩在右边缘时的【更渐进的毛玻璃凹形液面】（带有呼吸微澜动效，柔和半透明过渡） -->
+          <!-- 点击后压缩在右边缘时的【超柔缓渐进羽化凹形液面】（彻底去除生硬线条，柔和漫射）与竖排标签 -->
           <svg
             v-if="choice === 'yes'"
             class="concave-liquid-svg svg-green"
-            viewBox="0 0 46 124"
+            viewBox="0 0 52 124"
             preserveAspectRatio="none"
             aria-hidden="true"
           >
             <defs>
-              <!-- 渐进毛玻璃绿调渐变（从透明自然过渡至柔绿） -->
-              <linearGradient id="frostedGreenGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="#bbf7d0" stop-opacity="0" />
-                <stop offset="25%" stop-color="#bbf7d0" stop-opacity="0.32" />
-                <stop offset="60%" stop-color="#dcfce7" stop-opacity="0.75" />
-                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.95" />
+              <!-- 超柔缓无断阶渐变：从左侧完全透明平滑过渡至柔绿，与左侧白底如晨雾般无痕晕染 -->
+              <linearGradient id="softDiffuseGreenGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#dcfce7" stop-opacity="0" />
+                <stop offset="30%" stop-color="#dcfce7" stop-opacity="0.18" />
+                <stop offset="60%" stop-color="#dcfce7" stop-opacity="0.55" />
+                <stop offset="85%" stop-color="#dcfce7" stop-opacity="0.88" />
+                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.96" />
               </linearGradient>
-              <!-- 毛玻璃曲面微光边缘 -->
-              <linearGradient id="frostedGreenRimGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25" />
-                <stop offset="25%" stop-color="#86efac" stop-opacity="0.8" />
-                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.9" />
-                <stop offset="75%" stop-color="#86efac" stop-opacity="0.8" />
-                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.25" />
+
+              <!-- 极柔和环境弥散光晕（无锐利描边线） -->
+              <linearGradient id="ambientGreenRim" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+                <stop offset="30%" stop-color="#bbf7d0" stop-opacity="0.4" />
+                <stop offset="70%" stop-color="#bbf7d0" stop-opacity="0.4" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
               </linearGradient>
-              <filter id="softGlowGreen" x="-20%" y="-10%" width="140%" height="120%">
-                <feGaussianBlur stdDeviation="1" />
+
+              <filter id="gentleFluidBlurGreen" x="-40%" y="-15%" width="180%" height="130%">
+                <feGaussianBlur stdDeviation="3" />
               </filter>
             </defs>
 
-            <!-- 毛玻璃渐进光晕 -->
-            <path
-              class="morphing-concave-halo"
-              fill="none"
-              stroke="url(#frostedGreenRimGrad)"
-              stroke-width="3"
-              filter="url(#softGlowGreen)"
-              opacity="0.35"
-            >
-              <animate
-                attributeName="d"
-                dur="3.8s"
-                repeatCount="indefinite"
-                values="
-                  M 0 0 C 16 38, 16 86, 0 124;
-                  M 0 0 C 19 42, 14 82, 0 124;
-                  M 0 0 C 15 36, 17 88, 0 124;
-                  M 0 0 C 16 38, 16 86, 0 124
-                "
-                calcMode="spline"
-                keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
-              />
-            </path>
-
-            <!-- 凹形渐进毛玻璃主体（左侧向右内凹，渐进羽化，高雅自然） -->
+            <!-- 凹形微澜羽化主体（彻底去除硬边，极度柔和自然） -->
             <path
               class="morphing-concave-path"
-              fill="url(#frostedGreenGrad)"
+              fill="url(#softDiffuseGreenGrad)"
             >
               <animate
                 attributeName="d"
-                dur="3.8s"
+                dur="4.2s"
                 repeatCount="indefinite"
                 values="
-                  M 0 0 C 16 38, 16 86, 0 124 L 46 124 L 46 0 Z;
-                  M 0 0 C 19 42, 14 82, 0 124 L 46 124 L 46 0 Z;
-                  M 0 0 C 15 36, 17 88, 0 124 L 46 124 L 46 0 Z;
-                  M 0 0 C 16 38, 16 86, 0 124 L 46 124 L 46 0 Z
+                  M 0 0 C 18 36, 18 88, 0 124 L 52 124 L 52 0 Z;
+                  M 0 0 C 22 42, 15 82, 0 124 L 52 124 L 52 0 Z;
+                  M 0 0 C 17 37, 20 87, 0 124 L 52 124 L 52 0 Z;
+                  M 0 0 C 18 36, 18 88, 0 124 L 52 124 L 52 0 Z
                 "
                 calcMode="spline"
                 keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
               />
             </path>
 
-            <!-- 柔和毛玻璃曲面高光棱线（仅 1.1px 纤细高光） -->
+            <!-- 极轻柔的虚化漫射柔光（高斯模糊弥散，绝非生硬描边线） -->
             <path
-              class="morphing-concave-rim"
+              class="morphing-concave-feather"
               fill="none"
-              stroke="url(#frostedGreenRimGrad)"
-              stroke-width="1.1"
-              stroke-linecap="round"
+              stroke="url(#ambientGreenRim)"
+              stroke-width="3"
+              filter="url(#gentleFluidBlurGreen)"
+              opacity="0.5"
             >
               <animate
                 attributeName="d"
-                dur="3.8s"
+                dur="4.2s"
                 repeatCount="indefinite"
                 values="
-                  M 0 0 C 16 38, 16 86, 0 124;
-                  M 0 0 C 19 42, 14 82, 0 124;
-                  M 0 0 C 15 36, 17 88, 0 124;
-                  M 0 0 C 16 38, 16 86, 0 124
+                  M 0 0 C 18 36, 18 88, 0 124;
+                  M 0 0 C 22 42, 15 82, 0 124;
+                  M 0 0 C 17 37, 20 87, 0 124;
+                  M 0 0 C 18 36, 18 88, 0 124
                 "
                 calcMode="spline"
                 keySplines="0.45 0 0.55 1; 0.45 0 0.55 1; 0.45 0 0.55 1"
@@ -445,7 +403,7 @@ function reset() {
 .underlay-input-wrap {
   width: 100%;
   height: 100%;
-  padding-right: 56px;
+  padding-right: 64px;
   box-sizing: border-box;
   animation: contentGentleFadeIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -495,7 +453,7 @@ function reset() {
 .underlay-green-stage:focus-visible {
   width: 100%;
   height: 100%;
-  padding-left: 54px;
+  padding-left: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -614,12 +572,12 @@ function reset() {
 
 /* 选择蓝色状态：
    1. 蓝色自身颜色柔缓淡出消失（透明），平滑自然露出输入框
-   2. 绿色体积柔缓压缩至右边缘（约 46px）
-   3. 绿色试剂呈优雅【渐进毛玻璃凹形】，配合 backdrop-filter 光学模糊与半透明渐变
+   2. 绿色体积柔缓压缩至右边缘（约 52px）
+   3. 绿色试剂呈【超柔缓渐进羽化凹形】，剔除任何突兀硬线，配合柔和弥散光晕
    4. 颜色保持柔和淡绿，不加深
 */
 .reagent-choice-card.state-yes .side-blue {
-  width: calc(100% - 46px);
+  width: calc(100% - 52px);
   background: transparent !important;
   pointer-events: none;
 }
@@ -630,7 +588,7 @@ function reset() {
 }
 
 .reagent-choice-card.state-yes .side-green {
-  width: 46px;
+  width: 52px;
   background: transparent !important;
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -639,17 +597,17 @@ function reset() {
 }
 
 .reagent-choice-card.state-yes .side-green:hover .concave-liquid-svg {
-  filter: brightness(1.05);
+  filter: brightness(1.04);
 }
 
 /* 选择绿色状态：
    1. 绿色试剂不消失，舒缓展开铺满右侧（绿色保留）
-   2. 蓝色以 0.88s 柔缓压缩至最左侧（约 46px）
-   3. 蓝色试剂呈渐进毛玻璃凹形微澜过渡，颜色保持原淡蓝色不加深
+   2. 蓝色以 0.88s 柔缓压缩至最左侧（约 52px）
+   3. 蓝色试剂呈【超柔缓渐进羽化凹形】，剔除任何突兀硬线，与右侧绿底自然晕染交融
    4. 彻底消除点击产生的黑色焦点外框
 */
 .reagent-choice-card.state-no .side-green {
-  width: calc(100% - 46px);
+  width: calc(100% - 52px);
   background: transparent !important;
   pointer-events: none;
 }
@@ -660,7 +618,7 @@ function reset() {
 }
 
 .reagent-choice-card.state-no .side-blue {
-  width: 46px;
+  width: 52px;
   background: transparent !important;
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -669,10 +627,10 @@ function reset() {
 }
 
 .reagent-choice-card.state-no .side-blue:hover .concave-liquid-svg {
-  filter: brightness(1.05);
+  filter: brightness(1.04);
 }
 
-/* 渐进毛玻璃凹形矢量试剂背景（呼吸微澜动效，柔和淡入） */
+/* 渐进毛玻璃凹形矢量试剂背景（微澜呼吸，柔和淡入） */
 .concave-liquid-svg {
   position: absolute;
   inset: 0;
@@ -680,13 +638,13 @@ function reset() {
   height: 100%;
   display: block;
   pointer-events: none;
-  animation: concaveSvgFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: concaveSvgFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes concaveSvgFadeIn {
   0% {
     opacity: 0;
-    transform: scaleX(0.7);
+    transform: scaleX(0.75);
   }
   100% {
     opacity: 1;
@@ -728,12 +686,12 @@ function reset() {
 }
 
 .side-blue .label-compressed {
-  left: 10px;
+  left: 12px;
   color: #0369a1;
 }
 
 .side-green .label-compressed {
-  right: 10px;
+  right: 12px;
   color: #15803d;
 }
 
@@ -866,7 +824,7 @@ function reset() {
 .spray-right .rg-10 { width: 6px; height: 6px; background: #22c55e; top: 76%; right: 0; animation: ruptureFloatRight 2.9s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.3s; }
 .spray-right .rg-11 { width: 4px; height: 4px; background: #ffffff; top: 18%; right: 0; animation: ruptureFloatRight 2.2s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.0s; }
 .spray-right .rg-12 { width: 6px; height: 6px; background: #4ade80; top: 82%; right: 0; animation: ruptureFloatRight 2.8s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 1.5s; }
-.spray-right .rg-13 { width: 3px; height: 3px; background: #86efac; top: 38%; right: 0; animation: ruptureFloatRight 2.1s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.45s; }
+.spray-right .rg-13 { width: 3px; height: 3px; background: #86efac; top: 38%; right: 0; animation: ruptureFloatRight 2.1s cubic-bezier(0.2, 0.8, 0.3, 1) infinite 0.45s; }
 .spray-right .rg-14 { width: 5px; height: 5px; background: #ffffff; top: 60%; right: 0; animation: ruptureFloatRight 2.7s cubic-bezier(0.2, 0.8, 0.25, 1) infinite 0.85s; }
 
 @keyframes ruptureFloatRight {
