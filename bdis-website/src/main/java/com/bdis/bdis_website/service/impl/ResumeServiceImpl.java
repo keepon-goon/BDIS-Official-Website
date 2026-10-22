@@ -20,14 +20,19 @@ public class ResumeServiceImpl implements ResumeService {
     private final ResumeConversionService conversions;
     private final ResumeProperties properties;
     private final Clock clock;
+    private final ResumePhotoService photos;
+    private final Object stateLock = new Object();
+    private final java.util.Set<String> replacing = new java.util.HashSet<>();
 
     public ResumeServiceImpl(ResumeStorageService storage, ResumeDocumentService documents,
-                             ResumeConversionService conversions, ResumeProperties properties, Clock resumeClock) {
+                             ResumeConversionService conversions, ResumeProperties properties, Clock resumeClock,
+                             ResumePhotoService photos) {
         this.storage = storage;
         this.documents = documents;
         this.conversions = conversions;
         this.properties = properties;
         this.clock = resumeClock;
+        this.photos = photos;
     }
 
     @Override
@@ -67,6 +72,58 @@ public class ResumeServiceImpl implements ResumeService {
             return new ResumeFile(Files.readAllBytes(path), filename);
         } catch (IOException e) {
             throw new ResumeException(503, "预览文件暂不可读，请稍后重试");
+        }
+    }
+
+    @Override
+    public ResumePreviewVO photo(String token, org.springframework.web.multipart.MultipartFile photo) {
+        if (photo.isEmpty()) throw new ResumeException(400, "请选择照片");
+        if (photo.getSize() > ResumePhotoService.MAX_BYTES) throw new ResumeException(413, "单张照片不能超过5MB");
+        String oldHash = storage.hash(token);
+        ResumePreviewSnapshot original;
+        synchronized (stateLock) {
+            original = storage.load(token);
+            if (!"FORM".equals(original.getSourceType())) throw new ResumeException(400, "请在本地修改上传的Word后重新上传");
+            if (!replacing.add(oldHash)) throw new ResumeException(409, "正在更新照片，请稍后操作");
+        }
+        try {
+            return conversions.execute(() -> {
+                String nextToken = storage.newToken();
+                String nextHash = storage.hash(nextToken);
+                Path work = storage.directory("work", nextHash);
+                Files.createDirectory(work);
+                boolean replaced = false;
+                try {
+                    byte[] normalized = photos.normalize(photo);
+                    var snapshot = new ResumePreviewSnapshot();
+                    snapshot.setTokenHash(nextHash);
+                    snapshot.setSourceType("FORM");
+                    snapshot.setForm(original.getForm());
+                    snapshot.setAcademicYear(original.getAcademicYear());
+                    snapshot.setDocumentName(original.getDocumentName());
+                    snapshot.setTemplateVersion(original.getTemplateVersion());
+                    snapshot.setExpiresAt(clock.instant().plusSeconds(properties.getPreviewMinutes() * 60L));
+                    snapshot.setHasPhoto(true);
+                    Files.write(work.resolve("photo.png"), normalized);
+                    Path word = storage.file(work, snapshot.getDocumentName() + ".docx");
+                    documents.generate(snapshot.getForm(), snapshot.getAcademicYear(), normalized, word);
+                    conversions.convert(word);
+                    if (Thread.currentThread().isInterrupted()) throw new ResumeException(503, "照片合成已取消，请重试");
+                    synchronized (stateLock) {
+                        var active = storage.load(token);
+                        storage.publish(work, snapshot);
+                        active.setSuperseded(true);
+                        storage.writeSnapshot(storage.directory("previews", oldHash), active);
+                        replaced = true;
+                    }
+                    return view(nextToken, snapshot);
+                } finally {
+                    storage.deleteTemporary(work);
+                    if (!replaced) storage.deleteTemporary(storage.directory("previews", nextHash));
+                }
+            });
+        } finally {
+            synchronized (stateLock) { replacing.remove(oldHash); }
         }
     }
 

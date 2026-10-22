@@ -43,6 +43,12 @@ public class ResumeController {
         return download(file.bytes(), file.filename(), false);
     }
 
+    @PostMapping(value = "/previews/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Result<ResumePreviewVO> photo(@RequestHeader(value = "X-Resume-Preview-Token", required = false) String token,
+                                         @RequestPart("photo") org.springframework.web.multipart.MultipartFile photo) {
+        return Result.success(service.photo(token, photo));
+    }
+
     public static ResponseEntity<byte[]> download(byte[] bytes, String filename, boolean pdf) {
         return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .header(HttpHeaders.CONTENT_DISPOSITION, (pdf ? ContentDisposition.inline() : ContentDisposition.attachment())

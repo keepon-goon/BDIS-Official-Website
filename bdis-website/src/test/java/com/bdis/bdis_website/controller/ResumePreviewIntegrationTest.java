@@ -19,6 +19,13 @@ import java.nio.file.StandardCopyOption;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import org.springframework.mock.web.MockMultipartFile;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(properties = {"resume.converter=docker", "resume.storage-root=target/integration-private-resumes"})
@@ -53,11 +60,46 @@ class ResumePreviewIntegrationTest {
         Files.copy(word, Path.of("target/test-artifacts/generated-resume.docx"), StandardCopyOption.REPLACE_EXISTING);
         Files.copy(pdf, Path.of("target/test-artifacts/generated-resume.pdf"), StandardCopyOption.REPLACE_EXISTING);
         assertThat(response).doesNotContain(directory.toString());
+        String withPhoto = mvc.perform(multipart("/api/resume/previews/photo")
+                        .file(picture(400, 600, Color.RED)).header("X-Resume-Preview-Token", token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.hasPhoto").value(true))
+                .andReturn().getResponse().getContentAsString();
+        String nextToken = json.readTree(withPhoto).at("/data/previewToken").asText();
+        mvc.perform(get("/api/resume/previews/pdf").header("X-Resume-Preview-Token", token)).andExpect(status().isGone());
+        mvc.perform(multipart("/api/resume/previews/photo").file(picture(400, 400, Color.BLUE))
+                .header("X-Resume-Preview-Token", nextToken)).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/resume/previews/pdf").header("X-Resume-Preview-Token", nextToken)).andExpect(status().isOk());
+        String replaced = mvc.perform(multipart("/api/resume/previews/photo")
+                        .file(picture(400, 600, Color.BLUE)).header("X-Resume-Preview-Token", nextToken))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String finalToken = json.readTree(replaced).at("/data/previewToken").asText();
+        var finalSnapshot = storage.load(finalToken);
+        Path finalWord = storage.directory("previews", storage.hash(finalToken)).resolve(finalSnapshot.getDocumentName() + ".docx");
+        assertThat(finalSnapshot.getDocumentName()).isEqualTo(snapshot.getDocumentName());
+        try (var document = new XWPFDocument(Files.newInputStream(finalWord))) {
+            assertThat(document.getAllPictures()).hasSize(1);
+            var image = ImageIO.read(new java.io.ByteArrayInputStream(document.getAllPictures().get(0).getData()));
+            assertThat(image.getRGB(300, 450)).isEqualTo(Color.BLUE.getRGB());
+        }
+        Files.copy(finalWord, Path.of("target/test-artifacts/photo-resume.docx"), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(finalWord.resolveSibling(finalSnapshot.getDocumentName() + ".pdf"),
+                Path.of("target/test-artifacts/photo-resume.pdf"), StandardCopyOption.REPLACE_EXISTING);
     }
 
     @Test
     void rejectsInvalidFormWithoutGeneratingPreview() throws Exception {
         mvc.perform(post("/api/resume/previews").contentType("application/json").content("{}"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value(1));
+    }
+
+    private MockMultipartFile picture(int width, int height, Color color) throws Exception {
+        var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        var graphics = image.createGraphics();
+        graphics.setColor(color);
+        graphics.fillRect(0, 0, width, height);
+        graphics.dispose();
+        var bytes = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", bytes);
+        return new MockMultipartFile("photo", "照片.png", "image/png", bytes.toByteArray());
     }
 }
