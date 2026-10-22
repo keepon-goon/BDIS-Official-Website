@@ -3,6 +3,11 @@ package com.bdis.bdis_website.controller;
 import com.bdis.bdis_website.common.Result;
 import com.bdis.bdis_website.entity.ResumeSubmission;
 import com.bdis.bdis_website.mapper.ResumeSubmissionMapper;
+import com.bdis.bdis_website.service.ResumeDocumentService;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.util.ByteArrayDataSource;
@@ -15,10 +20,24 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("/api/resume")
 public class ResumeController {
+
+    @Autowired
+    private ResumeDocumentService documents;
+
+    @GetMapping("/template")
+    public ResponseEntity<byte[]> template() {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
+                        .filename(documents.blankFilename(), StandardCharsets.UTF_8).build().toString())
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                .body(documents.blankTemplate());
+    }
 
     @Autowired
     private ResumeSubmissionMapper mapper;

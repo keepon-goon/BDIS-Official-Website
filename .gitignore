@@ -19,3 +19,8 @@ backend/*.war
 backend/__pycache__/
 backend/*.pyc/
 backend/venv/
+bdis-website/target/
+**/private-resumes/
+.local/
+playwright-report/
+test-results/
