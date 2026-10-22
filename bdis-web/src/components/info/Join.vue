@@ -109,8 +109,10 @@
               <span class="cta-value">重庆理工大学 博园4号楼305</span>
             </div>
           </div>
-          <a class="cta-button" href="/工作室招新报名表.docx" download="工作室招新报名表.docx">
-            获取报名表
+          <RouterLink class="cta-button" to="/resume/apply">在线填写报名表</RouterLink>
+          <RouterLink class="cta-button" to="/resume/upload">上传已填写 Word</RouterLink>
+          <a class="cta-button" href="/api/resume/template">
+            下载两页报名模板
           </a>
         </div>
       </div>

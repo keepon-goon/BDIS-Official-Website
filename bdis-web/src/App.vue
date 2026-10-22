@@ -1,5 +1,5 @@
 <template>
-  <template v-if="isAdminRoute">
+  <template v-if="isStandaloneRoute">
     <RouterView />
   </template>
   <template v-else>
@@ -15,5 +15,5 @@ import { RouterView, useRoute } from 'vue-router'
 import BaseLayout from './layouts/BaseLayout.vue'
 
 const route = useRoute()
-const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+const isStandaloneRoute = computed(() => route.path.startsWith('/admin') || route.path.startsWith('/resume/'))
 </script>

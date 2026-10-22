@@ -1,0 +1,31 @@
+.resume-shell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+  color: #23364a;
+}
+.resume-shell h1 { font-size: 30px; margin: 16px 0 12px; color: #0c3d70; }
+.resume-shell h2 { font-size: 20px; margin: 0 0 24px; color: #0c3d70; }
+.resume-lead { line-height: 1.8; color: #617184; margin-bottom: 28px; }
+.resume-card { border: 1px solid #e0e6ee; border-radius: 12px; padding: 28px; margin: 24px 0; background: white; }
+.resume-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+.resume-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 20px 0; }
+.resume-actions .el-button + .el-button { margin-left: 0; }
+.resume-note { font-size: 14px; line-height: 1.8; color: #617184; margin: 12px 0; }
+.resume-filename { overflow-wrap: anywhere; font-size: 14px; color: #617184; }
+.resume-shell .el-date-editor { width: 100%; }
+.resume-shell .el-alert { margin: 16px 0; }
+.resume-file-input { display: none; }
+.resume-back { color: #0c3d70; text-decoration: none; font-size: 14px; }
+.resume-shell .el-form-item__label { font-weight: 500; }
+.resume-success { text-align: center; padding: 64px 24px; }
+.resume-success strong { color: #0c3d70; font-size: 24px; }
+.resume-photo-panel { background: #f6f9fd; }
+.resume-empty { padding: 64px 24px; text-align: center; }
+@media (max-width: 700px) {
+  .resume-shell { padding: 28px 16px 40px; }
+  .resume-shell h1 { font-size: 25px; }
+  .resume-card { padding: 20px 16px; }
+  .resume-grid { grid-template-columns: minmax(0, 1fr); }
+  .resume-actions { gap: 10px; }
+}

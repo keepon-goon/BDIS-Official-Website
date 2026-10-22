@@ -3,6 +3,9 @@ import HomeView from '../views/HomeView.vue'
 import UnderConstruction from '../components/UnderConstruction.vue'
 
 const routes = [
+  { path: '/resume/apply', component: () => import('@/views/ResumeApplyView.vue') },
+  { path: '/resume/preview', component: () => import('@/views/ResumePreviewView.vue') },
+  { path: '/resume/upload', component: () => import('@/views/ResumeUploadView.vue') },
   {
     path: '/',
     name: 'home',
@@ -46,6 +49,7 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       { path: 'dashboard', component: () => import('@/views/admin/DashboardView.vue') },
+      { path: 'resumes', component: () => import('@/views/admin/ResumeManage.vue') },
       { path: 'banners', component: () => import('@/views/admin/BannerManage.vue') },
       { path: 'news', component: () => import('@/views/admin/NewsManage.vue') },
       { path: 'announcements', component: () => import('@/views/admin/AnnouncementManage.vue') },
