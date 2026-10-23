@@ -1,4 +1,7 @@
-param([switch]$SkipBuild)
+param(
+    [switch]$SkipBuild,
+    [switch]$Wait
+)
 
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path $PSScriptRoot -Parent
@@ -27,8 +30,8 @@ $env:BDIS_JWT_SECRET = [string]$taskSettings.jwtSecret
 $env:BDIS_RESUME_STORAGE_ROOT = Join-Path $taskLocal 'private-resumes'
 $env:BDIS_RESUME_CONVERTER = 'docker'
 $env:DOCKER_HOST = 'npipe:////./pipe/dockerDesktopLinuxEngine'
-$env:BDIS_MAIL_USERNAME = ''
-$env:BDIS_MAIL_PASSWORD = ''
+$env:BDIS_MAIL_USERNAME = [string]$taskSettings.mailUsername
+$env:BDIS_MAIL_PASSWORD = [string]$taskSettings.mailPassword
 $env:SERVER_ADDRESS = '127.0.0.1'
 $taskJar = Join-Path $taskRoot 'bdis-website/target/bdis-website-0.0.1-SNAPSHOT.jar'
 $taskBackend = Start-Process -FilePath (Get-Command java.exe).Source -ArgumentList @('-Xms128m', '-Xmx512m', '-jar', "`"$taskJar`"") -WorkingDirectory (Join-Path $taskRoot 'bdis-website') -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $taskLocal 'backend.log') -RedirectStandardError (Join-Path $taskLocal 'backend-error.log')
@@ -44,17 +47,27 @@ $taskProcesses = @{
 }
 [IO.File]::WriteAllText((Join-Path $taskLocal 'resume-processes.json'), ($taskProcesses | ConvertTo-Json -Depth 3), [Text.UTF8Encoding]::new($false))
 $taskReady = $false
-$taskDeadline = (Get-Date).AddSeconds(30)
+$taskDeadline = (Get-Date).AddSeconds(45)
 while ((Get-Date) -lt $taskDeadline) {
     try {
-        if ((Invoke-WebRequest 'http://127.0.0.1:8081/api/resume/template' -TimeoutSec 2).StatusCode -eq 200) {
+        $taskStatus = (& curl.exe -s -o NUL -w "%{http_code}" http://127.0.0.1:8081/api/resume/template)
+        if ($taskStatus -eq '200') {
+            $taskReady = $true
+            break
+        }
+    } catch { }
+    try {
+        if ((Invoke-WebRequest 'http://127.0.0.1:8081/api/resume/template' -UseBasicParsing -TimeoutSec 2).StatusCode -eq 200) {
             $taskReady = $true
             break
         }
     } catch { }
     Start-Sleep -Milliseconds 500
 }
-if (!$taskReady) { throw '后端未在30秒内就绪，请查看.local/backend.log及backend-error.log' }
+if (!$taskReady) { throw '后端未在45秒内就绪，请查看.local/backend.log及backend-error.log' }
 Write-Output '前端：http://127.0.0.1:5173/resume/apply'
 Write-Output '后台：http://127.0.0.1:5173/admin/resumes'
-Write-Output '日志保存在.local；本地启动不提供真实SMTP凭据。'
+Write-Output '日志保存在.local；邮件发件配置从本地私有配置读取。'
+if ($Wait) {
+    Wait-Process -Id $taskBackend.Id, $taskFrontend.Id
+}
