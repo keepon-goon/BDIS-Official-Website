@@ -188,10 +188,13 @@ public class ResumeDocumentService {
         XWPFParagraph paragraph = cell.getParagraphs().get(0);
         while (!paragraph.getRuns().isEmpty()) paragraph.removeRun(0);
         paragraph.setAlignment(ParagraphAlignment.LEFT);
+        paragraph.setSpacingBefore(0);
+        paragraph.setSpacingAfter(0);
+        paragraph.setSpacingBetween(narrative ? 12 : 13.5, LineSpacingRule.EXACT);
         XWPFRun run = paragraph.createRun();
         run.setFontFamily("Noto Serif CJK SC");
         run.setFontFamily("Noto Serif CJK SC", XWPFRun.FontCharRange.eastAsia);
-        run.setFontSize(12);
+        run.setFontSize(narrative ? 10.5 : 11);
         String[] lines = (text == null ? "" : text.strip()).split("\\R", -1);
         for (int i = 0; i < lines.length; i++) {
             if (i > 0) run.addBreak();

@@ -38,6 +38,37 @@ class ResumePreviewIntegrationTest {
     @Autowired private com.bdis.bdis_website.service.ResumeDocumentService documents;
 
     @Test
+    void keepsNearLimitNarrativesWithBlankLinesWithinTwoPages() throws Exception {
+        var form = (com.fasterxml.jackson.databind.node.ObjectNode) json.readTree(
+                new ClassPathResource("resume-form.json").getContentAsByteArray());
+        String intro = String.join("\n\n", java.util.Collections.nCopies(10, "　　" + "学习".repeat(38)));
+        String awards = String.join("\n\n", java.util.Collections.nCopies(6, "　　" + "获奖".repeat(39)));
+        String showcase = String.join("\n\n", java.util.Collections.nCopies(6, "　　" + "作品".repeat(39)));
+        form.put("intro", intro).put("awards", awards).put("showcase", showcase);
+        String response = mvc.perform(post("/api/resume/previews").contentType("application/json").content(json.writeValueAsBytes(form)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.code").value(0))
+                .andReturn().getResponse().getContentAsString();
+        String token = json.readTree(response).at("/data/previewToken").asText();
+        var snapshot = storage.load(token);
+        Path directory = storage.directory("previews", storage.hash(token));
+        Path word = directory.resolve(snapshot.getDocumentName() + ".docx");
+        Path pdf = directory.resolve(snapshot.getDocumentName() + ".pdf");
+        try (var document = Loader.loadPDF(pdf.toFile())) {
+            assertThat(document.getNumberOfPages()).isEqualTo(2);
+            var text = new org.apache.pdfbox.text.PDFTextStripper().getText(document);
+            assertThat(text.chars().filter(value -> value == '学').count()).isGreaterThanOrEqualTo(380);
+            assertThat(text.chars().filter(value -> value == '获').count()).isGreaterThanOrEqualTo(234);
+            assertThat(text.chars().filter(value -> value == '作').count()).isGreaterThanOrEqualTo(234);
+        }
+        try (var document = new XWPFDocument(Files.newInputStream(word)); var extractor = new XWPFWordExtractor(document)) {
+            assertThat(extractor.getText()).contains(intro.strip(), awards.strip(), showcase.strip());
+        }
+        Files.createDirectories(Path.of("target/test-artifacts"));
+        Files.copy(word, Path.of("target/test-artifacts/multiline-resume.docx"), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(pdf, Path.of("target/test-artifacts/multiline-resume.pdf"), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    @Test
     void createsRealTwoPageWordAndPdfWithPrivateSnapshot() throws Exception {
         byte[] form = new ClassPathResource("resume-form.json").getContentAsByteArray();
         String response = mvc.perform(post("/api/resume/previews").contentType("application/json").content(form))
