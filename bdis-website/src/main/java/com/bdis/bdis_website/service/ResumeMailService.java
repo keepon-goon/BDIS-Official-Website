@@ -8,6 +8,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import jakarta.mail.internet.MimeUtility;
 
 @Service
 public class ResumeMailService {
@@ -36,13 +37,20 @@ public class ResumeMailService {
         var mailSender = sender.getObject();
         var message = mailSender.createMimeMessage();
         var helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setFrom(from);
+        helper.setFrom(from, "BDIS实验室");
         helper.setTo(recipient);
         helper.setSubject("[BDIS招新] " + submission.getName() + "-" + submission.getStudentNo());
         helper.setText("收到一份已确认保存的报名简历。\n姓名：" + submission.getName()
                 + "\n学号：" + submission.getStudentNo() + "\n学年：" + submission.getAcademicYear());
-        helper.addAttachment(submission.getDocumentName() + ".docx", new ByteArrayResource(bytes),
+        String filename = submission.getDocumentName() + ".docx";
+        helper.addAttachment(filename, new ByteArrayResource(bytes),
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        var attachments = helper.getRootMimeMultipart();
+        var attachment = attachments.getBodyPart(attachments.getCount() - 1);
+        String encodedFilename = MimeUtility.encodeText(filename, "UTF-8", "B");
+        attachment.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFilename + "\"");
+        attachment.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document; name=\""
+                + encodedFilename + "\"");
         mailSender.send(message);
     }
 }

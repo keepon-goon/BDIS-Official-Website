@@ -5,7 +5,9 @@ import com.bdis.bdis_website.entity.ResumeSubmission;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.Multipart;
 import jakarta.mail.Session;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeUtility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
@@ -14,6 +16,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.time.Clock;
 import java.util.Properties;
 
@@ -49,11 +53,20 @@ class ResumeMailServiceTest {
         verify(sender, times(1)).send(capture.capture());
         var message = capture.getValue();
         message.saveChanges();
+        var output = new ByteArrayOutputStream();
+        message.writeTo(output);
+        message = new MimeMessage(Session.getInstance(new Properties()), new ByteArrayInputStream(output.toByteArray()));
         assertThat(message.getAllRecipients()[0].toString()).isEqualTo("target@example.com");
+        var from = (InternetAddress) message.getFrom()[0];
+        assertThat(from.getAddress()).isEqualTo("sender@example.com");
+        assertThat(from.getPersonal()).isEqualTo("BDIS实验室");
         Multipart multipart = (Multipart) message.getContent();
         var attachment = multipart.getBodyPart(1);
-        assertThat(attachment.getFileName()).isEqualTo(record.getDocumentName() + ".docx");
+        assertThat(MimeUtility.decodeText(attachment.getFileName())).isEqualTo(record.getDocumentName() + ".docx");
+        assertThat(attachment.getHeader("Content-Disposition")[0]).contains("=?UTF-8?").doesNotContain("filename*", "%E");
         assertThat(attachment.getInputStream().readAllBytes()).isEqualTo(original);
+        Files.createDirectories(Path.of("target/test-artifacts"));
+        Files.write(Path.of("target/test-artifacts/resume-mail.eml"), output.toByteArray());
     }
 
     @Test
