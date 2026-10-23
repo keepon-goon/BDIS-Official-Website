@@ -1,0 +1,295 @@
+<template>
+  <section class="resume-shell">
+    <!-- 显眼顶部倒计时警示弹窗（Teleport到body，固定在屏幕当前视口正上方） -->
+    <Teleport to="body">
+      <transition name="tg-alert">
+        <div v-if="alertState.visible" class="custom-warning-toast" role="alert">
+          <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
+          <span class="warning-text">{{ alertState.message }}</span>
+          <el-icon class="warning-triangle-icon"><WarningFilled /></el-icon>
+          <button type="button" class="warning-close-btn" title="关闭提示" @click="closeAlert">
+            <el-icon><Close /></el-icon>
+          </button>
+          <div class="warning-progress-line" :key="alertState.key" @animationend="onAlertTimeout"></div>
+        </div>
+      </transition>
+    </Teleport>
+
+    <!-- Apple 风格分段进度指示条 (提交后更新为全部完成) -->
+    <div class="resume-step-indicator">
+      <div class="step-node is-done">
+        <span class="step-badge">✓</span>
+        <span>在线填写</span>
+      </div>
+      <span class="step-sep">›</span>
+      <div class="step-node is-done">
+        <span class="step-badge">✓</span>
+        <span>排版预览</span>
+      </div>
+      <span class="step-sep">›</span>
+      <div class="step-node" :class="{ 'is-done is-active': resumeDraft.submission, 'is-active': !resumeDraft.submission }">
+        <span class="step-badge">{{ resumeDraft.submission ? '✓' : '3' }}</span>
+        <span>{{ resumeDraft.submission ? '提交完成' : '确认提交' }}</span>
+      </div>
+    </div>
+
+    <!-- 提交成功展示面板 -->
+    <template v-if="resumeDraft.submission">
+      <el-result icon="success" title="报名已成功保存" :sub-title="resumeDraft.submission.message">
+        <template #extra>
+          <p>提交编号：<strong>{{ resumeDraft.submission.submissionId }}</strong></p>
+          <p class="resume-note">无需重复提交 邮件尚未成功时，可由管理员后续补发 </p>
+          <div class="resume-actions">
+            <el-button @click="router.push('/info/join')">返回加入我们</el-button>
+            <el-button type="primary" @click="newApplication">填写新的报名表</el-button>
+          </div>
+        </template>
+      </el-result>
+    </template>
+
+    <!-- 预览与核对面板 -->
+    <template v-else-if="preview">
+      <h1>核对报名表预览</h1>
+      <p class="resume-lead">请核对全部内容与分页效果 你可以下载当前 Word 自行贴照，也可以上传照片合成后再次预览 </p>
+      <el-alert title="如果无法显示，请检查是否开启了第三方下载插件（如IDM），建议将其暂时关闭" type="info" :closable="false" show-icon />
+      <div class="resume-meta-bar">
+        <span class="resume-filename">{{ preview.wordFilename }}</span>
+        <el-tag effect="plain">{{ preview.sourceType === 'UPLOAD' ? '上传的 Word 原件' : preview.hasPhoto ? '已合成照片' : '照片留白' }}</el-tag>
+      </div>
+      <el-alert v-if="errorText" :title="errorText" type="error" :closable="false" show-icon />
+      <div class="resume-card resume-photo-panel" v-if="preview.sourceType === 'FORM'">
+        <h2>证件照（可选）</h2>
+        <p class="resume-note">支持 JPG/JPEG、PNG，单张不超过 <strong>10 MB</strong> 不限照片比例，照片会等比缩放、居中留白，不拉伸或裁切；竖版照片更适合当前照片框 </p>
+        <div class="resume-actions">
+          <el-button type="primary" :loading="operation === 'photo'" :disabled="busy || loadingPdf" @click="photoInput.click()">
+            {{ preview.hasPhoto ? '更换照片并重新预览' : '上传照片合成预览' }}
+          </el-button>
+          <span class="resume-note">不上传照片也可以确认提交 </span>
+        </div>
+        <input ref="photoInput" data-testid="resume-photo-input" class="resume-file-input" type="file" accept="image/jpeg,image/png" @change="changePhoto" />
+      </div>
+      <p v-else class="resume-note">此预览保留上传 Word 的原内容 需要更换照片或修改文字时，请在本地编辑后重新上传 </p>
+      <div class="resume-actions">
+        <el-button :loading="operation === 'download'" :disabled="busy || loadingPdf" @click="downloadWord">下载当前 Word</el-button>
+        <el-button :disabled="busy || loadingPdf" @click="router.push('/resume/upload')">上传已编辑 Word</el-button>
+        <el-button v-if="preview.sourceType === 'FORM'" :disabled="busy || loadingPdf" @click="router.push('/resume/apply')">返回修改表单</el-button>
+        <el-button :disabled="busy || loadingPdf" @click="loadPdf">重新加载预览</el-button>
+      </div>
+      <p class="resume-note">下载后在本地修改不会自动同步 自行贴照后，请上传修改后的 Word，再预览并确认提交 </p>
+      <div v-loading="loadingPdf || operation === 'photo'" element-loading-text="正在生成或读取预览，请稍候">
+        <ResumePdfPreview :url="pdfUrl" :filename="preview.pdfFilename" :max-pages="preview.sourceType === 'UPLOAD' ? 6 : 2"
+          @ready="renderedUrl = $event" @error="renderFailed" />
+      </div>
+      <div class="resume-actions">
+        <el-button type="primary" size="large" :loading="operation === 'confirm'" :disabled="!canConfirm" @click="promptConfirm">确认当前版本并提交</el-button>
+        <span class="resume-note">预览有效期至 {{ new Date(preview.expiresAt).toLocaleString() }}</span>
+      </div>
+    </template>
+
+    <div v-else class="resume-empty">
+      <h1>请先生成报名表预览</h1>
+      <p class="resume-note">页面刷新或预览凭证丢失后，需要重新填写生成，或上传已保存的 Word </p>
+      <div class="resume-actions">
+        <el-button type="primary" @click="router.push('/resume/apply')">在线填写</el-button>
+        <el-button @click="router.push('/resume/upload')">上传已填写 Word</el-button>
+      </div>
+    </div>
+
+    <!-- Apple 风格提交二次确认对话框 (独立轻量遮罩，不篡改页面滚动锁，彻底杜绝死锁) -->
+    <Teleport to="body">
+      <div v-if="showConfirmDialog" class="apple-modal-backdrop" @click.self="showConfirmDialog = false">
+        <div class="apple-modal-card">
+          <h3 class="apple-modal-title">确认提交招新报名表？</h3>
+          <p class="apple-modal-desc">提交后将正式保存并登记为你的报名记录 提交后将不可修改 确认要现在提交吗 </p>
+          <div class="apple-modal-actions">
+            <button type="button" class="modal-btn btn-cancel" @click="showConfirmDialog = false">返回检查</button>
+            <button type="button" class="modal-btn btn-confirm" :disabled="busy" @click="executeConfirm">确认提交</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+  </section>
+</template>
+
+<script setup>
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
+import { WarningFilled, Close } from '@element-plus/icons-vue'
+import ResumePdfPreview from '../components/resume/ResumePdfPreview.vue'
+import { resumeDraft, setResumePreview, resetResumeDraft } from '../utils/resumeDraft'
+import { resumeApi, downloadResumeFile } from '../utils/resumeApi'
+import { launchCelebrationConfetti } from '../utils/confetti'
+import '../assets/resume.css'
+
+const router = useRouter()
+const preview = computed(() => resumeDraft.preview)
+const photoInput = ref()
+const pdfUrl = ref('')
+const pdfToken = ref('')
+const renderedUrl = ref('')
+const loadingPdf = ref(false)
+const operation = ref('')
+const errorText = ref('')
+const showConfirmDialog = ref(false)
+const busy = computed(() => Boolean(operation.value))
+const canConfirm = computed(() => preview.value && !busy.value && !loadingPdf.value && pdfUrl.value
+  && pdfToken.value === preview.value.previewToken
+  && renderedUrl.value === pdfUrl.value
+  && (preview.value.sourceType !== 'FORM' || preview.value.formVersion === resumeDraft.version))
+let active = true
+
+/* 警示弹窗控制 */
+const alertState = reactive({
+  visible: false,
+  message: '',
+  key: 0,
+  timer: null
+})
+
+function showAlert(message) {
+  if (alertState.timer) clearTimeout(alertState.timer)
+  alertState.message = message
+  alertState.key++
+  alertState.visible = true
+  alertState.timer = setTimeout(() => {
+    closeAlert()
+  }, 3000)
+}
+
+function closeAlert() {
+  alertState.visible = false
+  if (alertState.timer) {
+    clearTimeout(alertState.timer)
+    alertState.timer = null
+  }
+}
+
+function onAlertTimeout() {
+  closeAlert()
+}
+
+function clearPdf() {
+  if (pdfUrl.value) URL.revokeObjectURL(pdfUrl.value)
+  pdfUrl.value = ''
+  pdfToken.value = ''
+  renderedUrl.value = ''
+}
+
+function renderFailed(message) {
+  renderedUrl.value = ''
+  errorText.value = message
+  showAlert(message)
+}
+
+onBeforeUnmount(() => {
+  active = false
+  clearPdf()
+  closeAlert()
+})
+
+onMounted(() => {
+  document.body.style.overflow = ''
+  document.documentElement.style.overflow = ''
+  document.body.classList.remove('el-popup-parent--hidden')
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  if (preview.value) loadPdf()
+})
+
+async function loadPdf() {
+  if (!preview.value) return
+  const token = preview.value.previewToken
+  clearPdf()
+  loadingPdf.value = true
+  errorText.value = ''
+  try {
+    const { blob } = await resumeApi.previewPdf(token)
+    if (!active || preview.value?.previewToken !== token) return
+    pdfUrl.value = URL.createObjectURL(blob)
+    pdfToken.value = token
+  } catch (error) {
+    errorText.value = error.message
+    showAlert(error.message)
+  }
+  finally { loadingPdf.value = false }
+}
+
+async function validatePhoto(file) {
+  if (file.size > 10 * 1024 * 1024) throw new Error('单张照片不能超过10MB')
+  if (file.type && !['image/jpeg', 'image/png'].includes(file.type)) throw new Error('照片仅支持JPG/JPEG或PNG')
+  const url = URL.createObjectURL(file)
+  try {
+    const image = new Image()
+    await new Promise((resolve, reject) => {
+      image.onload = resolve
+      image.onerror = () => reject(new Error('照片无法读取，请更换图片'))
+      image.src = url
+    })
+  } finally { URL.revokeObjectURL(url) }
+}
+
+async function changePhoto(event) {
+  const file = event.target.files?.[0]
+  if (!file || busy.value || !preview.value) return
+  operation.value = 'photo'
+  errorText.value = ''
+  try {
+    await validatePhoto(file)
+    const result = await resumeApi.photo(preview.value.previewToken, file)
+    if (!active) return
+    setResumePreview(result)
+    await loadPdf()
+  } catch (error) {
+    errorText.value = error.message
+    showAlert(error.message)
+  }
+  finally { operation.value = ''; event.target.value = '' }
+}
+
+async function downloadWord() {
+  operation.value = 'download'
+  try { downloadResumeFile(await resumeApi.previewWord(preview.value.previewToken)) }
+  catch (error) {
+    errorText.value = error.message
+    showAlert(error.message)
+  }
+  finally { operation.value = '' }
+}
+
+/* 点击提交按钮时先弹出确认询问 */
+function promptConfirm() {
+  if (!canConfirm.value) return
+  showConfirmDialog.value = true
+}
+
+/* 确认后调用提交接口，并触发礼花喷射特效 */
+async function executeConfirm() {
+  if (!canConfirm.value) return
+  operation.value = 'confirm'
+  errorText.value = ''
+  try {
+    const result = await resumeApi.confirm(preview.value.previewToken)
+    if (!active) return
+    showConfirmDialog.value = false
+    document.body.style.overflow = ''
+    document.documentElement.style.overflow = ''
+    document.body.classList.remove('el-popup-parent--hidden')
+    resumeDraft.submission = result
+    resumeDraft.preview = null
+    clearPdf()
+    // 触发屏幕下方两侧角落喷射礼花特效
+    launchCelebrationConfetti()
+  } catch (error) {
+    errorText.value = error.message
+    showAlert(error.message)
+  }
+  finally { operation.value = '' }
+}
+
+function newApplication() {
+  document.body.style.overflow = ''
+  document.documentElement.style.overflow = ''
+  document.body.classList.remove('el-popup-parent--hidden')
+  resetResumeDraft()
+  router.push('/resume/apply')
+}
+</script>

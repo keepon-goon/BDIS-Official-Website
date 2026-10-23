@@ -1,0 +1,855 @@
+/* ==========================================================================
+   BDIS Resume Suite - Apple & Telegram Minimalist Aesthetic
+   Inspired by Apple Product Showcase & Telegram Fluid Micro-interactions
+   ========================================================================== */
+
+/* Shell Container with Telegram-style fluid entry */
+.resume-shell {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, "MiSans", "SF Pro Text", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  animation: tgSpringIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes tgSpringIn {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Minimalist Back Button */
+.resume-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #86868b;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 980px;
+  background: #f5f5f7;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: all 0.22s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.resume-back:hover {
+  color: #1d1d1f;
+  background: #e8e8ed;
+  transform: translateX(-2px);
+}
+
+/* Headings with Apple Typography */
+.resume-shell h1 {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: #1d1d1f;
+  margin: 20px 0 8px;
+  line-height: 1.25;
+}
+
+.resume-shell h2 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #1d1d1f;
+  margin: 0 0 22px;
+}
+
+.resume-lead {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #86868b;
+  margin-bottom: 28px;
+}
+
+/* Apple-style Segmented Step Indicator */
+.resume-step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 24px 0 32px;
+  padding: 8px 12px;
+  background: #f5f5f7;
+  border-radius: 980px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.step-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 980px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #86868b;
+  transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: default;
+}
+
+.step-node.is-active {
+  background: #ffffff;
+  color: #1d1d1f;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  font-weight: 600;
+}
+
+.step-node.is-done {
+  color: #1d1d1f;
+}
+
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.06);
+  color: #86868b;
+  transition: all 0.25s ease;
+}
+
+.step-node.is-active .step-badge {
+  background: #1d1d1f;
+  color: #ffffff;
+}
+
+.step-node.is-done .step-badge {
+  background: #34c759;
+  color: #ffffff;
+}
+
+.step-sep {
+  color: #d2d2d7;
+  font-size: 12px;
+}
+
+/* Apple-style Architectural Cards */
+.resume-card {
+  background: #ffffff;
+  border: 1px solid #e5e5ea;
+  border-radius: 18px;
+  padding: 32px 36px;
+  margin: 24px 0;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.resume-card:hover {
+  border-color: #d2d2d7;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.resume-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 32px;
+}
+
+/* Telegram & Apple Fluid Buttons */
+.resume-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  margin: 32px 0 20px;
+}
+
+.resume-actions .el-button + .el-button {
+  margin-left: 0;
+}
+
+/* Primary Button - Pure, confident Apple Solid Obsidian */
+.resume-shell .el-button--primary {
+  background-color: #1d1d1f !important;
+  border-color: #1d1d1f !important;
+  color: #ffffff !important;
+  border-radius: 980px !important;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  padding: 10px 24px;
+  font-size: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.22s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.resume-shell .el-button--primary:hover:not(:disabled) {
+  background-color: #333336 !important;
+  border-color: #333336 !important;
+  transform: scale(1.015);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+}
+
+.resume-shell .el-button--primary:active:not(:disabled) {
+  transform: scale(0.975);
+}
+
+/* Secondary Button - Frosted Apple Neutral Pill */
+.resume-shell .el-button:not(.el-button--primary) {
+  background-color: #f5f5f7 !important;
+  border: 1px solid #e5e5ea !important;
+  color: #1d1d1f !important;
+  border-radius: 980px !important;
+  font-weight: 500;
+  padding: 10px 22px;
+  font-size: 14px;
+  transition: all 0.22s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.resume-shell .el-button:not(.el-button--primary):hover:not(:disabled) {
+  background-color: #e8e8ed !important;
+  border-color: #d2d2d7 !important;
+  color: #000000 !important;
+  transform: scale(1.015);
+}
+
+.resume-shell .el-button:not(.el-button--primary):active:not(:disabled) {
+  transform: scale(0.975);
+}
+
+.resume-shell .el-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Notes & Labels */
+.resume-note {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #86868b;
+  margin: 12px 0;
+}
+
+.resume-filename {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1d1d1f;
+  background: #f5f5f7;
+  padding: 7px 16px;
+  border-radius: 980px;
+  margin: 12px 0;
+  border: 1px solid #e5e5ea;
+}
+
+.resume-meta-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+/* Inputs & Form Elements */
+.resume-shell .el-form-item {
+  margin-bottom: 22px;
+}
+
+.resume-shell .full-row-item {
+  width: 100% !important;
+}
+
+.resume-shell .el-form-item__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1d1d1f;
+  margin-bottom: 6px !important;
+}
+
+.resume-shell .el-input__wrapper,
+.resume-shell .el-textarea__inner {
+  border-radius: 10px !important;
+  background-color: #fbfbfd;
+  box-shadow: 0 0 0 1px #e5e5ea inset !important;
+  transition: all 0.22s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.resume-shell .el-input__wrapper:hover,
+.resume-shell .el-textarea__inner:hover {
+  box-shadow: 0 0 0 1px #d2d2d7 inset !important;
+}
+
+.resume-shell .el-input__wrapper.is-focus,
+.resume-shell .el-textarea__inner:focus {
+  background-color: #ffffff;
+  box-shadow: 0 0 0 1.5px #0071e3 inset, 0 0 0 4px rgba(0, 113, 227, 0.12) !important;
+}
+
+.resume-shell .el-date-editor {
+  width: 100%;
+}
+
+.resume-shell .el-select {
+  width: 100%;
+}
+
+.resume-shell .resume-other {
+  margin-top: 8px;
+}
+
+.resume-file-input {
+  display: none;
+}
+
+/* ==========================================================================
+   试管试剂交汇动画选择器 (Reagent Tube Fluid Selector)
+   全横排铺满、左右黑白试剂交汇、动感液面波纹与偶发气泡
+   ========================================================================== */
+.reagent-tube-wrapper {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.reagent-tube {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  border-radius: 980px;
+  background-color: #1d1d1f;
+  border: 1.5px solid #d2d2d7;
+  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.7), inset 0 -2px 5px rgba(0, 0, 0, 0.15), 0 4px 14px rgba(0, 0, 0, 0.06);
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.reagent-side {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  transition: width 0.45s cubic-bezier(0.25, 1, 0.5, 1), transform 0.15s ease;
+}
+
+.reagent-side:active {
+  transform: scale(0.98);
+}
+
+/* 左侧：白色试剂 "是" */
+.reagent-side.side-yes {
+  width: 50%;
+  background: #ffffff;
+  color: #1d1d1f;
+  padding-left: 20px;
+}
+
+/* 右侧：黑色试剂 "否" */
+.reagent-side.side-no {
+  width: 50%;
+  background: #1d1d1f;
+  color: #ffffff;
+  padding-right: 20px;
+}
+
+.reagent-text {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.reagent-selected-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 980px;
+  font-weight: 500;
+  animation: bdisFadeIn 0.25s ease;
+}
+
+.side-yes .reagent-selected-badge {
+  background: rgba(0, 0, 0, 0.08);
+  color: #1d1d1f;
+}
+
+.side-no .reagent-selected-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* 选中状态下试剂的流动膨胀 */
+.reagent-tube.is-yes .side-yes {
+  width: 62%;
+}
+.reagent-tube.is-yes .side-no {
+  width: 38%;
+}
+
+.reagent-tube.is-no .side-yes {
+  width: 38%;
+}
+.reagent-tube.is-no .side-no {
+  width: 62%;
+}
+
+/* 中间试剂交汇液面 */
+.reagent-meniscus {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 36px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 5;
+  transition: left 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.reagent-tube.is-yes .reagent-meniscus {
+  left: 62%;
+}
+.reagent-tube.is-no .reagent-meniscus {
+  left: 38%;
+}
+
+/* 动态起伏波纹 */
+.meniscus-wave {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 35%, rgba(29, 29, 31, 0.8) 65%, #1d1d1f 100%);
+  filter: blur(2px);
+  animation: waveUndulate 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes waveUndulate {
+  0% {
+    transform: scaleX(0.85) skewX(-4deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scaleX(1.15) skewX(4deg);
+    opacity: 1;
+  }
+}
+
+/* 偶发冒泡特效 */
+.reagent-bubble {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* 白色小泡向右飘入黑色试剂中 */
+.bubble-white-1 {
+  width: 7px;
+  height: 7px;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+  top: 60%;
+  left: 30%;
+  animation: bubbleToRight 3.4s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+.bubble-white-2 {
+  width: 5px;
+  height: 5px;
+  background: #ffffff;
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
+  top: 30%;
+  left: 35%;
+  animation: bubbleToRight 4.6s cubic-bezier(0.25, 1, 0.5, 1) infinite 1.8s;
+}
+
+@keyframes bubbleToRight {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px) scale(0.5);
+  }
+  20% {
+    opacity: 0.95;
+    transform: translate(4px, -1px) scale(1);
+  }
+  75% {
+    opacity: 0.8;
+    transform: translate(18px, -12px) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(25px, -20px) scale(0.3);
+  }
+}
+
+/* 黑色小泡向左飘入白色试剂中 */
+.bubble-black-1 {
+  width: 6px;
+  height: 6px;
+  background: #1d1d1f;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  top: 55%;
+  right: 30%;
+  animation: bubbleToLeft 4s cubic-bezier(0.25, 1, 0.5, 1) infinite 1s;
+}
+
+.bubble-black-2 {
+  width: 8px;
+  height: 8px;
+  background: #1d1d1f;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+  top: 25%;
+  right: 35%;
+  animation: bubbleToLeft 5.2s cubic-bezier(0.25, 1, 0.5, 1) infinite 2.6s;
+}
+
+@keyframes bubbleToLeft {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px) scale(0.5);
+  }
+  25% {
+    opacity: 0.9;
+    transform: translate(-4px, -2px) scale(1);
+  }
+  75% {
+    opacity: 0.75;
+    transform: translate(-16px, -14px) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-24px, -20px) scale(0.3);
+  }
+}
+
+/* Refined Photo Upload Panel */
+.resume-photo-panel {
+  background: #fafafc;
+  border: 1px dashed #d2d2d7;
+  border-radius: 16px;
+  padding: 24px 28px;
+}
+
+.resume-photo-panel h2 {
+  margin-bottom: 8px;
+}
+
+/* Minimalist Tag */
+.resume-shell .el-tag {
+  border-radius: 980px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+/* Alerts */
+.resume-shell .el-alert {
+  border-radius: 12px;
+  margin: 16px 0;
+  background-color: #f5f5f7;
+  border: 1px solid #e5e5ea;
+  color: #1d1d1f;
+}
+
+.resume-shell .el-alert--info {
+  background-color: #f5f5f7;
+  border-color: #e5e5ea;
+}
+
+.resume-shell .el-alert--error {
+  background-color: #fff2f2;
+  border-color: #ffccd0;
+}
+
+/* ==========================================================================
+   Custom Warning Alert Bar (细长红底白框倒计时弹窗)
+   ========================================================================== */
+.custom-warning-toast {
+  position: fixed;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px 12px 18px;
+  background-color: #e53935;
+  border: 1.5px solid #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28), 0 4px 12px rgba(229, 57, 53, 0.4);
+  color: #ffffff;
+  min-width: 340px;
+  max-width: 90vw;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.warning-triangle-icon {
+  font-size: 18px;
+  color: #ffffff;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.warning-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  line-height: 1.4;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  flex: 1;
+  text-align: center;
+}
+
+.warning-close-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 4px;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  border-radius: 4px;
+}
+
+.warning-close-btn:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+/* 框的下边界白线匀速从右到左消失 */
+.warning-progress-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2.5px;
+  background-color: #ffffff;
+  transform-origin: left center;
+  animation: lineDeplete 3s linear forwards;
+}
+
+@keyframes lineDeplete {
+  0% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+  }
+}
+
+.tg-alert-enter-active,
+.tg-alert-leave-active {
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tg-alert-enter-from {
+  opacity: 0;
+  transform: translate(-50%, -24px) scale(0.96);
+}
+
+.tg-alert-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -18px) scale(0.96);
+}
+
+/* ==========================================================================
+   Apple Style Confirm Modal Dialog (Teleported to Body, Zero Scroll Lock Bug)
+   ========================================================================== */
+.apple-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.apple-modal-card {
+  width: 440px;
+  max-width: 100%;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px 32px 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  animation: modalScaleIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.apple-modal-title {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.015em;
+}
+
+.apple-modal-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #6e6e73;
+  margin: 0 0 28px;
+}
+
+.apple-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal-btn {
+  padding: 10px 22px;
+  border-radius: 980px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  border: 1px solid transparent;
+}
+
+.btn-cancel {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border-color: #e5e5ea;
+}
+
+.btn-cancel:hover {
+  background: #e8e8ed;
+  border-color: #d2d2d7;
+}
+
+.btn-confirm {
+  background: #1d1d1f;
+  color: #ffffff;
+}
+
+.btn-confirm:hover:not(:disabled) {
+  background: #333336;
+  transform: scale(1.02);
+}
+
+.btn-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* PDF Preview Document Stage */
+.resume-pdf {
+  margin-top: 24px;
+}
+
+.resume-pdf-pages {
+  max-height: 900px;
+  overflow: auto;
+  padding: 28px 16px;
+  border: 1px solid #e5e5ea;
+  border-radius: 16px;
+  background: #f5f5f7;
+}
+
+.resume-pdf-page {
+  margin: 0 auto 20px;
+  width: fit-content;
+  max-width: 100%;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.04);
+  border-radius: 2px;
+  transition: transform 0.25s ease;
+}
+
+.resume-pdf-page:last-child {
+  margin-bottom: 0;
+}
+
+.resume-pdf-page canvas {
+  display: block;
+  max-width: 100%;
+}
+
+.resume-pdf a {
+  color: #0071e3;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.resume-pdf a:hover {
+  text-decoration: underline;
+}
+
+.resume-empty {
+  padding: 72px 24px;
+  text-align: center;
+}
+
+.resume-empty h1 {
+  font-size: 26px;
+  margin-bottom: 12px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .resume-shell {
+    padding: 24px 16px 48px;
+  }
+  .resume-step-indicator {
+    padding: 4px;
+    gap: 2px;
+  }
+  .step-node {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  .step-sep {
+    display: none;
+  }
+  .resume-card {
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+  .resume-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .resume-actions {
+    gap: 8px;
+  }
+}

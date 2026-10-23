@@ -1,0 +1,16 @@
+{
+  "name": "测试同学",
+  "gender": "男",
+  "ethnicity": "汉族",
+  "college": "测试学院",
+  "studentNo": "000020260001",
+  "birthMonth": "2006-08",
+  "major": "大数据管理与应用",
+  "phone": "13800000000",
+  "specialties": "学习Java，愿意协作。",
+  "gpa": "3.60",
+  "hasCompetitionExperience": false,
+  "intro": "正在学习Spring Boot。\n说明：A&B、<测试>作为普通文字保留。",
+  "awards": "无",
+  "showcase": "课程作品：学生信息管理系统。"
+}
