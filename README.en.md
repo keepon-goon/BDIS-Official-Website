@@ -2,7 +2,7 @@
 
 <img src="bdis-web/src/assets/logo.jpg" alt="BDIS Big Data Intelligence Studio Logo" width="480" />
 
-[简体中文](README.md) | **English**
+[简体中文](README.md) | **English** | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [한국어](README.ko.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
 <p>
   <sub>Developed &amp; Maintained by the <strong>BDIS Engineering Team</strong></sub>

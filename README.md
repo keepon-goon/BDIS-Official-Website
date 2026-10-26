@@ -2,7 +2,7 @@
 
 <img src="bdis-web/src/assets/logo.jpg" alt="BDIS 大数据智能工作室 Logo" width="480" />
 
-**简体中文** | [English](README.en.md)
+**简体中文** | [English](README.en.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [한국어](README.ko.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
 <p>
   <sub>Developed &amp; Maintained by the <strong>BDIS Engineering Team</strong></sub>
