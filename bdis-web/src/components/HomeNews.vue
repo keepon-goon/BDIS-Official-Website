@@ -125,20 +125,47 @@ const goMore = () => router.push('/info/news')
 }
 
 .homeNews-item-more {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   flex: 0 0 55px;
   line-height: 55px;
   width: 100%;
   text-align: center;
   border-top: 1px solid #eee;
-  background-color: #0C3D70;
-  color: #FFFFFF;
+  background-color: rgb(236, 245, 255);
+  color: #000000;
   cursor: pointer;
-  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-.homeNews-item-more:hover {
-  background-color: rgb(236, 245, 255);
-  color: rgb(64, 158, 255);
+.homeNews-item-more::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: #ffffff;
+  pointer-events: none;
+  clip-path: circle(0% at 50% 50%);
+  transition: clip-path 260ms cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .homeNews-item-more:hover::before {
+    clip-path: circle(75% at 50% 50%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+  .homeNews-item-more::before {
+    clip-path: none;
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+
+  .homeNews-item-more:hover::before {
+    clip-path: none;
+    opacity: 1;
+  }
 }
 
 .homeNews-item-box-left {

@@ -31,12 +31,6 @@ axios.interceptors.response.use(
   }
 )
 
-if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCK === 'true') {
-  const { worker } = await import('./mocks/browser')
-  await worker.start()
-  console.log('MSW 已启动')
-}
-
 const app = createApp(App)
 app.use(router)
 app.use(ElementPlus)

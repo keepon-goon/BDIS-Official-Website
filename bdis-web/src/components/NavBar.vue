@@ -27,23 +27,28 @@
       </button>
     </div>
 
-    <div id="site-navigation" class="nav-right" :class="{ 'is-open': mobileMenuOpen }">
-      <nav class="nav-right-top" aria-label="相关链接">
-        <a href="https://www.cqut.edu.cn/" class="nav-utility-link">University</a>
-        <a href="https://cs.cqut.edu.cn/" class="nav-utility-link">School</a>
-        <a href="https://www.tipdm.com/" class="nav-utility-link">Partners</a>
-        <router-link to="/wip" class="nav-utility-link" @click="closeMobileMenu()">Members</router-link>
-        <router-link to="/wip" class="nav-utility-link lang-btn" @click="closeMobileMenu()">EN</router-link>
-        <router-link to="/admin/login" class="nav-utility-link admin-btn" @click="closeMobileMenu()">Admin</router-link>
+    <div
+      id="site-navigation"
+      class="nav-right"
+      :class="{ 'is-open': mobileMenuOpen }"
+      :inert="isMobileViewport && !mobileMenuOpen"
+    >
+      <nav class="nav-right-top" aria-label="相关链接" :style="{ '--menu-offset': mainMenus.length }">
+        <a href="https://www.cqut.edu.cn/" class="nav-utility-link" style="--menu-order: 0">University</a>
+        <a href="https://cs.cqut.edu.cn/" class="nav-utility-link" style="--menu-order: 1">School</a>
+        <a href="https://www.tipdm.com/" class="nav-utility-link" style="--menu-order: 2">Partners</a>
+        <router-link to="/wip" class="nav-utility-link lang-btn" style="--menu-order: 3" @click="closeMobileMenu()">EN</router-link>
+        <router-link to="/admin/login" class="nav-utility-link admin-btn" style="--menu-order: 4" @click="closeMobileMenu()">Admin</router-link>
       </nav>
       <div class="nav-right-foot">
         <nav class="nav-menu-right" aria-label="主导航">
           <router-link
-            v-for="item in mainMenus"
+            v-for="(item, menuIndex) in mainMenus"
             :key="item.index"
             :to="item.path"
             class="nav-menu-link"
             :class="{ 'is-active': activeMain === item.index }"
+            :style="{ '--menu-order': menuIndex }"
             :aria-current="activeMain === item.index ? 'page' : undefined"
             @click="closeMobileMenu()"
           >
@@ -67,6 +72,7 @@ import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
 const mobileMenuOpen = ref(false)
+const isMobileViewport = ref(false)
 const navElement = ref(null)
 const menuToggle = ref(null)
 let mobileViewport
@@ -102,6 +108,7 @@ const handleOutsidePress = (event) => {
 }
 
 const handleViewportChange = () => {
+  isMobileViewport.value = mobileViewport.matches
   closeMobileMenu()
 }
 
@@ -115,6 +122,7 @@ watch(() => route.fullPath, () => closeMobileMenu())
 onMounted(() => {
   // Keep this breakpoint in sync with the responsive styles below.
   mobileViewport = window.matchMedia('(max-width: 1279px)')
+  isMobileViewport.value = mobileViewport.matches
   mobileViewport.addEventListener('change', handleViewportChange)
   document.addEventListener('pointerdown', handleOutsidePress)
 })
@@ -260,6 +268,8 @@ onBeforeUnmount(() => {
 
 @media (max-width: 1279px) {
   .nav {
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
     flex-wrap: wrap;
     gap: 0;
     height: auto;
@@ -298,7 +308,6 @@ onBeforeUnmount(() => {
   }
 
   .nav-right {
-    display: none;
     position: absolute;
     top: calc(100% - 2px);
     right: 16px;
@@ -316,10 +325,45 @@ onBeforeUnmount(() => {
     border-radius: 8px;
     background-color: #fff;
     box-shadow: 0 10px 28px rgba(12, 61, 112, 0.16);
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px) scale(0.97);
+    transform-origin: top right;
+    transition:
+      opacity 160ms var(--ease-out),
+      transform 160ms var(--ease-out),
+      visibility 0s 160ms;
   }
 
   .nav-right.is-open {
-    display: flex;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+    transition-duration: 180ms, 180ms, 0s;
+    transition-delay: 0s;
+  }
+
+  .nav-menu-link,
+  .nav-utility-link {
+    opacity: 0;
+    transform: perspective(500px) translateY(-30%) rotateX(-14deg) scale(0.97);
+    transform-origin: top center;
+    transition:
+      opacity 120ms var(--ease-out),
+      transform 160ms var(--ease-out),
+      background-color 200ms ease;
+  }
+
+  .nav-right.is-open .nav-menu-link,
+  .nav-right.is-open .nav-utility-link {
+    opacity: 1;
+    transform: perspective(500px) translateY(0) rotateX(0) scale(1);
+    transition:
+      opacity 140ms var(--ease-out) calc((var(--menu-offset, 0) + var(--menu-order, 0)) * 30ms),
+      transform 220ms var(--ease-out-back) calc((var(--menu-offset, 0) + var(--menu-order, 0)) * 30ms),
+      background-color 200ms ease;
   }
 
   .nav-right-foot {
@@ -378,6 +422,26 @@ onBeforeUnmount(() => {
 
   .nav-desktop-search {
     display: none;
+  }
+}
+
+@media (max-width: 1279px) and (prefers-reduced-motion: reduce) {
+  .nav-right,
+  .nav-right.is-open {
+    transform: none;
+    transition: opacity 100ms ease, visibility 0s 100ms;
+  }
+
+  .nav-right.is-open {
+    transition-delay: 0s;
+  }
+
+  .nav-menu-link,
+  .nav-utility-link,
+  .nav-right.is-open .nav-menu-link,
+  .nav-right.is-open .nav-utility-link {
+    transform: none;
+    transition: opacity 100ms ease, background-color 200ms ease;
   }
 }
 </style>
