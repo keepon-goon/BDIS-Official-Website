@@ -23,6 +23,7 @@
             <li><router-link to="/info/platform" class="footer-link">创新竞赛</router-link></li>
             <li><router-link to="/info/education" class="footer-link">学习资料</router-link></li>
             <li><router-link to="/info/join" class="footer-link">加入我们</router-link></li>
+            <li><router-link to="/feedback" class="footer-link">匿名信箱</router-link></li>
           </ul>
         </div>
 
@@ -33,7 +34,7 @@
             <el-icon class="contact-icon">
               <Location />
             </el-icon>
-            <span class="contact-text">重庆理工大学 博园4号楼305</span>
+            <span class="contact-text">重庆理工大学 汇智楼502</span>
           </div>
           <div class="contact-item">
             <el-icon class="contact-icon">
@@ -76,7 +77,15 @@
       <div class="footer-bottom">
         <div class="footer-copyright">
           <p>© {{ currentYear }} 大数据智能工作室 (BDIS) 版权所有</p>
-          <a class="footer-beian btn" href="https://beian.miit.gov.cn/#/Integrated/index">苏ICP备2026001180号-1</a>
+          <div class="footer-records">
+            <a class="footer-beian footer-icp" href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="noopener noreferrer">
+              苏ICP备2026001180号-1
+            </a>
+            <a class="footer-beian footer-police" href="https://beian.mps.gov.cn/#/query/webSearch?code=50011202505460" target="_blank" rel="noopener noreferrer">
+              <img class="footer-police-badge" src="https://cos.puidc.com/LightPicture/2023/07/0e0247d5219f4535.png" alt="公安备案图标" referrerpolicy="no-referrer">
+              <span>渝公网安备50011202505460号</span>
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -196,9 +205,36 @@ const currentYear = computed(() => new Date().getFullYear())
   color: #b0c4de;
 }
 
+.footer-records {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
 .footer-beian {
   font-size: 12px;
   color: #9bb3d3;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-beian:hover {
+  color: #ffffff;
+}
+
+.footer-police {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-police-badge {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  flex: 0 0 auto;
 }
 
 /* 响应式设计 */
@@ -221,6 +257,10 @@ const currentYear = computed(() => new Date().getFullYear())
 
   .footer-section {
     text-align: left;
+  }
+
+  .footer-records {
+    align-items: center;
   }
 }
 </style>

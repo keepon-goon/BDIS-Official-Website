@@ -23,7 +23,8 @@ import Footer from '../components/Footer.vue'
 <style scoped>
 .layout {
   min-height: 100vh;
-  min-width: 100vw;
+  width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   background-color: white;

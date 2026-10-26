@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <!-- 状态为“有/小露一手”时：绿色被压缩在最右侧，向右外侧区域自单一破口高速高密喷逸 -->
+    <!-- 状态为“有/小露一手”时：白色被压缩在最右侧，向右外侧区域自单一破口高速高密喷逸 -->
     <div v-if="choice === 'yes'" class="rupture-spray spray-right" aria-hidden="true">
       <div class="rupture-nozzle">
         <div class="rupture-fissure"></div>
@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <!-- 试管主容器（纯净 Apple 灰边框，彻底消除任何蓝色提示框与黑色焦点框） -->
+    <!-- 试管主容器（蓝灰边框，彻底消除任何蓝色提示框与黑色焦点框） -->
     <div
       class="reagent-choice-card"
       :class="{
@@ -29,7 +29,7 @@
     >
       <!-- 底层内容区：选择蓝色时露出无框输入框 -->
       <div class="underlay-content">
-        <!-- 选择蓝色时呈现的纯净输入区域（无内部边框，柔缓渐隐露出，与右侧绿色凹形试剂自然融为一体） -->
+        <!-- 选择蓝色时呈现的纯净输入区域（无内部边框，柔缓渐隐露出，与右侧白色凹形试剂自然融为一体） -->
         <div v-show="choice === 'yes'" class="underlay-input-wrap">
           <el-input
             :id="id"
@@ -46,7 +46,7 @@
           />
         </div>
 
-        <!-- 选择绿色时呈现的纯文本寄语（绿色背景保留不显示白色，无标签，仅保留优雅文字，无任何黑色框） -->
+        <!-- 选择白色时呈现的纯文本寄语（白色背景保留不显示白色，无标签，仅保留优雅文字，无任何黑色框） -->
         <div v-if="choice === 'no'" class="underlay-green-stage">
           <input
             type="hidden"
@@ -94,16 +94,16 @@
           >
             <defs>
               <linearGradient id="softDiffuseBlueGrad" x1="1" y1="0" x2="0" y2="0">
-                <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0" />
-                <stop offset="30%" stop-color="#e0f2fe" stop-opacity="0.35" />
-                <stop offset="60%" stop-color="#e0f2fe" stop-opacity="0.8" />
-                <stop offset="85%" stop-color="#e0f2fe" stop-opacity="0.95" />
-                <stop offset="100%" stop-color="#e0f2fe" stop-opacity="1" />
+                <stop offset="0%" stop-color="#e6f0fa" stop-opacity="0" />
+                <stop offset="30%" stop-color="#e6f0fa" stop-opacity="0.35" />
+                <stop offset="60%" stop-color="#e6f0fa" stop-opacity="0.8" />
+                <stop offset="85%" stop-color="#e6f0fa" stop-opacity="0.95" />
+                <stop offset="100%" stop-color="#e6f0fa" stop-opacity="1" />
               </linearGradient>
               <linearGradient id="ambientBlueRim" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
-                <stop offset="30%" stop-color="#bae6fd" stop-opacity="0.45" />
-                <stop offset="70%" stop-color="#bae6fd" stop-opacity="0.45" />
+                <stop offset="30%" stop-color="#cbdff2" stop-opacity="0.45" />
+                <stop offset="70%" stop-color="#cbdff2" stop-opacity="0.45" />
                 <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
               </linearGradient>
               <filter id="gentleFluidBlurBlue" x="-40%" y="-15%" width="180%" height="130%">
@@ -168,7 +168,7 @@
             <path
               class="seam-path seam-blue"
               :class="{ 'is-hovered': isHoverBlue }"
-              :fill="isHoverBlue ? '#bae6fd' : '#e0f2fe'"
+              :fill="isHoverBlue ? '#cbdff2' : '#e6f0fa'"
               @mouseenter="!choice && (isHoverBlue = true)"
               @mouseleave="!choice && (isHoverBlue = false)"
               @click.stop="onSideClick('yes')"
@@ -188,11 +188,11 @@
               />
             </path>
 
-            <!-- 绿色咬合部：与右侧 side-green 颜色完全一致，从 S 曲线中线延伸至右侧，无任何白色间隔 -->
+            <!-- 白色咬合部：与右侧 side-green 颜色完全一致，从 S 曲线中线延伸至右侧，无任何白色间隔 -->
             <path
               class="seam-path seam-green"
               :class="{ 'is-hovered': isHoverGreen }"
-              :fill="isHoverGreen ? '#bbf7d0' : '#dcfce7'"
+              :fill="isHoverGreen ? '#edf4fb' : '#ffffff'"
               @mouseenter="!choice && (isHoverGreen = true)"
               @mouseleave="!choice && (isHoverGreen = false)"
               @click.stop="onSideClick('no')"
@@ -214,8 +214,8 @@
           </svg>
         </div>
 
-        <!-- 绿色试剂侧 (无 / 不告诉你)：
-             未选择时占 50% 宽，选有(yes)时以 Q 弹果冻动效压缩至最右侧 52px，选无(no)时展开保留绿色背景
+        <!-- 白色试剂侧 (无 / 不告诉你)：
+             未选择时占 50% 宽，选有(yes)时以 Q 弹果冻动效压缩至最右侧 52px，选无(no)时展开保留白色背景
         -->
         <button
           type="button"
@@ -245,16 +245,16 @@
           >
             <defs>
               <linearGradient id="softDiffuseGreenGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="#dcfce7" stop-opacity="0" />
-                <stop offset="30%" stop-color="#dcfce7" stop-opacity="0.22" />
-                <stop offset="60%" stop-color="#dcfce7" stop-opacity="0.6" />
-                <stop offset="85%" stop-color="#dcfce7" stop-opacity="0.9" />
-                <stop offset="100%" stop-color="#dcfce7" stop-opacity="0.98" />
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+                <stop offset="30%" stop-color="#ffffff" stop-opacity="0.22" />
+                <stop offset="60%" stop-color="#ffffff" stop-opacity="0.6" />
+                <stop offset="85%" stop-color="#ffffff" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0.98" />
               </linearGradient>
               <linearGradient id="ambientGreenRim" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
-                <stop offset="30%" stop-color="#bbf7d0" stop-opacity="0.45" />
-                <stop offset="70%" stop-color="#bbf7d0" stop-opacity="0.45" />
+                <stop offset="30%" stop-color="#edf4fb" stop-opacity="0.45" />
+                <stop offset="70%" stop-color="#edf4fb" stop-opacity="0.45" />
                 <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
               </linearGradient>
               <filter id="gentleFluidBlurGreen" x="-40%" y="-15%" width="180%" height="130%">
@@ -374,7 +374,7 @@ function reset() {
   margin-bottom: 8px;
 }
 
-/* 试管主卡片容器：保持沉静内敛的灰白 Apple 边框，彻底杜绝输入框选中时的蓝色外圈与黑框 */
+/* 试管主卡片容器：保持沉静内敛的蓝白边框，彻底杜绝输入框选中时的蓝色外圈与黑框 */
 .reagent-choice-card,
 .reagent-choice-card.state-yes,
 .reagent-choice-card.state-no,
@@ -386,7 +386,7 @@ function reset() {
   border-radius: 14px;
   overflow: hidden;
   background: #ffffff;
-  border: 1.5px solid #d2d2d7 !important;
+  border: 1.5px solid #c7d9eb !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
   outline: none !important;
   user-select: none;
@@ -432,7 +432,7 @@ function reset() {
   font-size: 14px;
   line-height: 1.6;
   padding: 14px 18px;
-  color: #1e293b;
+  color: #23415a;
 }
 
 .chamber-seamless-textarea :deep(textarea:focus),
@@ -448,7 +448,7 @@ function reset() {
   bottom: 8px;
 }
 
-/* 选择绿色时，绿色试剂不消失，背景保持典雅淡绿，中央仅展现高雅纯净文字，无任何黑色边框 */
+/* 选择白色时，白色试剂不消失，背景保持典雅白色，中央仅展现高雅纯净文字，无任何黑色边框 */
 .underlay-green-stage,
 .underlay-green-stage:focus,
 .underlay-green-stage:focus-visible {
@@ -459,7 +459,7 @@ function reset() {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  background: #dcfce7;
+  background: #ffffff;
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
@@ -480,7 +480,7 @@ function reset() {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #15803d;
+  color: #375b7e;
   letter-spacing: 0.8px;
   line-height: 1.5;
   border: none !important;
@@ -553,23 +553,23 @@ function reset() {
   transform: scale(0.975) scaleY(0.96);
 }
 
-/* 蓝色试剂侧（默认 50% 宽，原色 #e0f2fe） */
+/* 蓝色试剂侧（默认 50% 宽，原色 #e6f0fa） */
 .fluid-side.side-blue {
   left: 0;
   width: 50%;
-  background: #e0f2fe;
-  color: #0369a1;
+  background: #e6f0fa;
+  color: #0c3d70;
   pointer-events: auto;
   cursor: pointer;
   z-index: 2;
 }
 
-/* 绿色试剂侧（默认 50% 宽，原色 #dcfce7） */
+/* 白色试剂侧（默认 50% 宽，原色 #ffffff） */
 .fluid-side.side-green {
   right: 0;
   width: 50%;
-  background: #dcfce7;
-  color: #15803d;
+  background: #ffffff;
+  color: #375b7e;
   pointer-events: auto;
   cursor: pointer;
   z-index: 2;
@@ -580,21 +580,21 @@ function reset() {
 .side-blue:hover:not(.is-dissolved):not(.is-compressed),
 .fluid-interaction-layer:has(.side-blue:hover) .side-blue,
 .fluid-interaction-layer:has(.seam-blue:hover) .side-blue {
-  background: #bae6fd;
+  background: #cbdff2;
 }
 
 .side-green.is-hovered,
 .side-green:hover:not(.is-compressed),
 .fluid-interaction-layer:has(.side-green:hover) .side-green,
 .fluid-interaction-layer:has(.seam-green:hover) .side-green {
-  background: #bbf7d0;
+  background: #edf4fb;
 }
 
 /* --------------------------------------------------------------------------
    动态试剂交汇液面 (Reagent Meniscus Tube Interface)
    - 随点击沿管体横向平滑滑动 (0.72s cubic-bezier(0.34, 1.45, 0.45, 1))
    - 在滑动过程中保持全幅高能见度，直至抵达端点后才轻柔消隐交接
-   - 蓝绿两色共用同一条 S 曲线边界，0 间隙，0 白线，悬浮各自全区域完整加深
+   - 蓝白两色共用同一条 S 曲线边界，0 间隙，0 白线，悬浮各自全区域完整加深
    -------------------------------------------------------------------------- */
 .reagent-meniscus-tube {
   position: absolute;
@@ -636,33 +636,33 @@ function reset() {
 }
 
 .seam-blue {
-  fill: #e0f2fe;
+  fill: #e6f0fa;
 }
 
 .seam-blue.is-hovered,
 .seam-blue:hover,
 .fluid-interaction-layer:has(.side-blue:hover) .seam-blue,
 .fluid-interaction-layer:has(.seam-blue:hover) .seam-blue {
-  fill: #bae6fd;
+  fill: #cbdff2;
 }
 
 .seam-green {
-  fill: #dcfce7;
+  fill: #ffffff;
 }
 
 .seam-green.is-hovered,
 .seam-green:hover,
 .fluid-interaction-layer:has(.side-green:hover) .seam-green,
 .fluid-interaction-layer:has(.seam-green:hover) .seam-green {
-  fill: #bbf7d0;
+  fill: #edf4fb;
 }
 
 /* --------------------------------------------------------------------------
    状态分支：
    A. 选择蓝色 (state-yes):
       - 蓝色柔缓淡出消失（透明），平滑自然露出输入框
-      - 绿色体积以 0.72s 慢速 Q 弹超冲曲线向右压缩至 52px，并在触壁时产生弹性果冻微震
-      - 绿色块在滑行收缩全程保持鲜活饱满的绿色流体质感
+      - 白色体积以 0.72s 慢速 Q 弹超冲曲线向右压缩至 52px，并在触壁时产生弹性果冻微震
+      - 白色块在滑行收缩全程保持鲜活饱满的白色流体质感
    -------------------------------------------------------------------------- */
 .reagent-choice-card.state-yes .side-blue {
   width: calc(100% - 52px);
@@ -678,7 +678,7 @@ function reset() {
 
 .reagent-choice-card.state-yes .side-green {
   width: 52px;
-  background: linear-gradient(to right, transparent 0%, #dcfce7 16px) !important;
+  background: linear-gradient(to right, transparent 0%, #ffffff 16px) !important;
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
   cursor: pointer;
@@ -687,7 +687,7 @@ function reset() {
 }
 
 .reagent-choice-card.state-yes .side-green:hover {
-  background: linear-gradient(to right, transparent 0%, #bbf7d0 16px) !important;
+  background: linear-gradient(to right, transparent 0%, #edf4fb 16px) !important;
 }
 
 .reagent-choice-card.state-yes .side-green:hover .concave-liquid-svg {
@@ -703,8 +703,8 @@ function reset() {
 }
 
 /* --------------------------------------------------------------------------
-   B. 选择绿色 (state-no):
-      - 绿色试剂舒缓展开铺满右侧（绿色保留），显示温馨寄语
+   B. 选择白色 (state-no):
+      - 白色试剂舒缓展开铺满右侧（白色保留），显示温馨寄语
       - 蓝色以 0.72s 慢速 Q 弹超冲曲线向左压缩至 52px，并在触壁时产生弹性果冻微震
       - side-green 设为透明以完全透出并突显 underlay-green-stage 中的纯净寄语
    -------------------------------------------------------------------------- */
@@ -722,7 +722,7 @@ function reset() {
 
 .reagent-choice-card.state-no .side-blue {
   width: 52px;
-  background: linear-gradient(to right, #e0f2fe 0%, #e0f2fe 36px, transparent 52px) !important;
+  background: linear-gradient(to right, #e6f0fa 0%, #e6f0fa 36px, transparent 52px) !important;
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
   cursor: pointer;
@@ -731,7 +731,7 @@ function reset() {
 }
 
 .reagent-choice-card.state-no .side-blue:hover {
-  background: linear-gradient(to right, #bae6fd 0%, #bae6fd 36px, transparent 52px) !important;
+  background: linear-gradient(to right, #cbdff2 0%, #cbdff2 36px, transparent 52px) !important;
 }
 
 .reagent-choice-card.state-no .side-blue:hover .concave-liquid-svg {
@@ -848,20 +848,20 @@ function reset() {
 
 .side-blue .label-compressed {
   left: 12px;
-  color: #0369a1;
+  color: #0c3d70;
 }
 
 .side-green .label-compressed {
   right: 12px;
-  color: #15803d;
+  color: #375b7e;
 }
 
 .text-blue {
-  color: #0369a1;
+  color: #0c3d70;
 }
 
 .text-green {
-  color: #15803d;
+  color: #375b7e;
 }
 
 /* ==========================================================================
@@ -916,14 +916,14 @@ function reset() {
 
 .spray-left .rupture-fissure {
   left: -2px;
-  background: linear-gradient(to bottom, transparent, #38bdf8 30%, #ffffff 50%, #0284c7 70%, transparent);
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.95), 0 0 4px #ffffff;
+  background: linear-gradient(to bottom, transparent, #7ca4cb 30%, #ffffff 50%, #215b94 70%, transparent);
+  box-shadow: 0 0 10px rgba(124, 164, 203, 0.95), 0 0 4px #ffffff;
 }
 
 .spray-right .rupture-fissure {
   right: -2px;
-  background: linear-gradient(to bottom, transparent, #4ade80 30%, #ffffff 50%, #16a34a 70%, transparent);
-  box-shadow: 0 0 10px rgba(74, 222, 128, 0.95), 0 0 4px #ffffff;
+  background: linear-gradient(to bottom, transparent, #b9cfe4 30%, #ffffff 50%, #5b83ab 70%, transparent);
+  box-shadow: 0 0 10px rgba(185, 207, 228, 0.95), 0 0 4px #ffffff;
 }
 
 @keyframes fissurePulse {
@@ -1041,37 +1041,37 @@ function reset() {
 }
 
 /* 蓝色气泡喷射群 (32枚气泡全部自单点 (0, 0) 射出，绝无分散漏洞) */
-.spray-left .rb-1  { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #38bdf8; animation: ruptureJetFarLeft 0.85s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.02s; }
+.spray-left .rb-1  { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #7ca4cb; animation: ruptureJetFarLeft 0.85s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.02s; }
 .spray-left .rb-2  { width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #ffffff; animation: ruptureJetHighLeft 0.98s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.06s; }
-.spray-left .rb-3  { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #7dd3fc; animation: ruptureJetLowLeft 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.04s; }
-.spray-left .rb-4  { width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; background: #0284c7; animation: ruptureJetFarLeft 1.15s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.1s; }
+.spray-left .rb-3  { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #b4cfe8; animation: ruptureJetLowLeft 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.04s; }
+.spray-left .rb-4  { width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; background: #215b94; animation: ruptureJetFarLeft 1.15s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.1s; }
 .spray-left .rb-5  { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #ffffff; animation: ruptureJetFastLeft 0.72s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.01s; }
-.spray-left .rb-6  { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; background: #38bdf8; animation: ruptureJetLowLeft 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.12s; }
-.spray-left .rb-7  { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #bae6fd; animation: ruptureJetHighLeft 0.82s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.08s; }
+.spray-left .rb-6  { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; background: #7ca4cb; animation: ruptureJetLowLeft 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.12s; }
+.spray-left .rb-7  { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #cbdff2; animation: ruptureJetHighLeft 0.82s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.08s; }
 .spray-left .rb-8  { width: 12px; height: 12px; margin: -6px 0 0 -6px; background: #ffffff; animation: ruptureJetFarLeft 1.25s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.15s; }
-.spray-left .rb-9  { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #7dd3fc; animation: ruptureJetHighLeft 0.95s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.18s; }
-.spray-left .rb-10 { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: #0ea5e9; animation: ruptureJetLowLeft 1.02s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.2s; }
+.spray-left .rb-9  { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #b4cfe8; animation: ruptureJetHighLeft 0.95s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.18s; }
+.spray-left .rb-10 { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: #3c75ad; animation: ruptureJetLowLeft 1.02s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.2s; }
 .spray-left .rb-11 { width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; background: #ffffff; animation: ruptureJetFastLeft 0.65s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.05s; }
-.spray-left .rb-12 { width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #38bdf8; animation: ruptureJetFarLeft 0.96s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.24s; }
-.spray-left .rb-13 { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #7dd3fc; animation: ruptureJetFastLeft 0.7s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.14s; }
+.spray-left .rb-12 { width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #7ca4cb; animation: ruptureJetFarLeft 0.96s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.24s; }
+.spray-left .rb-13 { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #b4cfe8; animation: ruptureJetFastLeft 0.7s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.14s; }
 .spray-left .rb-14 { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #ffffff; animation: ruptureJetHighLeft 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.28s; }
-.spray-left .rb-15 { width: 10px; height: 10px; margin: -5px 0 0 -5px; background: #0284c7; animation: ruptureJetLowLeft 1.18s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.3s; }
-.spray-left .rb-16 { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #38bdf8; animation: ruptureJetFarLeft 0.88s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.22s; }
-.spray-left .rb-17 { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: #bae6fd; animation: ruptureJetLowLeft 1.08s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.34s; }
+.spray-left .rb-15 { width: 10px; height: 10px; margin: -5px 0 0 -5px; background: #215b94; animation: ruptureJetLowLeft 1.18s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.3s; }
+.spray-left .rb-16 { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #7ca4cb; animation: ruptureJetFarLeft 0.88s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.22s; }
+.spray-left .rb-17 { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: #cbdff2; animation: ruptureJetLowLeft 1.08s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.34s; }
 .spray-left .rb-18 { width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; background: #ffffff; animation: ruptureJetHighLeft 0.76s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.16s; }
-.spray-left .rb-19 { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; background: #0ea5e9; animation: ruptureJetFarLeft 1.12s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.38s; }
-.spray-left .rb-20 { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #7dd3fc; animation: ruptureJetFastLeft 0.68s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.26s; }
+.spray-left .rb-19 { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; background: #3c75ad; animation: ruptureJetFarLeft 1.12s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.38s; }
+.spray-left .rb-20 { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #b4cfe8; animation: ruptureJetFastLeft 0.68s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.26s; }
 .spray-left .rb-21 { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #ffffff; animation: ruptureJetHighLeft 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.42s; }
-.spray-left .rb-22 { width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; background: #38bdf8; animation: ruptureJetFarLeft 1.28s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.46s; }
-.spray-left .rb-23 { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #0284c7; animation: ruptureJetLowLeft 0.98s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.36s; }
+.spray-left .rb-22 { width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; background: #7ca4cb; animation: ruptureJetFarLeft 1.28s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.46s; }
+.spray-left .rb-23 { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #215b94; animation: ruptureJetLowLeft 0.98s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.36s; }
 .spray-left .rb-24 { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #ffffff; animation: ruptureJetFastLeft 0.72s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.32s; }
-.spray-left .rb-25 { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: #7dd3fc; animation: ruptureJetHighLeft 0.95s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.48s; }
-.spray-left .rb-26 { width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #bae6fd; animation: ruptureJetLowLeft 1.1s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.5s; }
+.spray-left .rb-25 { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: #b4cfe8; animation: ruptureJetHighLeft 0.95s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.48s; }
+.spray-left .rb-26 { width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #cbdff2; animation: ruptureJetLowLeft 1.1s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.5s; }
 .spray-left .rb-27 { width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; background: #ffffff; animation: ruptureJetFastLeft 0.62s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.08s; }
-.spray-left .rb-28 { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #0ea5e9; animation: ruptureJetFarLeft 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.4s; }
+.spray-left .rb-28 { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #3c75ad; animation: ruptureJetFarLeft 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.4s; }
 .spray-left .rb-29 { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; background: #ffffff; animation: ruptureJetHighLeft 1.16s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.54s; }
-.spray-left .rb-30 { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #38bdf8; animation: ruptureJetLowLeft 0.86s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.24s; }
-.spray-left .rb-31 { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #7dd3fc; animation: ruptureJetFastLeft 0.75s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.44s; }
+.spray-left .rb-30 { width: 4px; height: 4px; margin: -2px 0 0 -2px; background: #7ca4cb; animation: ruptureJetLowLeft 0.86s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.24s; }
+.spray-left .rb-31 { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #b4cfe8; animation: ruptureJetFastLeft 0.75s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.44s; }
 .spray-left .rb-32 { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: #ffffff; animation: ruptureJetFarLeft 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.56s; }
 
 /* 右侧自单点喷射轨迹 1: 远距水平疾速喷射 */
@@ -1166,38 +1166,38 @@ function reset() {
   }
 }
 
-/* 绿色气泡喷射群 (32枚气泡全部自单点 (0, 0) 射出，绝无分散漏洞) */
-.spray-right .rg-1  { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #4ade80; animation: ruptureJetFarRight 0.85s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.02s; }
+/* 白色气泡喷射群 (32枚气泡全部自单点 (0, 0) 射出，绝无分散漏洞) */
+.spray-right .rg-1  { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #b9cfe4; animation: ruptureJetFarRight 0.85s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.02s; }
 .spray-right .rg-2  { width: 8px; height: 8px; margin: -4px -4px 0 0; background: #ffffff; animation: ruptureJetHighRight 0.98s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.06s; }
-.spray-right .rg-3  { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #86efac; animation: ruptureJetLowRight 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.04s; }
-.spray-right .rg-4  { width: 11px; height: 11px; margin: -5.5px -5.5px 0 0; background: #16a34a; animation: ruptureJetFarRight 1.15s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.1s; }
+.spray-right .rg-3  { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #d9e6f3; animation: ruptureJetLowRight 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.04s; }
+.spray-right .rg-4  { width: 11px; height: 11px; margin: -5.5px -5.5px 0 0; background: #5b83ab; animation: ruptureJetFarRight 1.15s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.1s; }
 .spray-right .rg-5  { width: 6px; height: 6px; margin: -3px -3px 0 0; background: #ffffff; animation: ruptureJetFastRight 0.72s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.01s; }
-.spray-right .rg-6  { width: 9px; height: 9px; margin: -4.5px -4.5px 0 0; background: #4ade80; animation: ruptureJetLowRight 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.12s; }
-.spray-right .rg-7  { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #bbf7d0; animation: ruptureJetHighRight 0.82s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.08s; }
+.spray-right .rg-6  { width: 9px; height: 9px; margin: -4.5px -4.5px 0 0; background: #b9cfe4; animation: ruptureJetLowRight 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.12s; }
+.spray-right .rg-7  { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #edf4fb; animation: ruptureJetHighRight 0.82s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.08s; }
 .spray-right .rg-8  { width: 12px; height: 12px; margin: -6px -6px 0 0; background: #ffffff; animation: ruptureJetFarRight 1.25s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.15s; }
-.spray-right .rg-9  { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #86efac; animation: ruptureJetHighRight 0.95s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.18s; }
-.spray-right .rg-10 { width: 7px; height: 7px; margin: -3.5px -3.5px 0 0; background: #22c55e; animation: ruptureJetLowRight 1.02s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.2s; }
+.spray-right .rg-9  { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #d9e6f3; animation: ruptureJetHighRight 0.95s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.18s; }
+.spray-right .rg-10 { width: 7px; height: 7px; margin: -3.5px -3.5px 0 0; background: #90afcf; animation: ruptureJetLowRight 1.02s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.2s; }
 .spray-right .rg-11 { width: 3px; height: 3px; margin: -1.5px -1.5px 0 0; background: #ffffff; animation: ruptureJetFastRight 0.65s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.05s; }
-.spray-right .rg-12 { width: 8px; height: 8px; margin: -4px -4px 0 0; background: #4ade80; animation: ruptureJetFarRight 0.96s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.24s; }
-.spray-right .rg-13 { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #86efac; animation: ruptureJetFastRight 0.7s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.14s; }
+.spray-right .rg-12 { width: 8px; height: 8px; margin: -4px -4px 0 0; background: #b9cfe4; animation: ruptureJetFarRight 0.96s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.24s; }
+.spray-right .rg-13 { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #d9e6f3; animation: ruptureJetFastRight 0.7s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.14s; }
 .spray-right .rg-14 { width: 6px; height: 6px; margin: -3px -3px 0 0; background: #ffffff; animation: ruptureJetHighRight 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.28s; }
-.spray-right .rg-15 { width: 10px; height: 10px; margin: -5px -5px 0 0; background: #16a34a; animation: ruptureJetLowRight 1.18s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.3s; }
-.spray-right .rg-16 { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #4ade80; animation: ruptureJetFarRight 0.88s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.22s; }
-.spray-right .rg-17 { width: 7px; height: 7px; margin: -3.5px -3.5px 0 0; background: #bbf7d0; animation: ruptureJetLowRight 1.08s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.34s; }
+.spray-right .rg-15 { width: 10px; height: 10px; margin: -5px -5px 0 0; background: #5b83ab; animation: ruptureJetLowRight 1.18s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.3s; }
+.spray-right .rg-16 { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #b9cfe4; animation: ruptureJetFarRight 0.88s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.22s; }
+.spray-right .rg-17 { width: 7px; height: 7px; margin: -3.5px -3.5px 0 0; background: #edf4fb; animation: ruptureJetLowRight 1.08s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.34s; }
 .spray-right .rg-18 { width: 3px; height: 3px; margin: -1.5px -1.5px 0 0; background: #ffffff; animation: ruptureJetHighRight 0.76s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.16s; }
-.spray-right .rg-19 { width: 9px; height: 9px; margin: -4.5px -4.5px 0 0; background: #22c55e; animation: ruptureJetFarRight 1.12s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.38s; }
-.spray-right .rg-20 { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #86efac; animation: ruptureJetFastRight 0.68s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.26s; }
+.spray-right .rg-19 { width: 9px; height: 9px; margin: -4.5px -4.5px 0 0; background: #90afcf; animation: ruptureJetFarRight 1.12s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.38s; }
+.spray-right .rg-20 { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #d9e6f3; animation: ruptureJetFastRight 0.68s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.26s; }
 .spray-right .rg-21 { width: 6px; height: 6px; margin: -3px -3px 0 0; background: #ffffff; animation: ruptureJetHighRight 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.42s; }
-.spray-right .rg-22 { width: 13px; height: 13px; margin: -6.5px -6.5px 0 0; background: #4ade80; animation: ruptureJetFarRight 1.28s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.46s; }
-.spray-right .rg-23 { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #16a34a; animation: ruptureJetLowRight 0.98s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.36s; }
+.spray-right .rg-22 { width: 13px; height: 13px; margin: -6.5px -6.5px 0 0; background: #b9cfe4; animation: ruptureJetFarRight 1.28s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.46s; }
+.spray-right .rg-23 { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #5b83ab; animation: ruptureJetLowRight 0.98s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.36s; }
 .spray-right .rg-24 { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #ffffff; animation: ruptureJetFastRight 0.72s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.32s; }
-.spray-right .rg-25 { width: 7px; height: 7px; margin: -3.5px -3.5px 0 0; background: #86efac; animation: ruptureJetHighRight 0.95s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.48s; }
-.spray-right .rg-26 { width: 8px; height: 8px; margin: -4px -4px 0 0; background: #bbf7d0; animation: ruptureJetLowRight 1.1s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.5s; }
+.spray-right .rg-25 { width: 7px; height: 7px; margin: -3.5px -3.5px 0 0; background: #d9e6f3; animation: ruptureJetHighRight 0.95s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.48s; }
+.spray-right .rg-26 { width: 8px; height: 8px; margin: -4px -4px 0 0; background: #edf4fb; animation: ruptureJetLowRight 1.1s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.5s; }
 .spray-right .rg-27 { width: 3px; height: 3px; margin: -1.5px -1.5px 0 0; background: #ffffff; animation: ruptureJetFastRight 0.62s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.08s; }
-.spray-right .rg-28 { width: 6px; height: 6px; margin: -3px -3px 0 0; background: #22c55e; animation: ruptureJetFarRight 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.4s; }
+.spray-right .rg-28 { width: 6px; height: 6px; margin: -3px -3px 0 0; background: #90afcf; animation: ruptureJetFarRight 0.92s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.4s; }
 .spray-right .rg-29 { width: 9px; height: 9px; margin: -4.5px -4.5px 0 0; background: #ffffff; animation: ruptureJetHighRight 1.16s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.54s; }
-.spray-right .rg-30 { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #4ade80; animation: ruptureJetLowRight 0.86s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.24s; }
-.spray-right .rg-31 { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #86efac; animation: ruptureJetFastRight 0.75s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.44s; }
+.spray-right .rg-30 { width: 4px; height: 4px; margin: -2px -2px 0 0; background: #b9cfe4; animation: ruptureJetLowRight 0.86s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.24s; }
+.spray-right .rg-31 { width: 5px; height: 5px; margin: -2.5px -2.5px 0 0; background: #d9e6f3; animation: ruptureJetFastRight 0.75s cubic-bezier(0.08, 0.85, 0.2, 1) infinite 0.44s; }
 .spray-right .rg-32 { width: 7px; height: 7px; margin: -3.5px -3.5px 0 0; background: #ffffff; animation: ruptureJetFarRight 1.05s cubic-bezier(0.12, 0.8, 0.25, 1) infinite 0.56s; }
 
 .visually-hidden {

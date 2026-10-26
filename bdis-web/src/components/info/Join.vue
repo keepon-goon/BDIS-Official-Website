@@ -106,7 +106,7 @@
             </div>
             <div class="cta-item">
               <span class="cta-label">地点</span>
-              <span class="cta-value">重庆理工大学 博园4号楼305</span>
+              <span class="cta-value">重庆理工大学 汇智楼502</span>
             </div>
           </div>
           <RouterLink class="cta-button" to="/resume/apply">在线填写报名表</RouterLink>

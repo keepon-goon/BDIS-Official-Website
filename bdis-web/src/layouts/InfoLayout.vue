@@ -24,8 +24,9 @@ const route = useRoute()
 
 <style scoped>
 .info-layout {
+  box-sizing: border-box;
   width: 100%;
-  height: 100px;
+  min-height: 155px;
   background-color: #F9F9FA;
   padding: 30px 50px 25px 50px;
 }
@@ -67,5 +68,17 @@ const route = useRoute()
   font-family: 'MiSans';
   font-weight: 600;
   padding-right: 85px;
+}
+
+@media (max-width: 768px) {
+  .info-layout {
+    min-height: 120px;
+    padding: 20px;
+  }
+
+  .name {
+    padding-right: 0;
+    font-size: 26px;
+  }
 }
 </style>

@@ -444,5 +444,11 @@ onMounted(() => {
   .filter-group {
     width: 100%;
   }
+
+  :deep(.el-pagination) {
+    flex-wrap: wrap;
+    gap: 12px 0;
+    max-width: 100%;
+  }
 }
 </style>

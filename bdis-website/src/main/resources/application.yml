@@ -48,6 +48,9 @@ jwt:
   secret: ${BDIS_JWT_SECRET:change-me-before-deploying}
   expiration: ${BDIS_JWT_EXPIRATION:86400000}
 
+feedback:
+  storage-root: ${BDIS_FEEDBACK_STORAGE_ROOT:./private-feedback}
+
 upload:
   path: ${user.dir}/uploads
 

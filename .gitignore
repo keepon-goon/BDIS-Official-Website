@@ -21,6 +21,7 @@ backend/*.pyc/
 backend/venv/
 bdis-website/target/
 **/private-resumes/
+**/private-feedback/
 .local/
 playwright-report/
 test-results/

@@ -34,5 +34,5 @@ INSERT INTO `lab_info` (`id`, `lab_name`, `lab_desc`, `name_en`, `intro_short`, 
 SELECT 1, '大数据智能工作室', '依托大数据管理与应用专业，由泰迪·重理工大数据智能工作室与重庆理工大学创新实验室联合组建',
        'Big Data Intelligence Studio · BDIS',
        '大数据智能工作室（Big Data Intelligence Studio，简称 BDIS）依托大数据管理与应用专业，由重庆理工大学大数据智能工作室与重庆理工大学创新实验室联合组建。工作室聚焦大数据、人工智能、系统开发与模型训练等方向，致力于培养具备工程实践能力与科研创新能力的高水平复合型人才。',
-       '重庆理工大学 博园4号楼305', '18862028557@163.com', '935982021', NULL, NULL
+       '重庆理工大学 汇智楼502', '18862028557@163.com', '935982021', NULL, NULL
 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM `lab_info` WHERE `id` = 1);

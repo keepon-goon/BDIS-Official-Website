@@ -3,7 +3,7 @@
     <ViewOne />
   </section>
 
-  <el-dialog v-model="showNotice" title="首次加载说明" width="480px" :close-on-click-modal="false" align-center>
+  <el-dialog v-model="showNotice" title="首次加载说明" width="min(480px, calc(100% - 32px))" :close-on-click-modal="false" align-center>
     <div class="notice-body">
       <p>受页面资源加载机制影响，首次访问时加载速度可能偏慢，部分图片与交互按钮可能出现响应延迟。您可尝试稍作等待或刷新页面恢复正常使用，我们正在持续推进页面性能优化。感谢您的理解与支持。</p>
     </div>

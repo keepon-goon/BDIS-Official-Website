@@ -53,6 +53,10 @@
           <el-icon><Document /></el-icon>
           <span>简历管理</span>
         </el-menu-item>
+        <el-menu-item index="feedback">
+          <el-icon><ChatDotRound /></el-icon>
+          <span>意见收集</span>
+        </el-menu-item>
       </el-menu>
     </aside>
     <div class="admin-main">
@@ -98,6 +102,7 @@ const activeMenu = computed(() => {
   if (path.includes('/admin/forum-posts')) return 'forum-posts'
   if (path.includes('/admin/lab-info')) return 'lab-info'
   if (path.includes('/admin/resumes')) return 'resumes'
+  if (path.includes('/admin/feedback')) return 'feedback'
   return 'dashboard'
 })
 
@@ -112,7 +117,8 @@ const currentPageTitle = computed(() => {
     resources: '学习资料管理',
     'forum-posts': '竞赛组队管理',
     'lab-info': '站点设置',
-    resumes: '简历管理'
+    resumes: '简历管理',
+    feedback: '意见收集'
   }
   return titles[activeMenu.value] || '控制台'
 })

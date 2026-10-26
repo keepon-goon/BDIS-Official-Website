@@ -11,7 +11,7 @@ export const handlers = [
         name: "大数据智能工作室",
         nameEn: "Big Data Intelligence Studio · BDIS",
         introShort: "依托大数据管理与应用专业，由泰迪·重理工大数据智能工作室与重庆理工大学创新实验室联合组建，聚焦创新创业、系统开发与大模型训练�?,
-        address: "重庆理工大学 博园4号楼305",
+        address: "重庆理工大学 汇智楼502",
         email: "18862028557@163.com",
         qqGroup: "935982021",
         logoUrl: "/static/logo/bdis-logo.png",
