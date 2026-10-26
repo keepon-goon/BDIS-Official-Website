@@ -183,6 +183,7 @@ cd bdis-website
 
 <div align="center">
 
-Big Data Intelligence Studio (BDIS) · 2026
+**Big Data Intelligence Studio (BDIS) © 2026 All Rights Reserved.**  
+Crafted with ❤️ by the BDIS Engineering Team.
 
 </div>
