@@ -1,5 +1,7 @@
 <div align="center">
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+
 <img src="bdis-web/src/assets/logo.jpg" alt="BDIS Logo" width="480" />
 
 [简体中文](README.md) | [English](README.en.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | **Français** | [Deutsch](README.de.md) | [Español](README.es.md) | [한국어](README.ko.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
@@ -75,7 +77,7 @@ Les répertoires privés doivent être accessibles en écriture, sans exposition
 
 ## Licence et contributions
 
-Le dépôt ne contient actuellement aucun fichier LICENSE distinct et ne déclare pas de licence Apache-2.0 ou autre licence open source. Confirmer les autorisations auprès des responsables avant utilisation ou redistribution. Pour contribuer, créer un fork et une branche dédiée, exécuter les tests, puis ouvrir une Pull Request vers main.
+Ce projet est sous [licence MIT](LICENSE). L’utilisation, la modification et la distribution, y compris commerciales, sont autorisées sous réserve du respect des conditions de la licence et de la conservation des mentions de droit d’auteur et d’autorisation. Pour contribuer, créer un fork et une branche dédiée, exécuter les tests, puis ouvrir une Pull Request vers main.
 
 ---
 

@@ -1,5 +1,7 @@
 <div align="center">
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+
 <img src="bdis-web/src/assets/logo.jpg" alt="BDIS 大数据智能工作室 Logo" width="480" />
 
 **简体中文** | [English](README.en.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [한국어](README.ko.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
@@ -178,7 +180,7 @@ cd bdis-website
 
 ## License
 
-当前仓库未提供独立的 `LICENSE` 文件，因此此处不声明 Apache-2.0 或其他开源许可证。使用或分发代码前，请与维护者确认授权范围。
+本项目采用 [MIT 许可证](LICENSE)。允许使用、修改和分发代码，包括商业用途；使用时须遵守许可证条款，保留版权和许可声明。
 
 ---
 

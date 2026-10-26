@@ -1,5 +1,7 @@
 <div align="center">
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+
 <img src="bdis-web/src/assets/logo.jpg" alt="BDIS Logo" width="480" />
 
 [简体中文](README.md) | [English](README.en.md) | **繁體中文** | [日本語](README.ja.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [한국어](README.ko.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
@@ -75,7 +77,7 @@ cd ../bdis-website
 
 ## 授權與貢獻
 
-目前倉庫沒有獨立的 LICENSE 檔案，不聲明 Apache-2.0 或其他開源授權。使用或散布前請向維護者確認授權範圍。貢獻者可先 Fork，建立功能分支，完成測試後向 main 提出 Pull Request。
+本專案採用 [MIT 授權條款](LICENSE)。允許使用、修改及散布，包括商業用途；須遵守授權條款並保留版權與許可聲明。貢獻者可先 Fork，建立功能分支，完成測試後向 main 提出 Pull Request。
 
 ---
 

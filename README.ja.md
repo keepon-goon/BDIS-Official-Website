@@ -1,5 +1,7 @@
 <div align="center">
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+
 <img src="bdis-web/src/assets/logo.jpg" alt="BDIS Logo" width="480" />
 
 [简体中文](README.md) | [English](README.en.md) | [繁體中文](README.zh-TW.md) | **日本語** | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [한국어](README.ko.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
@@ -75,7 +77,7 @@ cd ../bdis-website
 
 ## ライセンスと貢献
 
-現在、独立した LICENSE ファイルはありません。Apache-2.0 などのオープンソースライセンスを宣言していません。利用・再配布の前に管理者へ許諾範囲を確認してください。貢献する場合は Fork と機能ブランチを作成し、テスト後に main 向けの Pull Request を送信できます。
+本プロジェクトは [MIT ライセンス](LICENSE)を採用しています。ライセンス条項に従い、著作権表示と許諾表示を保持することで、商用利用を含む使用、変更、配布が可能です。貢献する場合は Fork と機能ブランチを作成し、テスト後に main 向けの Pull Request を送信できます。
 
 ---
 

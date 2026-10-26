@@ -1,5 +1,7 @@
 <div align="center">
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+
 <img src="bdis-web/src/assets/logo.jpg" alt="BDIS Big Data Intelligence Studio Logo" width="480" />
 
 [简体中文](README.md) | **English** | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [한국어](README.ko.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
@@ -178,7 +180,7 @@ Frontend build: `npm run build`. Backend tests: `./mvnw test`, or `.\mvnw.cmd te
 
 ## License
 
-The repository currently has no standalone `LICENSE` file. This README does not declare Apache-2.0 or any other open-source license. Confirm the scope of authorization with the maintainers before using or distributing the code.
+This project is licensed under the [MIT License](LICENSE). Use, modification, and distribution, including commercial use, are permitted subject to the license terms and preservation of the copyright and permission notices.
 
 ---
 

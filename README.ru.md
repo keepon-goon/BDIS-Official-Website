@@ -1,5 +1,7 @@
 <div align="center">
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+
 <img src="bdis-web/src/assets/logo.jpg" alt="BDIS Logo" width="480" />
 
 [简体中文](README.md) | [English](README.en.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [한국어](README.ko.md) | **Русский** | [Português (Brasil)](README.pt-BR.md)
@@ -75,7 +77,7 @@ cd ../bdis-website
 
 ## Лицензия и участие
 
-В репозитории пока нет отдельного файла LICENSE; Apache-2.0 или другая открытая лицензия не заявлена. Перед использованием или распространением уточнить разрешения у сопровождающих. Для участия создать fork и отдельную ветку, выполнить тесты и открыть Pull Request в main.
+Проект распространяется по [лицензии MIT](LICENSE). Использование, изменение и распространение, включая коммерческие цели, разрешены при соблюдении условий лицензии и сохранении уведомлений об авторских правах и разрешении. Для участия создать fork и отдельную ветку, выполнить тесты и открыть Pull Request в main.
 
 ---
 
