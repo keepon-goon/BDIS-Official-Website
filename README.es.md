@@ -62,7 +62,7 @@ Resultados: `bdis-web/dist/` y `bdis-website/target/bdis-website-0.0.1-SNAPSHOT.
 
 En producción, configurar las credenciales de la base de datos y `BDIS_JWT_SECRET`, y mantener persistentes los directorios `BDIS_FEEDBACK_STORAGE_ROOT` y `BDIS_RESUME_STORAGE_ROOT`.
 
-El módulo de sugerencias no guarda la identidad ni la IP del remitente. Los registros de acceso del servidor dependen de la configuración; no se garantiza la imposibilidad de rastreo. Los directorios privados necesitan permisos de escritura y no deben exponerse como recursos estáticos públicos.
+Los directorios privados necesitan permisos de escritura y no deben exponerse como recursos estáticos públicos.
 
 ## Documentación detallada
 

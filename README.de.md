@@ -62,7 +62,7 @@ Ergebnisse: `bdis-web/dist/` und `bdis-website/target/bdis-website-0.0.1-SNAPSHO
 
 In Produktion Datenbankzugangsdaten und `BDIS_JWT_SECRET` konfigurieren und die Verzeichnisse `BDIS_FEEDBACK_STORAGE_ROOT` sowie `BDIS_RESUME_STORAGE_ROOT` dauerhaft speichern.
 
-Das Feedback-Modul speichert weder die Identität noch die IP-Adresse des Absenders. Server-Zugriffsprotokolle hängen jedoch von der Bereitstellung ab; Unverfolgbarkeit wird nicht zugesichert. Private Verzeichnisse benötigen Schreibrechte und dürfen nicht als öffentliche statische Ressourcen erreichbar sein.
+Private Verzeichnisse benötigen Schreibrechte und dürfen nicht als öffentliche statische Ressourcen erreichbar sein.
 
 ## Weitere Dokumentation
 

@@ -62,7 +62,7 @@ cd ../bdis-website
 
 正式環境須設定資料庫憑證及 `BDIS_JWT_SECRET`，並持久化保存 `BDIS_FEEDBACK_STORAGE_ROOT` 與 `BDIS_RESUME_STORAGE_ROOT` 指定的目錄。
 
-本模組不儲存投遞者身分或 IP，但伺服器存取日誌取決於部署設定，不承諾無法追蹤。私有目錄需要寫入權限，不可設定為公開靜態資源。
+私有目錄需要寫入權限，不可設定為公開靜態資源。
 
 ## 詳細文件
 

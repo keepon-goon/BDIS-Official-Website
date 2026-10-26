@@ -41,7 +41,6 @@ BDIS Official Website is the official portal of Big Data Intelligence Studio. It
   - No login required; members, prospective members, and other visitors can submit feedback.
   - Text, images, or both, with attachments stored in a private directory.
   - Administrator review, category filters, and processing status updates.
-  - The feedback module does not store sender identities or IP addresses. Server access logs depend on deployment settings; untraceability is not guaranteed.
 - **Content management**
   - JWT-based administrator authentication.
   - Management of banners, news, announcements, team members, projects, and resources.

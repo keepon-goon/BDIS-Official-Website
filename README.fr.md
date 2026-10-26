@@ -62,7 +62,7 @@ Résultats : `bdis-web/dist/` et `bdis-website/target/bdis-website-0.0.1-SNAPSHO
 
 En production, configurer les identifiants de la base et `BDIS_JWT_SECRET`, puis assurer la persistance des répertoires `BDIS_FEEDBACK_STORAGE_ROOT` et `BDIS_RESUME_STORAGE_ROOT`.
 
-Le module de suggestions ne conserve ni identité ni adresse IP de l’expéditeur. Les journaux d’accès du serveur dépendent toutefois de la configuration ; l’impossibilité de traçage n’est pas garantie. Les répertoires privés doivent être accessibles en écriture, sans exposition comme ressources statiques publiques.
+Les répertoires privés doivent être accessibles en écriture, sans exposition comme ressources statiques publiques.
 
 ## Documentation détaillée
 

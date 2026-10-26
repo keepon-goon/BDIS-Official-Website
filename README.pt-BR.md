@@ -62,7 +62,7 @@ Resultados: `bdis-web/dist/` e `bdis-website/target/bdis-website-0.0.1-SNAPSHOT.
 
 Em produção, configurar as credenciais do banco e `BDIS_JWT_SECRET`, além de garantir armazenamento persistente para os diretórios `BDIS_FEEDBACK_STORAGE_ROOT` e `BDIS_RESUME_STORAGE_ROOT`.
 
-O módulo de sugestões não armazena a identidade nem o IP do remetente. Porém, os registros de acesso do servidor dependem da configuração; não há garantia de impossibilidade de rastreamento. Os diretórios privados precisam de permissão de escrita e não devem ser expostos como recursos estáticos públicos.
+Os diretórios privados precisam de permissão de escrita e não devem ser expostos como recursos estáticos públicos.
 
 ## Documentação detalhada
 
