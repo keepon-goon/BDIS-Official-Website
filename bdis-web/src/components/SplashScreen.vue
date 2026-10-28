@@ -8,7 +8,7 @@
           <div class="ambient-glow"></div>
         </div>
 
-        <div class="splash-center" @click.stop>
+        <div class="splash-center" :class="{ 'fading-logo': isFadingLogo }" @click.stop>
           <!-- 紧凑比例的 Logo 整体框架（还原 logo.jpg 黄金比例与精致排版） -->
           <div class="logo-composite">
             <!-- 左侧：BDIS 矢量流体丝滑揭示 + 流光扫掠 -->
@@ -49,21 +49,36 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-const emit = defineEmits(['finish'])
+const emit = defineEmits(['enter-home', 'finish'])
 const visible = ref(true)
+const isFadingLogo = ref(false)
 let autoTimer = null
+let stageTimer = null
 
-// 触发离场：将 visible 置为 false，让 Vue 完整执行 1 秒的丝滑淡出过渡动画
+// 触发离场：
+// 1. 先柔和“淡化 BDIS”标识（约 0.75 秒优雅渐隐消退）
+// 2. 紧接着呼出首页大屏的进场动画（各模块一点点浮现出来）
+// 3. 白色画布背景淡出，两层视觉无缝衔接
 const skip = () => {
-  if (!visible.value) return
-  visible.value = false
+  if (isFadingLogo.value && !visible.value) return
   if (autoTimer) {
     clearTimeout(autoTimer)
     autoTimer = null
   }
+  if (stageTimer) {
+    clearTimeout(stageTimer)
+    stageTimer = null
+  }
+
+  isFadingLogo.value = true
+  emit('enter-home')
+
+  // BDIS 开始淡化 360ms 后，白色背景层开始透明溶出，底下首页各模块渐进浮现
+  stageTimer = setTimeout(() => {
+    visible.value = false
+  }, 360)
 }
 
-// 动画彻底播放完毕后再通知外层 unmount，确保退出动画完整呈现
 const onAfterLeave = () => {
   sessionStorage.setItem('bdis_splash_played', '1')
   emit('finish')
@@ -77,15 +92,16 @@ const handleKey = (e) => {
 
 onMounted(() => {
   window.addEventListener('keydown', handleKey)
-  // 整体放慢节奏：约 2.7 秒全部舒缓落定，留出约 1.5 秒从容欣赏期，共 4.2 秒后丝滑溶入首页
+  // 约 2.7 秒全部舒缓落定，留出约 1.3 秒从容欣赏期，共 4.0 秒后自然开启“淡化BDIS -> 显露首页”流程
   autoTimer = setTimeout(() => {
     skip()
-  }, 4200)
+  }, 4000)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKey)
   if (autoTimer) clearTimeout(autoTimer)
+  if (stageTimer) clearTimeout(stageTimer)
 })
 </script>
 
@@ -182,6 +198,17 @@ onBeforeUnmount(() => {
   }
 }
 
+/* BDIS Logo 独立淡化状态：先于背景轻柔消退（淡化BDIS） */
+.splash-center.fading-logo {
+  opacity: 0 !important;
+  transform: translateY(-8px) scale(0.975) !important;
+  filter: blur(6px) !important;
+  transition: 
+    opacity 0.75s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.75s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 0.75s ease !important;
+}
+
 /* 紧凑布局：间距精确还原 logo.jpg 的紧凑亲和感 */
 .logo-composite {
   display: flex;
@@ -229,7 +256,7 @@ onBeforeUnmount(() => {
   }
 }
 
-/* 表层硬件加速流体剪裁注入层（放慢至 1.5 秒，水墨流体感更足） */
+/* 表层硬件加速流体剪裁注入层 */
 .bdis-fluid-reveal {
   position: absolute;
   inset: 0;
@@ -329,7 +356,7 @@ onBeforeUnmount(() => {
   gap: 1px;
 }
 
-/* 英文标题色值 #19375D，字形清晰干练，琴键式平滑滑入（放慢至 1.0 秒） */
+/* 英文标题色值 #19375D，字形清晰干练，琴键式平滑滑入 */
 .en-line-1,
 .en-line-2 {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -351,7 +378,7 @@ onBeforeUnmount(() => {
   animation: cascadeSlide 1.0s 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* 中文标题色值 #19375D，原版字重，从容落定（1.2 秒时长，1.5 秒启动） */
+/* 中文标题色值 #19375D，原版字重，从容落定 */
 .cn-title {
   font-family: "MiSans", "Microsoft YaHei", -apple-system, system-ui, sans-serif;
   font-size: clamp(18px, 2.5vw, 35px);
@@ -378,29 +405,14 @@ onBeforeUnmount(() => {
   }
 }
 
-/* 核心：出首页时的宏大转场动画（整整 1.0 秒高质感平滑溶出） */
+/* 离场淡出动画：背景画布 1.0 秒柔光透明溶出 */
 .splash-fade-leave-active {
   transition: opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
 }
 
-.splash-fade-leave-active .splash-center {
-  transition: 
-    transform 1.0s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 1.0s ease;
-}
-
-/* 背景蒙版柔和透光，将下方的首页内容自然显现出来 */
 .splash-fade-leave-to {
   opacity: 0;
-}
-
-/* Logo 标识伴随微放大、柔光高斯虚化、向上悬浮微移升空溶出，极具视觉仪式感 */
-.splash-fade-leave-to .splash-center {
-  transform: scale(1.08) translateY(-14px);
-  opacity: 0;
-  filter: blur(10px);
 }
 
 /* 移动端精致自适应（保持横向黄金排版，不换行截断） */
