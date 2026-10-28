@@ -63,11 +63,56 @@ onMounted(async () => {
 .home-one-left .banner {
   flex: 1 1 auto;
   min-height: 0;
+  animation: bannerEnter 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .home-one-left .search {
   flex: 0 0 var(--home-search-height);
   min-height: 186px;
+  animation: searchEnter 0.95s 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.home-one-right {
+  animation: newsEnter 0.95s 0.08s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes bannerEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes searchEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes newsEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
 }
 
 @media (max-width: 1180px) {

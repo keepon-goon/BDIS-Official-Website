@@ -11,12 +11,15 @@
     </div>
     <div class="name">{{ route.meta.title }}</div>
   </div>
-  <router-view />
+  <router-view v-slot="{ Component, route: childRoute }">
+    <transition name="page-fade" mode="out-in">
+      <component :is="Component" :key="childRoute.path" />
+    </transition>
+  </router-view>
 </template>
 
 <script setup>
 import { ArrowRightBold } from '@element-plus/icons-vue';
-import router from '../router';
 import { useRoute } from 'vue-router';
 
 const route = useRoute()
@@ -29,6 +32,18 @@ const route = useRoute()
   min-height: 155px;
   background-color: #F9F9FA;
   padding: 30px 50px 25px 50px;
+  animation: infoHeaderIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes infoHeaderIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .way {
@@ -37,7 +52,6 @@ const route = useRoute()
 }
 
 .box {
-  /* width: 56px; */
   height: 17px;
   font-size: 16px;
   color: #ADADAD;

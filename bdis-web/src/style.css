@@ -156,4 +156,76 @@ button:focus-visible {
   .el-message-box {
     width: min(90vw, 420px) !important;
   }
-}
+}
+
+/* ============================================================
+   BDIS 前台全站页面级入场与平滑过渡体系
+   ============================================================ */
+/* 路由页面级平滑过渡 */
+.page-fade-enter-active {
+  transition: 
+    opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.42s ease;
+}
+
+.page-fade-leave-active {
+  transition: opacity 0.2s ease-in;
+}
+
+.page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(16px);
+  filter: blur(4px);
+}
+
+.page-fade-leave-to {
+  opacity: 0;
+}
+
+/* 前台各功能页面加载时轻盈浮现 */
+.home-one,
+.about-page,
+.join-page,
+.news-page,
+.education-page,
+.research,
+.platform,
+.feedback-page,
+.search-page,
+.news-detail,
+.project-detail,
+.forum-detail {
+  animation: pageContentEnter 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pageContentEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+/* 列表卡片依次轻盈微升（项目进展与创新竞赛卡片） */
+.tesearch-items,
+.platform-items {
+  animation: cardItemEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes cardItemEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
