@@ -24,7 +24,7 @@ import SplashScreen from './components/SplashScreen.vue'
 
 const route = useRoute()
 const isStandaloneRoute = computed(() => route.path.startsWith('/admin') || route.path.startsWith('/resume/'))
-const showSplash = ref(true)
+const showSplash = ref(!isStandaloneRoute.value && !sessionStorage.getItem('bdis_splash_played'))
 const isEmerging = ref(false)
 
 const startHomeReveal = () => {

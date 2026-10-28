@@ -217,6 +217,9 @@ const goToFrontend = () => {
 }
 
 onMounted(() => {
+  document.body.classList.remove('el-popup-parent--hidden')
+  document.body.style.overflow = ''
+  document.documentElement.style.overflow = ''
   checkScreen()
   window.addEventListener('resize', checkScreen)
 })
@@ -229,11 +232,12 @@ onBeforeUnmount(() => {
 <style scoped>
 .admin-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   background-color: #f0f2f5;
   position: relative;
   width: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* 侧边栏桌面端 */
@@ -243,6 +247,8 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  overflow: hidden;
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -311,8 +317,11 @@ onBeforeUnmount(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-width: 0;
+  min-height: 0;
   position: relative;
+  overflow: hidden;
 }
 
 .admin-header {
@@ -406,9 +415,27 @@ onBeforeUnmount(() => {
 
 .admin-content {
   flex: 1;
+  min-height: 0;
   padding: 20px;
   overflow-y: auto;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+}
+
+.admin-content::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.admin-content::-webkit-scrollbar-thumb {
+  background: rgba(12, 61, 112, 0.2);
+  border-radius: 4px;
+}
+
+.admin-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(12, 61, 112, 0.4);
 }
 
 /* 移动端侧边抽屉适配 */
@@ -419,6 +446,7 @@ onBeforeUnmount(() => {
     bottom: 0;
     left: 0;
     width: 240px;
+    height: 100%;
     z-index: 2100;
     transform: translateX(-100%);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.25);
@@ -449,6 +477,8 @@ onBeforeUnmount(() => {
 
   .admin-content {
     padding: 10px 8px;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 }
 
@@ -482,7 +512,7 @@ onBeforeUnmount(() => {
     margin-left: 0 !important;
   }
 
-  /* 表格防挤压：卡片内容横向自适应滑动 */
+  /* 表格防挤压：卡片内容横向自适应滑动，且允许手指垂直顺畅滑动屏幕 */
   :deep(.el-card) {
     border-radius: 8px !important;
   }
@@ -490,11 +520,19 @@ onBeforeUnmount(() => {
   :deep(.el-card__body) {
     padding: 10px 8px !important;
     overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y !important;
   }
 
   :deep(.el-table) {
     width: 100% !important;
     font-size: 13px !important;
+    touch-action: pan-x pan-y !important;
+  }
+
+  :deep(.el-table__body-wrapper) {
+    touch-action: pan-x pan-y !important;
+    -webkit-overflow-scrolling: touch;
   }
 
   :deep(.el-table .el-table__cell) {
