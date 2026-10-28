@@ -2,27 +2,35 @@
   <Teleport to="body">
     <transition name="splash-fade">
       <div v-if="visible" class="splash-overlay" @click="skip">
-        <!-- 纯净白底 + 浅蓝工程微网格（1:1 还原 logo.jpg） -->
+        <!-- 纯净白底 + 浅蓝工程微网格（1:1 还原 logo.jpg 背景质感） -->
         <div class="splash-bg">
           <div class="grid-pattern"></div>
+          <div class="ambient-glow"></div>
         </div>
 
         <div class="splash-center" @click.stop>
-          <!-- 紧凑比例的 Logo 整体框架（还原原图 1440x311 黄金比例与紧凑间距） -->
+          <!-- 紧凑比例的 Logo 整体框架（还原 logo.jpg 黄金比例与精致排版） -->
           <div class="logo-composite">
-            <!-- 左侧：BDIS 矢量线条画出与深海蓝注色 -->
+            <!-- 左侧：BDIS 矢量流体丝滑揭示 + 流光扫掠 -->
             <div class="bdis-svg-box">
-              <svg class="bdis-svg" viewBox="0 0 450 190" xmlns="http://www.w3.org/2000/svg">
-                <!-- 第一步：精确深蓝线稿（#19375D），线条更细更锐利 -->
-                <text x="0" y="162" class="bdis-draw-stroke">BDIS</text>
-                <!-- 第二步：原图深海蓝（#19375D）自然注入填色 -->
-                <text x="0" y="162" class="bdis-draw-fill">BDIS</text>
+              <!-- 底层：轻盈科技线稿底衬 -->
+              <svg class="bdis-svg bdis-svg-blueprint" viewBox="0 0 450 190" xmlns="http://www.w3.org/2000/svg">
+                <text x="0" y="162" class="bdis-blueprint-text">BDIS</text>
               </svg>
+
+              <!-- 表层：深海蓝（#19375D）实色层，通过硬件加速 clip-path 丝滑扫出 -->
+              <div class="bdis-fluid-reveal">
+                <svg class="bdis-svg bdis-svg-solid" viewBox="0 0 450 190" xmlns="http://www.w3.org/2000/svg">
+                  <text x="0" y="162" class="bdis-solid-text">BDIS</text>
+                </svg>
+                <!-- 伴随揭示边缘的高级微光 -->
+                <div class="bdis-shimmer-sheen"></div>
+              </div>
             </div>
 
-            <!-- 右侧：文字排版紧贴 BDIS（间距仅 28px，完美消除中间空档） -->
+            <!-- 右侧：文字排版紧贴 BDIS，琴键式瀑布流平滑滑入 -->
             <div class="bdis-text-column">
-              <!-- 右下角原版淡蓝圆弧水印 -->
+              <!-- 右下角原版淡蓝圆弧水印，自然光晕膨胀 -->
               <div class="watermark-arc"></div>
 
               <div class="en-titles">
@@ -60,10 +68,10 @@ const handleKey = (e) => {
 
 onMounted(() => {
   window.addEventListener('keydown', handleKey)
-  // 动画时长增加 20%，约 2.65 秒平滑淡出溶入首页
+  // 留出充裕的黄金驻留时间（约 1.2 秒），让用户从容看清完整 Logo，随后丝滑溶入首页
   autoTimer = setTimeout(() => {
     skip()
-  }, 2640)
+  }, 2950)
 })
 
 onBeforeUnmount(() => {
@@ -85,6 +93,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
   overflow: hidden;
   user-select: none;
+  will-change: opacity, transform, filter;
 }
 
 /* 1:1 还原 logo.jpg 的浅蓝微网格 */
@@ -101,6 +110,43 @@ onBeforeUnmount(() => {
     linear-gradient(rgba(25, 55, 93, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(25, 55, 93, 0.04) 1px, transparent 1px);
   background-size: 32px 32px;
+  animation: gridFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes gridFade {
+  0% {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 核心呼吸环境光 */
+.ambient-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(800px, 90vw);
+  height: min(450px, 60vh);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse, rgba(230, 242, 255, 0.65) 0%, rgba(240, 247, 255, 0.25) 55%, transparent 75%);
+  pointer-events: none;
+  opacity: 0;
+  animation: glowIn 1.5s 0.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes glowIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 .splash-center {
@@ -110,6 +156,19 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   padding: 0 20px;
+  animation: centerIn 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes centerIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* 紧凑布局：间距精确还原 logo.jpg 的紧凑亲和感 */
@@ -121,8 +180,9 @@ onBeforeUnmount(() => {
 
 /* 左侧 BDIS 矢量独立包装 */
 .bdis-svg-box {
+  position: relative;
   flex: 0 0 auto;
-  width: clamp(210px, 30vw, 420px);
+  width: clamp(160px, 28vw, 410px);
 }
 
 .bdis-svg {
@@ -131,50 +191,86 @@ onBeforeUnmount(() => {
   display: block;
 }
 
-/* 字体：更细致优雅的经典无衬线，字重改为 700（精准匹配 logo.jpg 骨架） */
-.bdis-draw-stroke,
-.bdis-draw-fill {
+/* 字体：无衬线字体骨架，字重 700 匹配 logo.jpg */
+.bdis-blueprint-text,
+.bdis-solid-text {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 175px;
   font-weight: 700;
   letter-spacing: 0px;
 }
 
-/* 原图严格采样的深蓝十六进制色值：#19375D，绘制时长增加 20%（1.1s -> 1.32s） */
-.bdis-draw-stroke {
+/* 底层轻量级线稿底衬（科技透气感） */
+.bdis-blueprint-text {
   fill: transparent;
   stroke: #19375D;
-  stroke-width: 1.5px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 850;
-  stroke-dashoffset: 850;
-  animation: drawStroke 1.32s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  stroke-width: 1.2px;
+  opacity: 0.18;
+  animation: blueprintFade 0.6s ease-out forwards;
 }
 
-@keyframes drawStroke {
-  0% {
-    stroke-dashoffset: 850;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-/* 线条闭合后，自然注入纯正的 #19375D 实色深蓝（延后 20%） */
-.bdis-draw-fill {
-  fill: #19375D;
-  stroke: transparent;
-  opacity: 0;
-  animation: fillFadeIn 0.54s 1.1s ease-out forwards;
-}
-
-@keyframes fillFadeIn {
+@keyframes blueprintFade {
   0% {
     opacity: 0;
   }
   100% {
+    opacity: 0.18;
+  }
+}
+
+/* 表层硬件加速流体剪裁注入层 */
+.bdis-fluid-reveal {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  clip-path: inset(0 100% 0 0);
+  animation: fluidReveal 1.05s 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: clip-path;
+}
+
+@keyframes fluidReveal {
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0% 0 0);
+  }
+}
+
+/* 原图深海蓝（#19375D）实色深蓝 */
+.bdis-solid-text {
+  fill: #19375D;
+  stroke: transparent;
+}
+
+/* 伴随揭示边缘的高级高光流扫线 */
+.bdis-shimmer-sheen {
+  position: absolute;
+  top: -15%;
+  bottom: -15%;
+  width: 44px;
+  background: linear-gradient(90deg, transparent 0%, rgba(66, 133, 244, 0.28) 40%, rgba(255, 255, 255, 0.9) 75%, transparent 100%);
+  transform: skewX(-16deg);
+  pointer-events: none;
+  animation: sheenTravel 1.05s 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: left, opacity;
+}
+
+@keyframes sheenTravel {
+  0% {
+    left: -10%;
+    opacity: 0;
+  }
+  18% {
     opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    left: 105%;
+    opacity: 0;
   }
 }
 
@@ -185,7 +281,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: clamp(6px, 1vw, 12px);
+  gap: clamp(5px, 0.9vw, 12px);
   padding-bottom: 4px;
 }
 
@@ -201,12 +297,18 @@ onBeforeUnmount(() => {
   pointer-events: none;
   z-index: -1;
   opacity: 0;
-  animation: arcReveal 0.72s 0.84s ease-out forwards;
+  transform: scale(0.8);
+  animation: arcBloom 1.1s 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes arcReveal {
-  to {
+@keyframes arcBloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
     opacity: 1;
+    transform: scale(1);
   }
 }
 
@@ -216,65 +318,94 @@ onBeforeUnmount(() => {
   gap: 1px;
 }
 
-/* 英文标题色值 #19375D，字形清晰干练 */
+/* 英文标题色值 #19375D，字形清晰干练，琴键式平滑滑入 */
 .en-line-1,
 .en-line-2 {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: clamp(16px, 2.1vw, 29px);
+  font-size: clamp(14px, 2vw, 29px);
   font-weight: 700;
   line-height: 1.2;
   color: #19375D;
   letter-spacing: 0.1px;
   opacity: 0;
-  transform: translateX(-10px);
+  transform: translateX(-18px);
+  will-change: transform, opacity, filter;
 }
 
 .en-line-1 {
-  animation: textSlide 0.54s 1.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: cascadeSlide 0.75s 0.48s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .en-line-2 {
-  animation: textSlide 0.54s 1.27s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: cascadeSlide 0.75s 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* 中文标题色值 #19375D，原版字重 */
+/* 中文标题色值 #19375D，原版字重，丝滑落定 */
 .cn-title {
   font-family: "MiSans", "Microsoft YaHei", -apple-system, system-ui, sans-serif;
-  font-size: clamp(20px, 2.6vw, 35px);
+  font-size: clamp(18px, 2.5vw, 35px);
   font-weight: 850;
   line-height: 1.2;
   color: #19375D;
-  letter-spacing: 1.8px;
+  letter-spacing: 1.6px;
   opacity: 0;
-  transform: translateX(-12px);
-  animation: textSlide 0.6s 1.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform: translateX(-20px);
+  will-change: transform, opacity, filter;
+  animation: cascadeSlide 0.85s 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes textSlide {
-  to {
+@keyframes cascadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(-18px);
+    filter: blur(5px);
+  }
+  100% {
     opacity: 1;
     transform: translateX(0);
+    filter: blur(0px);
   }
 }
 
-/* 离场淡出动画 */
+/* 离场淡出动画：优雅微舒展溶入首页，无塌陷感 */
 .splash-fade-leave-active {
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition: 
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), 
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), 
+    filter 0.7s ease;
 }
 
 .splash-fade-leave-to {
   opacity: 0;
-  transform: scale(0.98);
+  transform: scale(1.025);
+  filter: blur(4px);
 }
 
+/* 移动端精致自适应（保持横向黄金排版，不换行截断） */
 @media (max-width: 600px) {
   .logo-composite {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    gap: clamp(6px, 2.5vw, 12px);
   }
+
   .bdis-svg-box {
-    width: 240px;
+    width: clamp(130px, 38vw, 220px);
+  }
+
+  .en-line-1,
+  .en-line-2 {
+    font-size: clamp(9px, 2.6vw, 15px);
+  }
+
+  .cn-title {
+    font-size: clamp(12px, 3.4vw, 19px);
+    letter-spacing: 0.8px;
+  }
+
+  .watermark-arc {
+    width: 110px;
+    height: 110px;
+    right: -15px;
+    bottom: -20px;
   }
 }
 </style>
