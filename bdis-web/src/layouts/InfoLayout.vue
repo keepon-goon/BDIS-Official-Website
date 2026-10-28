@@ -1,21 +1,21 @@
 <template>
-  <div class="info-layout">
-    <div class="way">
-      <div class="box">首页</div>
-      <div class="box-icon">
-        <el-icon class="icon">
-          <ArrowRightBold />
-        </el-icon>
+  <div class="info-layout-container">
+    <div class="info-layout">
+      <div class="way">
+        <div class="box">首页</div>
+        <div class="box-icon">
+          <el-icon class="icon">
+            <ArrowRightBold />
+          </el-icon>
+        </div>
+        <div class="box">{{ route.meta.title }}</div>
       </div>
-      <div class="box">{{ route.meta.title }}</div>
+      <div class="name">{{ route.meta.title }}</div>
     </div>
-    <div class="name">{{ route.meta.title }}</div>
+    <main class="info-subpage-main">
+      <router-view />
+    </main>
   </div>
-  <router-view v-slot="{ Component, route: childRoute }">
-    <transition name="page-fade" mode="out-in">
-      <component :is="Component" :key="childRoute.path" />
-    </transition>
-  </router-view>
 </template>
 
 <script setup>
@@ -26,6 +26,10 @@ const route = useRoute()
 </script>
 
 <style scoped>
+.info-layout-container {
+  width: 100%;
+}
+
 .info-layout {
   box-sizing: border-box;
   width: 100%;
@@ -44,6 +48,10 @@ const route = useRoute()
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.info-subpage-main {
+  width: 100%;
 }
 
 .way {

@@ -6,19 +6,11 @@
   />
   <div :class="['app-root-view', { 'splash-active': showSplash && !isEmerging }]">
     <template v-if="isStandaloneRoute">
-      <router-view v-slot="{ Component, route: currentRoute }">
-        <transition name="page-fade" mode="out-in">
-          <component :is="Component" :key="currentRoute.path" />
-        </transition>
-      </router-view>
+      <RouterView />
     </template>
     <template v-else>
       <BaseLayout>
-        <router-view v-slot="{ Component, route: currentRoute }">
-          <transition name="page-fade" mode="out-in">
-            <component :is="Component" :key="currentRoute.path" />
-          </transition>
-        </router-view>
+        <RouterView />
       </BaseLayout>
     </template>
   </div>
