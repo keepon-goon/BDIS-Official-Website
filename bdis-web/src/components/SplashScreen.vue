@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <transition name="splash-fade">
+    <transition name="splash-fade" @after-leave="onAfterLeave">
       <div v-if="visible" class="splash-overlay" @click="skip">
         <!-- 纯净白底 + 浅蓝工程微网格（1:1 还原 logo.jpg 背景质感） -->
         <div class="splash-bg">
@@ -53,9 +53,18 @@ const emit = defineEmits(['finish'])
 const visible = ref(true)
 let autoTimer = null
 
+// 触发离场：将 visible 置为 false，让 Vue 完整执行 1 秒的丝滑淡出过渡动画
 const skip = () => {
   if (!visible.value) return
   visible.value = false
+  if (autoTimer) {
+    clearTimeout(autoTimer)
+    autoTimer = null
+  }
+}
+
+// 动画彻底播放完毕后再通知外层 unmount，确保退出动画完整呈现
+const onAfterLeave = () => {
   sessionStorage.setItem('bdis_splash_played', '1')
   emit('finish')
 }
@@ -68,10 +77,10 @@ const handleKey = (e) => {
 
 onMounted(() => {
   window.addEventListener('keydown', handleKey)
-  // 留出充裕的黄金驻留时间（约 1.2 秒），让用户从容看清完整 Logo，随后丝滑溶入首页
+  // 整体放慢节奏：约 2.7 秒全部舒缓落定，留出约 1.5 秒从容欣赏期，共 4.2 秒后丝滑溶入首页
   autoTimer = setTimeout(() => {
     skip()
-  }, 2950)
+  }, 4200)
 })
 
 onBeforeUnmount(() => {
@@ -110,7 +119,7 @@ onBeforeUnmount(() => {
     linear-gradient(rgba(25, 55, 93, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(25, 55, 93, 0.04) 1px, transparent 1px);
   background-size: 32px 32px;
-  animation: gridFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: gridFade 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes gridFade {
@@ -129,13 +138,13 @@ onBeforeUnmount(() => {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(800px, 90vw);
-  height: min(450px, 60vh);
+  width: min(850px, 92vw);
+  height: min(480px, 65vh);
   transform: translate(-50%, -50%);
-  background: radial-gradient(ellipse, rgba(230, 242, 255, 0.65) 0%, rgba(240, 247, 255, 0.25) 55%, transparent 75%);
+  background: radial-gradient(ellipse, rgba(230, 242, 255, 0.7) 0%, rgba(240, 247, 255, 0.28) 55%, transparent 75%);
   pointer-events: none;
   opacity: 0;
-  animation: glowIn 1.5s 0.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: glowIn 2.0s 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes glowIn {
@@ -156,18 +165,20 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   padding: 0 20px;
-  animation: centerIn 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity;
+  animation: centerIn 1.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, filter;
 }
 
 @keyframes centerIn {
   0% {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
+    transform: translateY(10px) scale(0.975);
+    filter: blur(4px);
   }
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
+    filter: blur(0px);
   }
 }
 
@@ -206,7 +217,7 @@ onBeforeUnmount(() => {
   stroke: #19375D;
   stroke-width: 1.2px;
   opacity: 0.18;
-  animation: blueprintFade 0.6s ease-out forwards;
+  animation: blueprintFade 0.9s ease-out forwards;
 }
 
 @keyframes blueprintFade {
@@ -218,14 +229,14 @@ onBeforeUnmount(() => {
   }
 }
 
-/* 表层硬件加速流体剪裁注入层 */
+/* 表层硬件加速流体剪裁注入层（放慢至 1.5 秒，水墨流体感更足） */
 .bdis-fluid-reveal {
   position: absolute;
   inset: 0;
   pointer-events: none;
   overflow: hidden;
   clip-path: inset(0 100% 0 0);
-  animation: fluidReveal 1.05s 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fluidReveal 1.5s 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: clip-path;
 }
 
@@ -249,11 +260,11 @@ onBeforeUnmount(() => {
   position: absolute;
   top: -15%;
   bottom: -15%;
-  width: 44px;
-  background: linear-gradient(90deg, transparent 0%, rgba(66, 133, 244, 0.28) 40%, rgba(255, 255, 255, 0.9) 75%, transparent 100%);
+  width: 48px;
+  background: linear-gradient(90deg, transparent 0%, rgba(66, 133, 244, 0.25) 40%, rgba(255, 255, 255, 0.92) 75%, transparent 100%);
   transform: skewX(-16deg);
   pointer-events: none;
-  animation: sheenTravel 1.05s 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: sheenTravel 1.5s 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: left, opacity;
 }
 
@@ -262,10 +273,10 @@ onBeforeUnmount(() => {
     left: -10%;
     opacity: 0;
   }
-  18% {
+  16% {
     opacity: 1;
   }
-  82% {
+  84% {
     opacity: 1;
   }
   100% {
@@ -285,7 +296,7 @@ onBeforeUnmount(() => {
   padding-bottom: 4px;
 }
 
-/* 原图右下角淡蓝圆弧水印（精确色值与透射） */
+/* 原图右下角淡蓝圆弧水印（精确色值与透射，放慢舒缓展开） */
 .watermark-arc {
   position: absolute;
   right: -30px;
@@ -298,7 +309,7 @@ onBeforeUnmount(() => {
   z-index: -1;
   opacity: 0;
   transform: scale(0.8);
-  animation: arcBloom 1.1s 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: arcBloom 1.6s 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes arcBloom {
@@ -318,7 +329,7 @@ onBeforeUnmount(() => {
   gap: 1px;
 }
 
-/* 英文标题色值 #19375D，字形清晰干练，琴键式平滑滑入 */
+/* 英文标题色值 #19375D，字形清晰干练，琴键式平滑滑入（放慢至 1.0 秒） */
 .en-line-1,
 .en-line-2 {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -328,19 +339,19 @@ onBeforeUnmount(() => {
   color: #19375D;
   letter-spacing: 0.1px;
   opacity: 0;
-  transform: translateX(-18px);
+  transform: translateX(-22px);
   will-change: transform, opacity, filter;
 }
 
 .en-line-1 {
-  animation: cascadeSlide 0.75s 0.48s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: cascadeSlide 1.0s 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .en-line-2 {
-  animation: cascadeSlide 0.75s 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: cascadeSlide 1.0s 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* 中文标题色值 #19375D，原版字重，丝滑落定 */
+/* 中文标题色值 #19375D，原版字重，从容落定（1.2 秒时长，1.5 秒启动） */
 .cn-title {
   font-family: "MiSans", "Microsoft YaHei", -apple-system, system-ui, sans-serif;
   font-size: clamp(18px, 2.5vw, 35px);
@@ -349,16 +360,16 @@ onBeforeUnmount(() => {
   color: #19375D;
   letter-spacing: 1.6px;
   opacity: 0;
-  transform: translateX(-20px);
+  transform: translateX(-24px);
   will-change: transform, opacity, filter;
-  animation: cascadeSlide 0.85s 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: cascadeSlide 1.2s 1.50s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes cascadeSlide {
   0% {
     opacity: 0;
-    transform: translateX(-18px);
-    filter: blur(5px);
+    transform: translateX(-22px);
+    filter: blur(6px);
   }
   100% {
     opacity: 1;
@@ -367,18 +378,29 @@ onBeforeUnmount(() => {
   }
 }
 
-/* 离场淡出动画：优雅微舒展溶入首页，无塌陷感 */
+/* 核心：出首页时的宏大转场动画（整整 1.0 秒高质感平滑溶出） */
 .splash-fade-leave-active {
-  transition: 
-    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), 
-    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), 
-    filter 0.7s ease;
+  transition: opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
 }
 
+.splash-fade-leave-active .splash-center {
+  transition: 
+    transform 1.0s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 1.0s ease;
+}
+
+/* 背景蒙版柔和透光，将下方的首页内容自然显现出来 */
 .splash-fade-leave-to {
   opacity: 0;
-  transform: scale(1.025);
-  filter: blur(4px);
+}
+
+/* Logo 标识伴随微放大、柔光高斯虚化、向上悬浮微移升空溶出，极具视觉仪式感 */
+.splash-fade-leave-to .splash-center {
+  transform: scale(1.08) translateY(-14px);
+  opacity: 0;
+  filter: blur(10px);
 }
 
 /* 移动端精致自适应（保持横向黄金排版，不换行截断） */
