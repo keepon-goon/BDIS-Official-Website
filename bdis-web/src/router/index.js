@@ -1,6 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import UnderConstruction from '../components/UnderConstruction.vue'
+import InfoLayout from '../layouts/InfoLayout.vue'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+
+NProgress.configure({ showSpinner: false, speed: 300 })
 
 const routes = [
   { path: '/feedback', name: 'feedback', component: () => import('@/views/FeedbackView.vue'), meta: { tab: 'feedback', title: '匿名信箱' } },
@@ -24,7 +29,7 @@ const routes = [
   },
   {
     path: '/info',
-    component: () => import('@/layouts/InfoLayout.vue'),
+    component: InfoLayout,
     redirect: '/wip',
     children: [
       { path: 'about', component: () => import('@/components/info/About.vue'), meta: { tab: 'about', title: '关于我们' } },
@@ -74,6 +79,9 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  if (to.path !== from.path) {
+    NProgress.start()
+  }
   if (to.matched.some(record => record.meta.requiresAuth)) {
     const token = localStorage.getItem('adminToken')
     if (!token) {
@@ -84,6 +92,14 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
+})
+
+router.afterEach(() => {
+  NProgress.done()
+})
+
+router.onError(() => {
+  NProgress.done()
 })
 
 export default router

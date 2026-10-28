@@ -3,6 +3,9 @@
 node_modules/
 dist/
 *.log
+*.zip
+deploy-ready/
+release-*/
 
 # 前端（Vite / Vue）
 bdis-web/node_modules/

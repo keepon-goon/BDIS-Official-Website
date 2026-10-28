@@ -90,3 +90,14 @@ button:focus-visible {
     color: #747bff;
   }
 }
+
+/* BDIS NProgress 顶部细线进度条 */
+#nprogress .bar {
+  background: #0C3D70 !important;
+  height: 3px !important;
+  z-index: 99999 !important;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px #0C3D70, 0 0 5px #1a5a8e !important;
+}

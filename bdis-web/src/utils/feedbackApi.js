@@ -1,10 +1,11 @@
 import axios from 'axios'
 
 export const feedbackCategories = [
-  { value: 'suggestion', label: '工作室与网站' },
-  { value: 'equipment', label: '设备问题' },
-  { value: 'activity', label: '活动建议' },
-  { value: 'other', label: '其他想法' }
+  { value: 'join', label: '了解与加入' },
+  { value: 'website', label: '网站与体验' },
+  { value: 'equipment', label: '设备与环境' },
+  { value: 'operation', label: '运转与制度' },
+  { value: 'other', label: '探索与杂谈' }
 ]
 
 export const feedbackStatuses = [

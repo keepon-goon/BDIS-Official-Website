@@ -50,6 +50,9 @@
             :class="{ 'is-active': activeMain === item.index }"
             :style="{ '--menu-order': menuIndex }"
             :aria-current="activeMain === item.index ? 'page' : undefined"
+            @mouseenter="prefetchRoute(item.index)"
+            @focus="prefetchRoute(item.index)"
+            @touchstart.passive="prefetchRoute(item.index)"
             @click="closeMobileMenu()"
           >
             {{ item.label }}
@@ -76,6 +79,33 @@ const isMobileViewport = ref(false)
 const navElement = ref(null)
 const menuToggle = ref(null)
 let mobileViewport
+
+const prefetchMap = {
+  about: () => import('@/components/info/About.vue'),
+  research: () => import('@/components/info/Research.vue'),
+  platform: () => import('@/components/info/Platform.vue'),
+  news: () => import('@/components/info/News.vue'),
+  education: () => import('@/components/info/Education.vue'),
+  join: () => import('@/components/info/Join.vue'),
+  feedback: () => import('@/views/FeedbackView.vue'),
+}
+
+const prefetched = new Set()
+const prefetchRoute = (key) => {
+  if (key && prefetchMap[key] && !prefetched.has(key)) {
+    prefetched.add(key)
+    prefetchMap[key]().catch(() => {})
+  }
+}
+
+watch(mobileMenuOpen, (isOpen) => {
+  if (isOpen) {
+    const prefetchIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 100))
+    prefetchIdle(() => {
+      Object.keys(prefetchMap).forEach(key => prefetchRoute(key))
+    })
+  }
+})
 
 const mainMenus = [
   { index: 'home', label: '首页', path: "/" },
