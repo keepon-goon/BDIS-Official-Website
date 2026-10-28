@@ -36,7 +36,7 @@ spring:
       mail.smtp.writetimeout: 10000
 
 mail:
-  recipient: ${BDIS_MAIL_RECIPIENT:${BDIS_MAIL_USERNAME:}}
+  recipient: ${BDIS_MAIL_RECIPIENT:18862028557@163.com}
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -50,6 +50,7 @@ jwt:
 
 feedback:
   storage-root: ${BDIS_FEEDBACK_STORAGE_ROOT:./private-feedback}
+  recipient: ${BDIS_FEEDBACK_RECIPIENT:18862028557@163.com}
 
 upload:
   path: ${user.dir}/uploads

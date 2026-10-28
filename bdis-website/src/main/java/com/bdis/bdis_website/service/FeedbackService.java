@@ -41,23 +41,29 @@ import java.util.stream.Collectors;
 public class FeedbackService {
     public static final int MAX_IMAGES = 6;
     public static final long MAX_IMAGE_BYTES = 5L * 1024 * 1024;
-    public static final Set<String> CATEGORIES = Set.of("suggestion", "equipment", "activity", "other");
+    public static final Set<String> CATEGORIES = Set.of(
+            "join", "website", "equipment", "operation", "other",
+            "suggestion", "activity"
+    );
     public static final Set<String> STATUSES = Set.of("UNREAD", "PROCESSING", "RESOLVED");
     private static final Logger log = LoggerFactory.getLogger(FeedbackService.class);
     private final FeedbackSubmissionMapper submissions;
     private final FeedbackImageMapper images;
     private final TransactionTemplate transactions;
     private final Clock clock;
+    private final FeedbackMailService mailService;
     private final Path root;
     private final Semaphore imageSlots = new Semaphore(2);
 
     public FeedbackService(FeedbackSubmissionMapper submissions, FeedbackImageMapper images,
                            PlatformTransactionManager transactionManager, Clock clock,
+                           FeedbackMailService mailService,
                            @Value("${feedback.storage-root:./private-feedback}") String storageRoot) {
         this.submissions = submissions;
         this.images = images;
         this.transactions = new TransactionTemplate(transactionManager);
         this.clock = clock;
+        this.mailService = mailService;
         this.root = Path.of(storageRoot).toAbsolutePath().normalize();
     }
 
@@ -102,6 +108,7 @@ public class FeedbackService {
                 submissions.insert(submission);
                 attachments.forEach(images::insert);
             });
+            mailService.sendNotification(submission, attachments, root);
         } catch (IOException e) {
             cleanup(written);
             throw new FeedbackException(500, "图片保存失败，请稍后重试");
