@@ -34,8 +34,11 @@ async function request(config) {
 
 export const feedbackApi = {
   submit: data => request({ method: 'post', url: '/api/feedback', data }),
+  qa: (params, signal) => request({ url: '/api/feedback/qa', params, signal }),
   list: (params, signal) => request({ url: '/api/admin/feedback', params, signal }),
   detail: (id, signal) => request({ url: `/api/admin/feedback/${encodeURIComponent(id)}`, signal }),
   status: (id, status) => request({ method: 'put', url: `/api/admin/feedback/${encodeURIComponent(id)}/status`, data: { status } }),
+  reply: (id, data) => request({ method: 'put', url: `/api/admin/feedback/${encodeURIComponent(id)}/reply`, data }),
+  emailReply: id => request({ method: 'post', url: `/api/admin/feedback/${encodeURIComponent(id)}/reply/email` }),
   image: (url, signal) => request({ url, responseType: 'blob', signal })
 }

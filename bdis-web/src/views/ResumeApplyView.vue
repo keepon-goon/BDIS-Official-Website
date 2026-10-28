@@ -64,46 +64,7 @@
 
         <!-- 试管试剂交汇动画选择器：整行横排占满、左白右黑动态交汇偶发冒泡 -->
         <el-form-item label="是否参加过大数据、计算机相关比赛" prop="hasCompetitionExperience" class="full-row-item">
-          <div class="reagent-tube-wrapper">
-            <div
-              class="reagent-tube"
-              :class="{
-                'is-yes': form.hasCompetitionExperience === true,
-                'is-no': form.hasCompetitionExperience === false
-              }"
-            >
-              <!-- 左侧：白色试剂 "是" (白底黑字) -->
-              <button
-                type="button"
-                class="reagent-side side-yes"
-                title="选择：是"
-                @click="selectCompetition(true)"
-              >
-                <span class="reagent-text">是</span>
-                <span v-if="form.hasCompetitionExperience === true" class="reagent-selected-badge">✓ 已选</span>
-              </button>
-
-              <!-- 中间试剂交汇动态液面与偶发气泡 -->
-              <div class="reagent-meniscus">
-                <div class="meniscus-wave"></div>
-                <div class="reagent-bubble bubble-white-1"></div>
-                <div class="reagent-bubble bubble-white-2"></div>
-                <div class="reagent-bubble bubble-black-1"></div>
-                <div class="reagent-bubble bubble-black-2"></div>
-              </div>
-
-              <!-- 右侧：黑色试剂 "否" (黑底白字) -->
-              <button
-                type="button"
-                class="reagent-side side-no"
-                title="选择：否"
-                @click="selectCompetition(false)"
-              >
-                <span class="reagent-text">否</span>
-                <span v-if="form.hasCompetitionExperience === false" class="reagent-selected-badge">✓ 已选</span>
-              </button>
-            </div>
-          </div>
+          <ReagentToggle :model-value="form.hasCompetitionExperience" label="是否参加过大数据、计算机相关比赛" :disabled="busy" @update:model-value="selectCompetition" />
         </el-form-item>
       </div>
 
@@ -139,6 +100,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { WarningFilled, Close } from '@element-plus/icons-vue'
 import ResumeChoiceTextarea from '../components/resume/ResumeChoiceTextarea.vue'
+import ReagentToggle from '../components/ReagentToggle.vue'
 import resumeOptions from '../data/resumeOptions.json'
 import { resumePhonePattern, resumePhoneMessage } from '../utils/resumeValidation'
 import { resumeDraft, setResumePreview } from '../utils/resumeDraft'

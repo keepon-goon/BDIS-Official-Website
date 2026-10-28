@@ -26,5 +26,7 @@ bdis-website/target/
 **/private-resumes/
 **/private-feedback/
 .local/
+/config/application.properties
+/out/
 playwright-report/
 test-results/

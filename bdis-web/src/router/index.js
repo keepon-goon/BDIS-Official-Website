@@ -9,6 +9,7 @@ NProgress.configure({ showSpinner: false, speed: 300 })
 
 const routes = [
   { path: '/feedback', name: 'feedback', component: () => import('@/views/FeedbackView.vue'), meta: { tab: 'feedback', title: '匿名信箱' } },
+  { path: '/feedback/qa', name: 'feedback-qa', component: () => import('@/views/FeedbackQaView.vue'), meta: { tab: 'feedback', title: '实验室 Q&A' } },
   { path: '/resume/apply', component: () => import('@/views/ResumeApplyView.vue') },
   { path: '/resume/preview', component: () => import('@/views/ResumePreviewView.vue') },
   { path: '/resume/upload', component: () => import('@/views/ResumeUploadView.vue') },
@@ -74,6 +75,7 @@ const router = createRouter({
   routes,
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition
+    if (to.hash) return { el: to.hash, top: 100 }
     return { top: 0, left: 0 }
   }
 })

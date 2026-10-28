@@ -1,5 +1,5 @@
 <template>
-  <div class="reagent-choice-wrapper" :data-choice="choice || 'pending'">
+  <div ref="wrapper" class="reagent-choice-wrapper" :data-choice="choice || 'pending'">
     <!-- 破裂外喷气泡群（所有的气泡均从单一破口高压高速喷涌，绝无多个漏洞） -->
     <!-- 状态为“无/不告诉你”时：蓝色被压缩在最左侧，向左外侧区域自单一破口高速高密喷逸 -->
     <div v-if="choice === 'no'" class="rupture-spray spray-left" aria-hidden="true">
@@ -31,6 +31,7 @@
       <div class="underlay-content">
         <!-- 选择蓝色时呈现的纯净输入区域（无内部边框，柔缓渐隐露出，与右侧白色凹形试剂自然融为一体） -->
         <div v-show="choice === 'yes'" class="underlay-input-wrap">
+          <slot>
           <el-input
             :id="id"
             ref="input"
@@ -44,6 +45,7 @@
             class="chamber-seamless-textarea"
             @update:model-value="emit('update:modelValue', $event)"
           />
+          </slot>
         </div>
 
         <!-- 选择白色时呈现的纯文本寄语（白色背景保留不显示白色，无标签，仅保留优雅文字，无任何黑色框） -->
@@ -54,7 +56,9 @@
             :value="modelValue"
           />
           <div class="pure-statement-container">
+            <slot name="declined">
             <p class="pure-statement-text">{{ declinedText }}</p>
+            </slot>
           </div>
         </div>
       </div>
@@ -77,6 +81,9 @@
           }"
           :title="choice === 'no' ? `点击切换为：${yesLabel}` : ''"
           :disabled="disabled"
+          :aria-label="yesLabel"
+          :aria-pressed="choice === 'yes'"
+          :tabindex="choice === 'yes' ? -1 : 0"
           @mouseenter="!choice && (isHoverBlue = true)"
           @mouseleave="!choice && (isHoverBlue = false)"
           @click="onSideClick('yes')"
@@ -228,6 +235,9 @@
           }"
           :title="choice === 'yes' ? `点击切换为：${noLabel}` : ''"
           :disabled="disabled"
+          :aria-label="noLabel"
+          :aria-pressed="choice === 'no'"
+          :tabindex="choice === 'no' ? -1 : 0"
           @mouseenter="!choice && (isHoverGreen = true)"
           @mouseleave="!choice && (isHoverGreen = false)"
           @click="onSideClick('no')"
@@ -302,7 +312,7 @@
               />
             </path>
           </svg>
-          <span v-if="choice === 'yes'" class="fluid-label label-compressed text-green">{{ noLabel }}</span>
+          <span v-if="choice === 'yes'" class="fluid-label label-compressed text-green">{{ compactNoLabel || noLabel }}</span>
         </button>
       </div>
 
@@ -311,6 +321,7 @@
         type="button"
         class="resume-choice-reset visually-hidden"
         aria-hidden="true"
+        tabindex="-1"
         :disabled="disabled"
         @click="reset"
       >
@@ -329,6 +340,7 @@ const props = defineProps({
   choice: String,
   yesLabel: String,
   noLabel: String,
+  compactNoLabel: String,
   placeholder: String,
   declinedText: String,
   negativeValue: { type: String, default: '' },
@@ -338,6 +350,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'update:choice'])
 
 const input = ref()
+const wrapper = ref()
 const isHoverBlue = ref(false)
 const isHoverGreen = ref(false)
 
@@ -351,7 +364,8 @@ async function onSideClick(side) {
       emit('update:modelValue', '')
     }
     await nextTick()
-    input.value?.focus()
+    if (input.value) input.value.focus()
+    else wrapper.value?.querySelector('[data-choice-input]')?.focus()
   } else {
     emit('update:choice', 'no')
     emit('update:modelValue', props.negativeValue)

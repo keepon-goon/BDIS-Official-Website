@@ -1,0 +1,9 @@
+ALTER TABLE feedback_submission
+    ADD COLUMN reply_requested BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN public_reply BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN display_name VARCHAR(40) NOT NULL DEFAULT '匿名',
+    ADD COLUMN reply_email VARCHAR(254) NOT NULL DEFAULT '',
+    ADD COLUMN reply_content TEXT,
+    ADD COLUMN published BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN replied_at DATETIME,
+    ADD COLUMN reply_emailed_at DATETIME;

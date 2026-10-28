@@ -10,6 +10,8 @@ import com.bdis.bdis_website.mapper.FeedbackImageMapper;
 import com.bdis.bdis_website.mapper.FeedbackSubmissionMapper;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.exif.ExifIFD0Directory;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,7 +69,8 @@ public class FeedbackService {
         this.root = Path.of(storageRoot).toAbsolutePath().normalize();
     }
 
-    public void submit(String category, String content, List<MultipartFile> files) {
+    public void submit(String category, String content, List<MultipartFile> files,
+                       boolean replyRequested, boolean publicReply, String displayName, String replyEmail) {
         String text = content == null ? "" : content.replace("\r\n", "\n").replace('\r', '\n').strip();
         String selectedCategory = category == null || category.isBlank() ? "other" : category;
         List<MultipartFile> uploads = files == null ? List.of() : files;
@@ -75,6 +78,23 @@ public class FeedbackService {
         if (text.length() > 3000) throw new FeedbackException(400, "意见内容不能超过3000字");
         if (uploads.size() > MAX_IMAGES) throw new FeedbackException(400, "每次最多上传6张图片");
         if (text.isBlank() && uploads.isEmpty()) throw new FeedbackException(400, "请填写意见或添加至少一张图片");
+        String name = "匿名";
+        String email = "";
+        if (replyRequested && publicReply) {
+            name = displayName == null || displayName.isBlank() ? "匿名" : displayName.strip();
+            if (name.length() > 40) throw new FeedbackException(400, "称呼不能超过40字");
+        } else if (replyRequested) {
+            email = replyEmail == null ? "" : replyEmail.strip();
+            if (email.length() > 254 || !email.matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+"))
+                throw new FeedbackException(400, "请填写有效的回信邮箱");
+            try {
+                InternetAddress address = new InternetAddress(email, true);
+                address.validate();
+                if (address.getPersonal() != null || address.isGroup()) throw new AddressException();
+            } catch (AddressException e) {
+                throw new FeedbackException(400, "请填写有效的回信邮箱");
+            }
+        }
         for (MultipartFile file : uploads) {
             if (file == null || file.isEmpty()) throw new FeedbackException(400, "图片为空，请重新选择");
             if (file.getSize() > MAX_IMAGE_BYTES) throw new FeedbackException(413, "每张图片不能超过5MB");
@@ -88,6 +108,11 @@ public class FeedbackService {
             submission.setCategory(selectedCategory);
             submission.setContent(text);
             submission.setStatus("UNREAD");
+            submission.setReplyRequested(replyRequested);
+            submission.setPublicReply(replyRequested && publicReply);
+            submission.setDisplayName(name);
+            submission.setReplyEmail(email);
+            submission.setPublished(false);
             submission.setCreatedAt(LocalDateTime.now(clock));
             submission.setUpdatedAt(submission.getCreatedAt());
             List<FeedbackImage> attachments = new ArrayList<>();
@@ -164,6 +189,49 @@ public class FeedbackService {
         if (updated == 0) throw new FeedbackException(404, "这条意见不存在");
     }
 
+    public void saveReply(String id, String replyContent, boolean published) {
+        FeedbackSubmission item = submissions.selectById(id);
+        if (item == null) throw new FeedbackException(404, "这条意见不存在");
+        if (!Boolean.TRUE.equals(item.getReplyRequested())) throw new FeedbackException(400, "投稿人未选择接收回复");
+        if (published && !Boolean.TRUE.equals(item.getPublicReply())) throw new FeedbackException(400, "投稿人未同意公开，不能公开这条问答");
+        String answer = replyContent == null ? "" : replyContent.replace("\r\n", "\n").replace('\r', '\n').strip();
+        if (answer.isBlank() || answer.length() > 3000) throw new FeedbackException(400, "请填写1到3000字的回复");
+        LocalDateTime now = LocalDateTime.now(clock);
+        boolean changed = !answer.equals(item.getReplyContent());
+        LambdaUpdateWrapper<FeedbackSubmission> update = new LambdaUpdateWrapper<FeedbackSubmission>()
+                .eq(FeedbackSubmission::getId, id).set(FeedbackSubmission::getReplyContent, answer)
+                .set(FeedbackSubmission::getPublished, published).set(FeedbackSubmission::getStatus, "RESOLVED")
+                .set(FeedbackSubmission::getRepliedAt, changed ? now : item.getRepliedAt())
+                .set(FeedbackSubmission::getUpdatedAt, now);
+        if (changed) update.set(FeedbackSubmission::getReplyEmailedAt, null);
+        submissions.update(null, update);
+    }
+
+    public void sendReplyEmail(String id) {
+        FeedbackSubmission item = submissions.selectById(id);
+        if (item == null) throw new FeedbackException(404, "这条意见不存在");
+        if (!Boolean.TRUE.equals(item.getReplyRequested()) || Boolean.TRUE.equals(item.getPublicReply()) || item.getReplyEmail().isBlank())
+            throw new FeedbackException(400, "这条意见没有选择邮箱回信");
+        if (item.getReplyContent() == null || item.getReplyContent().isBlank()) throw new FeedbackException(400, "请先保存回复");
+        mailService.sendReply(item);
+        LocalDateTime now = LocalDateTime.now(clock);
+        submissions.update(null, new LambdaUpdateWrapper<FeedbackSubmission>().eq(FeedbackSubmission::getId, id)
+                .set(FeedbackSubmission::getReplyEmailedAt, now).set(FeedbackSubmission::getUpdatedAt, now));
+    }
+
+    public Map<String, Object> publicQa(int page, int pageSize) {
+        if (page < 1 || page > 100000 || pageSize < 1 || pageSize > 50) throw new FeedbackException(400, "分页参数无效");
+        Page<FeedbackSubmission> result = submissions.selectPage(new Page<>(page, pageSize),
+                new LambdaQueryWrapper<FeedbackSubmission>().eq(FeedbackSubmission::getReplyRequested, true)
+                        .eq(FeedbackSubmission::getPublicReply, true).eq(FeedbackSubmission::getPublished, true)
+                        .isNotNull(FeedbackSubmission::getRepliedAt).isNotNull(FeedbackSubmission::getReplyContent)
+                        .ne(FeedbackSubmission::getReplyContent, "")
+                        .orderByDesc(FeedbackSubmission::getRepliedAt).orderByDesc(FeedbackSubmission::getId));
+        List<PublicQaView> records = result.getRecords().stream().map(item -> new PublicQaView(item.getId(),
+                item.getContent(), item.getReplyContent(), item.getDisplayName(), item.getRepliedAt())).toList();
+        return Map.of("list", records, "total", result.getTotal(), "page", page, "pageSize", pageSize);
+    }
+
     public byte[] image(String submissionId, String imageId) {
         FeedbackImage image = images.selectOne(new LambdaQueryWrapper<FeedbackImage>()
                 .eq(FeedbackImage::getId, imageId).eq(FeedbackImage::getSubmissionId, submissionId));
@@ -179,13 +247,18 @@ public class FeedbackService {
 
     private FeedbackView view(FeedbackSubmission item, List<FeedbackImage> attachments) {
         return new FeedbackView(item.getId(), item.getCategory(), item.getContent(), item.getStatus(), item.getCreatedAt(),
-                item.getUpdatedAt(), attachments.stream().map(image -> new ImageView(image.getId(), image.getByteSize(),
+                item.getUpdatedAt(), item.getReplyRequested(), item.getPublicReply(), item.getDisplayName(), item.getReplyEmail(),
+                item.getReplyContent(), item.getPublished(), item.getRepliedAt(), item.getReplyEmailedAt(),
+                attachments.stream().map(image -> new ImageView(image.getId(), image.getByteSize(),
                         "/api/admin/feedback/" + item.getId() + "/images/" + image.getId())).toList());
     }
 
     public record ImageView(String id, long size, String url) {}
     public record FeedbackView(String id, String category, String content, String status,
-                               LocalDateTime createdAt, LocalDateTime updatedAt, List<ImageView> images) {}
+                               LocalDateTime createdAt, LocalDateTime updatedAt, Boolean replyRequested, Boolean publicReply,
+                               String displayName, String replyEmail, String replyContent, Boolean published,
+                               LocalDateTime repliedAt, LocalDateTime replyEmailedAt, List<ImageView> images) {}
+    public record PublicQaView(String id, String question, String answer, String displayName, LocalDateTime repliedAt) {}
 
     // Decode and re-encode rather than retaining uploaded filenames or EXIF metadata.
     private byte[] normalize(MultipartFile file) {

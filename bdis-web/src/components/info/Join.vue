@@ -85,7 +85,7 @@
         </div>
       </div>
 
-      <div class="join-section">
+      <div id="contact" class="join-section">
         <div class="section-header">
           <h2 class="section-title">联系我们</h2>
           <div class="section-divider"></div>

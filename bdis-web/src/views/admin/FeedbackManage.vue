@@ -24,6 +24,8 @@
           <template #default="{ row }">{{ row.content || '仅图片投递' }}</template>
         </el-table-column>
         <el-table-column label="图片" width="85" align="center"><template #default="{ row }">{{ row.images.length }} 张</template></el-table-column>
+        <el-table-column label="回复方式" width="115"><template #default="{ row }">{{ !row.replyRequested ? '无需回复' : row.publicReply ? '公开问答' : '邮箱私信' }}</template></el-table-column>
+        <el-table-column label="回复情况" width="115"><template #default="{ row }">{{ !row.replyRequested ? '无需回复' : row.published ? '已公开' : row.replyContent ? '已回复未公开' : '尚未回复' }}</template></el-table-column>
         <el-table-column label="处理状态" width="110">
           <template #default="{ row }"><el-tag :type="statusInfo(row.status).type">{{ statusInfo(row.status).label }}</el-tag></template>
         </el-table-column>
@@ -38,7 +40,8 @@
     </el-card>
 
     <el-dialog v-model="detailVisible" title="匿名意见详情" width="min(780px, calc(100% - 32px))" destroy-on-close
-      :close-on-click-modal="!saving" :close-on-press-escape="!saving" :show-close="!saving" @close="closeDetail">
+      :close-on-click-modal="!saving && !replySaving && !emailSending" :close-on-press-escape="!saving && !replySaving && !emailSending"
+      :show-close="!saving && !replySaving && !emailSending" @close="closeDetail">
       <div v-loading="detailLoading" class="feedback-detail">
         <el-alert v-if="detailError" :title="detailError" type="error" :closable="false" show-icon />
         <template v-if="detail">
@@ -57,17 +60,35 @@
             </div>
             <p v-if="imageCards.some(item => !item.url)" class="feedback-image-help">部分图片未能读取，可关闭后重新打开详情重试。</p>
           </template>
-          <p class="feedback-private-note">匿名投递内容仅供管理员查看，请在工作室内部妥善处理。</p>
+          <section v-if="detail.replyRequested" class="feedback-reply-editor">
+            <h3>回复这位朋友</h3>
+            <p class="feedback-reply-preference">{{ detail.publicReply ? `投稿人同意公开，展示署名：${detail.displayName}` : `投稿人仅接收私密回信：${detail.replyEmail}` }}</p>
+            <label for="feedback-admin-reply">实验室朋友的回答</label>
+            <el-input id="feedback-admin-reply" v-model="replyContent" type="textarea" :rows="6" maxlength="3000" show-word-limit
+              placeholder="写下给这位朋友的回答" :disabled="replySaving || emailSending" />
+            <el-checkbox v-model="replyPublished" :disabled="!detail.publicReply || replySaving || emailSending">在官网 Q&A 公开展示</el-checkbox>
+            <p v-if="!detail.publicReply" class="feedback-private-note">投稿人未同意公开，本条问答只能通过邮箱回复。</p>
+            <div class="feedback-reply-actions">
+              <el-button type="primary" :loading="replySaving" :disabled="saving || emailSending || !replyContent.trim()" @click="saveReply">保存回复</el-button>
+              <el-button v-if="!detail.publicReply" :loading="emailSending"
+                :disabled="saving || replySaving || !detail.replyContent || replyDirty" @click="sendReplyEmail">{{ detail.replyEmailedAt ? '重新发送邮件' : '发送邮件回信' }}</el-button>
+            </div>
+            <p v-if="replyDirty && !detail.publicReply" class="feedback-private-note">先保存当前回复，再发送邮件。</p>
+            <p v-if="detail.replyEmailedAt" class="feedback-private-note">邮件服务已接受发送：{{ formatTime(detail.replyEmailedAt) }}</p>
+            <p v-if="replyError" class="feedback-reply-error" role="alert">{{ replyError }}</p>
+          </section>
+          <p v-else class="feedback-private-note">投稿人未选择接收回复，本条意见仅供管理员处理，不会公开展示。</p>
+          <p class="feedback-private-note">附件图片和回信邮箱仅供管理员查看。公开问答只展示留言文字、回复及展示署名。</p>
         </template>
       </div>
       <template #footer>
         <div class="feedback-detail-footer">
           <label v-if="detail" for="feedback-status">处理状态</label>
-          <el-select v-if="detail" id="feedback-status" v-model="selectedStatus" :disabled="saving || detailLoading" aria-label="更新处理状态">
+          <el-select v-if="detail" id="feedback-status" v-model="selectedStatus" :disabled="saving || detailLoading || replySaving || emailSending" aria-label="更新处理状态">
             <el-option v-for="item in feedbackStatuses" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
-          <el-button :disabled="saving" @click="detailVisible = false">关闭</el-button>
-          <el-button v-if="detail" type="primary" :loading="saving" :disabled="detailLoading || selectedStatus === detail.status" @click="saveStatus">保存状态</el-button>
+          <el-button :disabled="saving || replySaving || emailSending" @click="detailVisible = false">关闭</el-button>
+          <el-button v-if="detail" type="primary" :loading="saving" :disabled="detailLoading || replySaving || emailSending || selectedStatus === detail.status" @click="saveStatus">保存状态</el-button>
         </div>
       </template>
     </el-dialog>
@@ -75,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import { feedbackApi, feedbackCategories, feedbackStatuses } from '@/utils/feedbackApi'
 
@@ -95,6 +116,12 @@ const detailError = ref('')
 const imageCards = ref([])
 const selectedStatus = ref('')
 const saving = ref(false)
+const replyContent = ref('')
+const replyPublished = ref(false)
+const replySaving = ref(false)
+const emailSending = ref(false)
+const replyError = ref('')
+const replyDirty = computed(() => replyContent.value !== (detail.value?.replyContent || '') || replyPublished.value !== Boolean(detail.value?.published))
 const countItems = [{ key: 'total', label: '全部意见' }, { key: 'UNREAD', label: '未读' }, { key: 'PROCESSING', label: '处理中' }, { key: 'RESOLVED', label: '已处理' }]
 const categoryLabel = value => feedbackCategories.find(item => item.value === value)?.label || '其他想法'
 const statusInfo = value => feedbackStatuses.find(item => item.value === value) || feedbackStatuses[0]
@@ -133,6 +160,7 @@ async function openDetail(row) {
   detailRequest = controller
   detail.value = null
   detailError.value = ''
+  replyError.value = ''
   detailVisible.value = true
   detailLoading.value = true
   try {
@@ -140,6 +168,8 @@ async function openDetail(row) {
     if (controller.signal.aborted) return
     detail.value = result
     selectedStatus.value = result.status
+    replyContent.value = result.replyContent || ''
+    replyPublished.value = Boolean(result.published)
     for (const image of result.images) {
       try {
         const blob = await feedbackApi.image(image.url, controller.signal)
@@ -168,6 +198,33 @@ async function saveStatus() {
   finally { saving.value = false }
 }
 
+async function saveReply() {
+  if (!detail.value || replySaving.value || emailSending.value) return
+  replySaving.value = true
+  replyError.value = ''
+  try {
+    const result = await feedbackApi.reply(detail.value.id, { replyContent: replyContent.value, published: replyPublished.value })
+    detail.value = result
+    replyContent.value = result.replyContent
+    replyPublished.value = Boolean(result.published)
+    selectedStatus.value = result.status
+    ElMessage.success(result.published ? '回复已保存并公开展示' : '回复已保存')
+    await loadList()
+  } catch (failure) { replyError.value = failure.message }
+  finally { replySaving.value = false }
+}
+
+async function sendReplyEmail() {
+  if (!detail.value || emailSending.value || replyDirty.value) return
+  emailSending.value = true
+  replyError.value = ''
+  try {
+    detail.value = await feedbackApi.emailReply(detail.value.id)
+    ElMessage.success('回信已提交给邮件服务')
+  } catch (failure) { replyError.value = failure.message }
+  finally { emailSending.value = false }
+}
+
 onMounted(loadList)
 onBeforeUnmount(() => { listRequest?.abort(); closeDetail() })
 </script>
@@ -194,6 +251,12 @@ onBeforeUnmount(() => { listRequest?.abort(); closeDetail() })
 .feedback-image-error { display: grid; place-items: center; color: #8c9bac; font-size: 13px; margin: 0; }
 .feedback-image-help { color: #b25c26; font-size: 12px; }
 .feedback-private-note { color: #8293a4; font-size: 12px; margin-top: 24px; }
+.feedback-reply-editor { margin-top: 24px; padding-top: 4px; border-top: 1px solid #e1e9f2; }
+.feedback-reply-editor > label { display: block; margin: 14px 0 10px; color: #34516e; font-size: 14px; }
+.feedback-reply-preference { color: #62778d; font-size: 13px; overflow-wrap: anywhere; line-height: 1.8; }
+.feedback-reply-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.feedback-reply-actions .el-button + .el-button { margin-left: 0; }
+.feedback-reply-error { color: #ba303c; font-size: 13px; line-height: 1.8; }
 .feedback-detail-footer { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 12px; }
 .feedback-detail-footer label { font-size: 13px; color: #62778d; }
 .feedback-detail-footer .el-select { width: 130px; }

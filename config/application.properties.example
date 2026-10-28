@@ -1,0 +1,6 @@
+spring.mail.host=smtp.163.com
+spring.mail.port=465
+spring.mail.username=your-sender@163.com
+spring.mail.password=replace-with-smtp-authorization-code
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.ssl.enable=true

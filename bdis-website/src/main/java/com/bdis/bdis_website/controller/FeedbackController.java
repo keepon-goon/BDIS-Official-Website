@@ -20,8 +20,18 @@ public class FeedbackController {
     public ResponseEntity<Result<Map<String, Boolean>>> submit(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String content,
-            @RequestParam(required = false) List<MultipartFile> images) {
-        service.submit(category, content, images);
+            @RequestParam(required = false) List<MultipartFile> images,
+            @RequestParam(defaultValue = "false") boolean replyRequested,
+            @RequestParam(defaultValue = "false") boolean publicReply,
+            @RequestParam(required = false) String displayName,
+            @RequestParam(required = false) String replyEmail) {
+        service.submit(category, content, images, replyRequested, publicReply, displayName, replyEmail);
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Result.success(Map.of("received", true)));
+    }
+
+    @GetMapping("/qa")
+    public ResponseEntity<Result<Map<String, Object>>> qa(
+            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "6") int pageSize) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Result.success(service.publicQa(page, pageSize)));
     }
 }

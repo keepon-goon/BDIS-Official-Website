@@ -3,6 +3,8 @@ package com.bdis.bdis_website.controller;
 import com.bdis.bdis_website.entity.FeedbackImage;
 import com.bdis.bdis_website.mapper.FeedbackImageMapper;
 import com.bdis.bdis_website.mapper.FeedbackSubmissionMapper;
+import com.bdis.bdis_website.exception.FeedbackException;
+import com.bdis.bdis_website.service.FeedbackMailService;
 import com.bdis.bdis_website.util.JwtUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -27,6 +30,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -45,6 +50,7 @@ class FeedbackTest {
     @Autowired ObjectMapper json;
     @Autowired FeedbackSubmissionMapper submissions;
     @Autowired FeedbackImageMapper images;
+    @MockBean FeedbackMailService mailService;
 
     @BeforeEach void reset() throws Exception {
         images.delete(null);
@@ -78,6 +84,10 @@ class FeedbackTest {
         var entry = submissions.selectList(null).get(0);
         assertEquals("希望增加项目交流活动", entry.getContent());
         assertEquals("UNREAD", entry.getStatus());
+        assertFalse(entry.getReplyRequested());
+        assertFalse(entry.getPublicReply());
+        assertFalse(entry.getPublished());
+        assertEquals("匿名", entry.getDisplayName());
         mvc.perform(get("/api/feedback")).andExpect(status().isMethodNotAllowed());
         mvc.perform(get("/api/feedback/" + entry.getId())).andExpect(status().isNotFound());
         mvc.perform(get("/api/admin/feedback")).andExpect(status().isUnauthorized());
@@ -165,5 +175,114 @@ class FeedbackTest {
                 .andExpect(status().isBadRequest());
         mvc.perform(get("/api/admin/feedback").header("Authorization", auth()).param("pageSize", "999"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test void onlyPublishesAnsweredQuestionsWithBothVisitorAndAdminConsent() throws Exception {
+        mvc.perform(multipart("/api/feedback").param("content", "公开的问题")
+                        .param("replyRequested", "true").param("publicReply", "true")
+                        .param("displayName", "  小明  ").param("replyEmail", "hidden@example.com"))
+                .andExpect(status().isOk());
+        var entry = submissions.selectList(null).get(0);
+        assertEquals("小明", entry.getDisplayName());
+        assertEquals("", entry.getReplyEmail());
+        mvc.perform(get("/api/feedback/qa")).andExpect(jsonPath("$.data.total").value(0));
+        mvc.perform(put("/api/admin/feedback/" + entry.getId() + "/reply")
+                        .contentType("application/json").content("{\"replyContent\":\"欢迎来交流\",\"published\":true}"))
+                .andExpect(status().isUnauthorized());
+        String url = "/api/admin/feedback/" + entry.getId() + "/reply";
+        mvc.perform(put(url).header("Authorization", auth()).contentType("application/json")
+                        .content("{\"replyContent\":\"  欢迎来交流  \",\"published\":false}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("RESOLVED"));
+        mvc.perform(get("/api/feedback/qa")).andExpect(jsonPath("$.data.total").value(0));
+        mvc.perform(put(url).header("Authorization", auth()).contentType("application/json")
+                        .content("{\"replyContent\":\"欢迎来交流\",\"published\":true}"))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/feedback/qa"))
+                .andExpect(status().isOk()).andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.list[0].question").value("公开的问题"))
+                .andExpect(jsonPath("$.data.list[0].answer").value("欢迎来交流"))
+                .andExpect(jsonPath("$.data.list[0].displayName").value("小明"))
+                .andExpect(jsonPath("$.data.list[0].replyEmail").doesNotExist())
+                .andExpect(jsonPath("$.data.list[0].images").doesNotExist())
+                .andExpect(jsonPath("$.data.list[0].replyRequested").doesNotExist());
+        mvc.perform(put(url).header("Authorization", auth()).contentType("application/json")
+                        .content("{\"replyContent\":\"欢迎来交流\",\"published\":false}"))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/feedback/qa")).andExpect(jsonPath("$.data.total").value(0));
+    }
+
+    @Test void privateRepliesCannotBePublishedAndMailFailuresPreserveTheAnswer() throws Exception {
+        mvc.perform(multipart("/api/feedback").param("content", "私密的问题")
+                        .param("replyRequested", "true").param("publicReply", "false")
+                        .param("replyEmail", "  friend@example.com  ").param("displayName", "不该保存的署名"))
+                .andExpect(status().isOk());
+        var entry = submissions.selectList(null).get(0);
+        assertEquals("friend@example.com", entry.getReplyEmail());
+        assertEquals("匿名", entry.getDisplayName());
+        String url = "/api/admin/feedback/" + entry.getId() + "/reply";
+        mvc.perform(put(url).header("Authorization", auth()).contentType("application/json")
+                        .content("{\"replyContent\":\"私密回复\",\"published\":true}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(put(url).header("Authorization", auth()).contentType("application/json")
+                        .content("{\"replyContent\":\"私密回复\",\"published\":false}"))
+                .andExpect(status().isOk());
+        mvc.perform(post(url + "/email")).andExpect(status().isUnauthorized());
+        doThrow(new FeedbackException(503, "邮件服务不可用")).when(mailService).sendReply(any());
+        mvc.perform(post(url + "/email").header("Authorization", auth())).andExpect(status().isServiceUnavailable());
+        assertEquals("私密回复", submissions.selectById(entry.getId()).getReplyContent());
+        assertNull(submissions.selectById(entry.getId()).getReplyEmailedAt());
+        doNothing().when(mailService).sendReply(any());
+        mvc.perform(post(url + "/email").header("Authorization", auth()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.replyEmailedAt").isNotEmpty());
+        mvc.perform(put(url).header("Authorization", auth()).contentType("application/json")
+                        .content("{\"replyContent\":\"更新后的私密回复\",\"published\":false}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.replyEmailedAt").isEmpty());
+        mvc.perform(get("/api/feedback/qa")).andExpect(jsonPath("$.data.total").value(0));
+    }
+
+    @Test void validatesReplyPreferencesAndRejectsRepliesWithoutOptIn() throws Exception {
+        for (String email : Arrays.asList("", "invalid", "a@example.com,b@example.com", "朋友<a@example.com>")) {
+            mvc.perform(multipart("/api/feedback").param("content", "测试")
+                            .param("replyRequested", "true").param("replyEmail", email))
+                    .andExpect(status().isBadRequest());
+        }
+        mvc.perform(multipart("/api/feedback").param("content", "测试")
+                        .param("replyRequested", "true").param("publicReply", "true").param("displayName", "名".repeat(41)))
+                .andExpect(status().isBadRequest());
+        mvc.perform(multipart("/api/feedback").param("content", "默认投递")
+                        .param("publicReply", "true").param("replyEmail", "ignored@example.com"))
+                .andExpect(status().isOk());
+        var entry = submissions.selectList(null).get(0);
+        assertEquals("", entry.getReplyEmail());
+        assertFalse(entry.getPublicReply());
+        mvc.perform(put("/api/admin/feedback/" + entry.getId() + "/reply").header("Authorization", auth())
+                        .contentType("application/json").content("{\"replyContent\":\"不能回复\",\"published\":true}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(get("/api/feedback/qa").param("pageSize", "999")).andExpect(status().isBadRequest());
+    }
+
+    @Test void anonymousPublicAnswersValidateContentAndSupportPagination() throws Exception {
+        for (int index = 0; index < 2; index++) {
+            mvc.perform(multipart("/api/feedback").param("content", "问题" + index)
+                            .param("replyRequested", "true").param("publicReply", "true"))
+                    .andExpect(status().isOk());
+        }
+        for (var entry : submissions.selectList(null)) {
+            assertEquals("匿名", entry.getDisplayName());
+            String url = "/api/admin/feedback/" + entry.getId() + "/reply";
+            for (String answer : Arrays.asList("  ", "a".repeat(3001))) {
+                mvc.perform(put(url).header("Authorization", auth()).contentType("application/json")
+                                .content(json.writeValueAsString(java.util.Map.of("replyContent", answer, "published", true))))
+                        .andExpect(status().isBadRequest());
+            }
+            mvc.perform(put(url).header("Authorization", auth()).contentType("application/json")
+                            .content("{\"replyContent\":\"统一回复\",\"published\":true}"))
+                    .andExpect(status().isOk());
+            mvc.perform(post(url + "/email").header("Authorization", auth())).andExpect(status().isBadRequest());
+        }
+        mvc.perform(get("/api/feedback/qa").param("pageSize", "1").param("page", "2"))
+                .andExpect(jsonPath("$.data.total").value(2)).andExpect(jsonPath("$.data.list.length()").value(1))
+                .andExpect(jsonPath("$.data.list[0].displayName").value("匿名"));
     }
 }

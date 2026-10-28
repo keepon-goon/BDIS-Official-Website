@@ -30,7 +30,7 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.ssl.enable: true
-      mail.smtp.from: ${BDIS_MAIL_USERNAME:}
+      mail.smtp.from: ${spring.mail.username}
       mail.smtp.connectiontimeout: 5000
       mail.smtp.timeout: 10000
       mail.smtp.writetimeout: 10000
@@ -45,7 +45,7 @@ mybatis-plus:
     map-underscore-to-camel-case: true
 
 jwt:
-  secret: ${BDIS_JWT_SECRET:change-me-before-deploying}
+  secret: ${BDIS_JWT_SECRET:bdis-local-dev-only-change-before-production}
   expiration: ${BDIS_JWT_EXPIRATION:86400000}
 
 feedback:

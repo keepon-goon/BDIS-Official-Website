@@ -15,7 +15,7 @@
       </div>
       <div class="search-hot-right-list">
         <div class="search-hot-right-item" v-for="item in hotSearch" :key="item.index"
-          @click="hotWordClick(item.label)">
+          @click="hotWordClick">
           <span class="search-hot-text">{{ item.label }}</span>
           <el-icon class="search-hot-icon">
             <TopRight />
@@ -53,9 +53,8 @@ const SearchClick = () => {
   console.log('search:', input.value)
 }
 
-const hotWordClick = (label) => {
-  input.value = label
-  SearchClick()
+const hotWordClick = () => {
+  router.push({ path: '/info/join', hash: '#contact' })
 }
 </script>
 

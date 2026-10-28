@@ -2,6 +2,7 @@ package com.bdis.bdis_website.service;
 
 import com.bdis.bdis_website.entity.FeedbackImage;
 import com.bdis.bdis_website.entity.FeedbackSubmission;
+import com.bdis.bdis_website.exception.FeedbackException;
 import jakarta.mail.internet.MimeUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +68,7 @@ public class FeedbackMailService {
             var message = mailSender.createMimeMessage();
             var helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(from, "BDIS官方网站");
+            helper.setFrom(from, "BDIS实验室");
             helper.setTo(recipient);
 
             String catLabel = CATEGORY_NAMES.getOrDefault(submission.getCategory(), submission.getCategory());
@@ -77,6 +78,16 @@ public class FeedbackMailService {
             body.append("BDIS 匿名信箱收到一条新的意见投递：\n\n");
             body.append("【投递时间】：").append(submission.getCreatedAt() != null ? submission.getCreatedAt().format(TIME_FMT) : "").append("\n");
             body.append("【意见分类】：").append(catLabel).append("\n\n");
+            if (Boolean.TRUE.equals(submission.getReplyRequested())) {
+                if (Boolean.TRUE.equals(submission.getPublicReply())) {
+                    body.append("【回复意愿】：希望公开回复，署名：").append(submission.getDisplayName()).append("\n\n");
+                } else {
+                    body.append("【回复意愿】：仅邮箱私密回信，不同意公开\n");
+                    body.append("【回信邮箱】：").append(submission.getReplyEmail()).append("\n\n");
+                }
+            } else {
+                body.append("【回复意愿】：未选择接收回复，请勿公开\n\n");
+            }
             body.append("【意见内容】：\n");
             if (submission.getContent() != null && !submission.getContent().isBlank()) {
                 body.append(submission.getContent()).append("\n\n");
@@ -115,6 +126,25 @@ public class FeedbackMailService {
             log.info("匿名意见邮件已成功发送至 {}", recipient);
         } catch (Exception e) {
             log.error("发送匿名意见通知邮件失败: {}", e.getMessage(), e);
+        }
+    }
+
+    public void sendReply(FeedbackSubmission submission) {
+        if (!configured()) throw new FeedbackException(503, "邮件服务尚未配置，回复已保存，请配置后重新发送");
+        try {
+            var mailSender = sender.getObject();
+            var message = mailSender.createMimeMessage();
+            var helper = new MimeMessageHelper(message, false, "UTF-8");
+            helper.setFrom(from, "BDIS实验室");
+            helper.setTo(submission.getReplyEmail());
+            helper.setSubject("[BDIS匿名信箱] 实验室朋友给你的回信");
+            helper.setText("你好，实验室朋友收到你的留言了。\n\n【你的留言】\n" + submission.getContent()
+                    + "\n\n【实验室朋友的回答】\n" + submission.getReplyContent()
+                    + "\n\n这是一封私密回信，本次问答不会在官网公开。\nBDIS 实验室");
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("匿名信箱回信发送失败", e);
+            throw new FeedbackException(503, "回信发送失败，回复已保存，请稍后重试发送");
         }
     }
 }

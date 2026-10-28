@@ -5,7 +5,8 @@
         <div>
           <h1>一起将 BDIS 建设得更好</h1>
           <p class="feedback-lead">无论是准备加入 BDIS 的新朋友，还是已经在实验室并肩作战的伙伴。从加入流程、网站体验细节，到实验室日常运转与技术探索<br />留下你的声音，一起向着更远处出发</p>
-          <span class="feedback-privacy">完全的匿名投递，让所有人更舒服的畅所欲言</span>
+          <span class="feedback-privacy">默认匿名投递，也可以选择公开问答或留下邮箱悄悄收信。</span>
+          <router-link to="/feedback/qa" class="feedback-qa-toggle">看看其他人的Q&A?</router-link>
         </div>
       </header>
 
@@ -60,6 +61,8 @@
             </div>
           </div>
 
+          <FeedbackReplyOptions ref="replyOptions" v-model="replyPreferences" :disabled="busy" />
+
           <p v-if="error" id="feedback-error" class="feedback-error" role="alert">{{ error }}</p>
           <div class="feedback-form-footer">
             <button class="feedback-submit" type="submit" :disabled="busy">
@@ -82,8 +85,9 @@
 
 <script setup>
 import { ref, nextTick, onBeforeUnmount } from 'vue'
-import { Lock, Picture, Position, CircleCheck, Monitor, OfficeBuilding, Calendar } from '@element-plus/icons-vue'
+import { Picture, Position, CircleCheck, Monitor, OfficeBuilding, Calendar } from '@element-plus/icons-vue'
 import { feedbackApi, feedbackCategories } from '@/utils/feedbackApi'
+import FeedbackReplyOptions from '@/components/feedback/FeedbackReplyOptions.vue'
 
 const content = ref('')
 const category = ref('')
@@ -95,6 +99,8 @@ const dragging = ref(false)
 const fileInput = ref(null)
 const contentInput = ref(null)
 const successPanel = ref(null)
+const replyOptions = ref(null)
+const replyPreferences = ref({ replyRequested: null, publicReply: null, displayName: '', replyEmail: '' })
 const ideas = [
   { title: '了解与加入流程', text: '招新信息是否清晰、加入流程是否有疑惑，以及网站排版、多端浏览是否顺畅。', icon: Monitor },
   { title: '环境与日常协作', text: '工位设施、网络连接、开发环境与算力资源，或是日常协作中影响效率的卡点。', icon: OfficeBuilding },
@@ -126,21 +132,29 @@ async function submit() {
     contentInput.value?.focus()
     return
   }
+  const replyError = replyOptions.value?.validate()
+  if (replyError) { error.value = replyError; return }
   error.value = ''
   busy.value = true
   const data = new FormData()
   data.append('content', content.value.trim())
   data.append('category', category.value || 'other')
+  const preferences = replyPreferences.value
+  data.append('replyRequested', String(Boolean(preferences.replyRequested)))
+  data.append('publicReply', String(Boolean(preferences.replyRequested && preferences.publicReply)))
+  if (preferences.replyRequested && preferences.publicReply) data.append('displayName', preferences.displayName.trim())
+  if (preferences.replyRequested && !preferences.publicReply) data.append('replyEmail', preferences.replyEmail.trim())
   files.value.forEach(item => data.append('images', item.file))
   try {
     await feedbackApi.submit(data)
     sent.value = true
     content.value = ''
     category.value = ''
+    replyPreferences.value = { replyRequested: null, publicReply: null, displayName: '', replyEmail: '' }
     clearFiles()
     await nextTick()
     successPanel.value?.focus({ preventScroll: true })
-    successPanel.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    successPanel.value?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' })
   } catch (failure) { error.value = failure.message }
   finally { busy.value = false }
 }
@@ -156,6 +170,7 @@ onBeforeUnmount(clearFiles)
 .feedback-intro h1 { color: #0c3d70; font-size: clamp(28px, 3.5vw, 42px); font-weight: 650; line-height: 1.35; margin: 0 0 16px; }
 .feedback-lead { color: #333333; font-size: 15px; line-height: 1.9; margin: 0 0 18px; }
 .feedback-privacy { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: #555555; }
+.feedback-qa-toggle { display: inline-flex; margin-top: 20px; padding: 11px 18px; border: 1px solid #bdd0e3; border-radius: 24px; background: #edf4fb; color: #0c3d70; font-size: 14px; font-weight: 600; }
 .feedback-layout { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 24px; align-items: start; }
 .feedback-form { min-width: 0; background: white; border: 1px solid #dce7f2; border-radius: 16px; padding: 28px; }
 .form-heading { margin-bottom: 26px; }

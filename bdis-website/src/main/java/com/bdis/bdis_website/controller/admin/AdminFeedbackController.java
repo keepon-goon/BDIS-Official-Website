@@ -38,5 +38,18 @@ public class AdminFeedbackController {
                 .header("X-Content-Type-Options", "nosniff").body(service.image(id, imageId));
     }
 
+    @PutMapping("/{id}/reply")
+    public Result<FeedbackService.FeedbackView> reply(@PathVariable String id, @RequestBody ReplyUpdate body) {
+        service.saveReply(id, body.replyContent(), body.published());
+        return Result.success(service.detail(id));
+    }
+
+    @PostMapping("/{id}/reply/email")
+    public Result<FeedbackService.FeedbackView> emailReply(@PathVariable String id) {
+        service.sendReplyEmail(id);
+        return Result.success(service.detail(id));
+    }
+
     public record StatusUpdate(String status) {}
+    public record ReplyUpdate(String replyContent, boolean published) {}
 }

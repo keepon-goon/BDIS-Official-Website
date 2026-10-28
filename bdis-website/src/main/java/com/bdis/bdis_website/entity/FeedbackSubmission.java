@@ -14,6 +14,14 @@ public class FeedbackSubmission {
     private String category;
     private String content;
     private String status;
+    private Boolean replyRequested;
+    private Boolean publicReply;
+    private String displayName;
+    private String replyEmail;
+    private String replyContent;
+    private Boolean published;
+    private LocalDateTime repliedAt;
+    private LocalDateTime replyEmailedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
