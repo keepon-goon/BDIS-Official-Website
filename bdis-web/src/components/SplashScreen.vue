@@ -33,14 +33,6 @@
             </div>
           </div>
         </div>
-
-        <!-- 右上角极简跳过按钮 -->
-        <button type="button" class="skip-btn" @click.stop="skip">
-          <span>跳过</span>
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
       </div>
     </transition>
   </Teleport>
@@ -68,10 +60,10 @@ const handleKey = (e) => {
 
 onMounted(() => {
   window.addEventListener('keydown', handleKey)
-  // 约 2.2 秒平滑淡出溶入首页
+  // 动画时长增加 20%，约 2.65 秒平滑淡出溶入首页
   autoTimer = setTimeout(() => {
     skip()
-  }, 2200)
+  }, 2640)
 })
 
 onBeforeUnmount(() => {
@@ -148,7 +140,7 @@ onBeforeUnmount(() => {
   letter-spacing: 0px;
 }
 
-/* 原图严格采样的深蓝十六进制色值：#19375D */
+/* 原图严格采样的深蓝十六进制色值：#19375D，绘制时长增加 20%（1.1s -> 1.32s） */
 .bdis-draw-stroke {
   fill: transparent;
   stroke: #19375D;
@@ -157,7 +149,7 @@ onBeforeUnmount(() => {
   stroke-linejoin: round;
   stroke-dasharray: 850;
   stroke-dashoffset: 850;
-  animation: drawStroke 1.1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  animation: drawStroke 1.32s cubic-bezier(0.65, 0, 0.35, 1) forwards;
 }
 
 @keyframes drawStroke {
@@ -169,12 +161,12 @@ onBeforeUnmount(() => {
   }
 }
 
-/* 线条闭合后，自然注入纯正的 #19375D 实色深蓝 */
+/* 线条闭合后，自然注入纯正的 #19375D 实色深蓝（延后 20%） */
 .bdis-draw-fill {
   fill: #19375D;
   stroke: transparent;
   opacity: 0;
-  animation: fillFadeIn 0.45s 0.92s ease-out forwards;
+  animation: fillFadeIn 0.54s 1.1s ease-out forwards;
 }
 
 @keyframes fillFadeIn {
@@ -209,7 +201,7 @@ onBeforeUnmount(() => {
   pointer-events: none;
   z-index: -1;
   opacity: 0;
-  animation: arcReveal 0.6s 0.7s ease-out forwards;
+  animation: arcReveal 0.72s 0.84s ease-out forwards;
 }
 
 @keyframes arcReveal {
@@ -238,15 +230,15 @@ onBeforeUnmount(() => {
 }
 
 .en-line-1 {
-  animation: textSlide 0.45s 0.98s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: textSlide 0.54s 1.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .en-line-2 {
-  animation: textSlide 0.45s 1.06s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: textSlide 0.54s 1.27s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* 中文标题色值 #19375D，原版字重 */
-.logo-cn-title {
+.cn-title {
   font-family: "MiSans", "Microsoft YaHei", -apple-system, system-ui, sans-serif;
   font-size: clamp(20px, 2.6vw, 35px);
   font-weight: 850;
@@ -255,7 +247,7 @@ onBeforeUnmount(() => {
   letter-spacing: 1.8px;
   opacity: 0;
   transform: translateX(-12px);
-  animation: textSlide 0.5s 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: textSlide 0.6s 1.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes textSlide {
@@ -265,34 +257,9 @@ onBeforeUnmount(() => {
   }
 }
 
-/* 跳过按钮 */
-.skip-btn {
-  position: absolute;
-  top: 28px;
-  right: 32px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 14px;
-  border-radius: 18px;
-  border: 1px solid #dce7f2;
-  background: rgba(255, 255, 255, 0.9);
-  color: #71879b;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(6px);
-}
-
-.skip-btn:hover {
-  color: #19375D;
-  border-color: #19375D;
-  background: #ffffff;
-}
-
 /* 离场淡出动画 */
 .splash-fade-leave-active {
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .splash-fade-leave-to {
@@ -308,10 +275,6 @@ onBeforeUnmount(() => {
   }
   .bdis-svg-box {
     width: 240px;
-  }
-  .skip-btn {
-    top: 18px;
-    right: 18px;
   }
 }
 </style>

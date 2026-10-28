@@ -198,4 +198,23 @@ onMounted(async () => {
   margin: 0 auto;
   padding: 60px 32px;
 }
+
+@media (max-width: 768px) {
+  .detail-container,
+  .loading-container,
+  .empty-container {
+    padding: 24px 16px;
+  }
+  .detail-title {
+    font-size: 22px;
+  }
+  .detail-cover {
+    height: 200px;
+    margin-bottom: 24px;
+  }
+  .detail-info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
 </style>

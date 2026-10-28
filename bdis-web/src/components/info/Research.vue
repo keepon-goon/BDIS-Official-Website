@@ -10,22 +10,19 @@
             <el-icon class="icon">
               <Calendar />
             </el-icon>
-            <span class="icon-word">开始时间：{{ item.updatedAt }}
-            </span>
+            <span class="icon-word">开始时间：{{ item.updatedAt }}</span>
           </div>
           <div class="item-row">
             <el-icon class="icon">
               <Position />
             </el-icon>
-            <span class="icon-word">招募角色：{{ (item.recruitRolesArray || []).join('、') || '—' }}
-            </span>
+            <span class="icon-word">招募角色：{{ (item.recruitRolesArray || []).join('、') || '—' }}</span>
           </div>
           <div class="item-row">
             <el-icon class="icon">
               <User />
             </el-icon>
-            <span class="icon-word">参与人员：{{ (item.membersArray || []).join('、') || '—' }}
-            </span>
+            <span class="icon-word">参与人员：{{ (item.membersArray || []).join('、') || '—' }}</span>
           </div>
           <div class="item-progress">
             <div class="progress-bar">
@@ -34,8 +31,7 @@
             <span class="progress-text">{{ item.progress || 0 }}%</span>
           </div>
         </div>
-        <div class="item-box-middle">
-        </div>
+        <div class="item-box-middle"></div>
         <div class="item-box-right">
           <img :src="normalizeImageUrl(item.coverUrl)" :alt="item.name" loading="lazy" decoding="async" />
         </div>
@@ -67,71 +63,81 @@ onMounted(async () => {
 
 const router = useRouter()
 const goDetail = id => router.push('/info/project/' + id)
-
 </script>
 
 <style scoped>
 .research {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 20px 140px 20px 140px;
+  gap: 20px;
+  padding: 30px clamp(16px, 4vw, 40px);
 }
 
 .tesearch-items {
   background: #fff;
-  border: 1px solid #eee;
-  border-radius: 0px;
-  padding: 14px 16px;
+  border: 1px solid #e2ecf5;
+  border-radius: 12px;
   background-color: rgb(243, 246, 248);
   cursor: pointer;
-  transition: transform 0.5s ease, box-shadow 0.5s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  overflow: hidden;
 }
 
 .tesearch-items:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 15px 15px 0 rgba(0, 0, 0, 0.08);
-  background-color: #FFFFFFDE;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(12, 61, 112, 0.08);
+  background-color: #ffffff;
 }
 
 .item-box {
   width: 100%;
-  height: 240px;
+  min-height: 200px;
   display: grid;
-  grid-template-columns: 5.5fr 1fr 2.5fr;
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 24px;
   align-items: center;
-  padding: 20px;
+  padding: 24px;
   box-sizing: border-box;
+}
+
+.item-box-middle {
+  display: none;
 }
 
 .item-box-left {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  min-width: 0;
 }
 
 .item-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 18px;
-  font-weight: 500;
-  color: rgb(35, 65, 90);
   flex-wrap: wrap;
 }
 
 .item-name {
-  font-family: 'MiSans';
-  font-size: 20px;
+  font-family: 'MiSans', -apple-system, sans-serif;
+  font-size: clamp(17px, 1.8vw, 20px);
+  font-weight: 600;
   text-align: left;
+  line-height: 1.4;
+  color: rgb(35, 65, 90);
+  word-break: break-word;
 }
 
 .icon {
   display: flex;
-  color: #4c4c4c;
+  color: #0c3d70;
   font-size: 16px;
-  margin: 2px 6px 0 0;
+  margin-top: 3px;
+  flex-shrink: 0;
 }
 
 .item-row {
@@ -139,12 +145,23 @@ const goDetail = id => router.push('/info/project/' + id)
   color: #444;
   text-align: left;
   display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.icon-word {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
 }
 
 .item-progress {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  margin-top: 4px;
 }
 
 .progress-bar {
@@ -170,10 +187,10 @@ const goDetail = id => router.push('/info/project/' + id)
 
 .item-box-right {
   width: 100%;
-  height: 100%;
-  border-radius: 0px;
+  height: 180px;
+  border-radius: 8px;
   overflow: hidden;
-  background: #f7f7f8;
+  background: #eef3f8;
 }
 
 .item-box-right img {
@@ -185,13 +202,56 @@ const goDetail = id => router.push('/info/project/' + id)
   transform-origin: center center;
 }
 
-.item-box:hover img {
-  transform: scale(1.06);
+.item-box:hover .item-box-right img {
+  transform: scale(1.05);
 }
 
 .more {
-  font-family: 'MiSans';
-  font-size: 16px;
-  color: #000;
+  font-family: 'MiSans', sans-serif;
+  font-size: 15px;
+  color: #888888;
+  padding: 16px 0;
+}
+
+/* 响应式断点：平板与大屏手机 */
+@media (max-width: 768px) {
+  .research {
+    padding: 20px 16px;
+    gap: 16px;
+  }
+
+  .item-box {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 16px;
+    height: auto;
+    min-height: auto;
+  }
+
+  .item-box-right {
+    order: -1;
+    height: clamp(160px, 48vw, 220px);
+  }
+
+  .item-name {
+    font-size: 17px;
+  }
+
+  .item-row {
+    font-size: 13.5px;
+  }
+}
+
+/* 响应式断点：小屏手机 */
+@media (max-width: 480px) {
+  .research {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+
+  .item-box {
+    padding: 14px;
+    gap: 14px;
+  }
 }
 </style>
