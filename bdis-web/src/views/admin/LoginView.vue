@@ -108,11 +108,12 @@ const handleLogin = async () => {
 }
 
 .login-card {
-  width: 400px;
-  padding: 40px 36px 32px;
+  width: min(400px, calc(100vw - 32px));
+  padding: clamp(28px, 6vw, 40px) clamp(20px, 5vw, 36px);
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
 }
 
 .login-header {
