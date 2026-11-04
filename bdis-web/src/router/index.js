@@ -66,6 +66,7 @@ const routes = [
       { path: 'resources', component: () => import('@/views/admin/ResourceManage.vue') },
       { path: 'forum-posts', component: () => import('@/views/admin/ForumPostManage.vue') },
       { path: 'lab-info', component: () => import('@/views/admin/LabInfoManage.vue') },
+      { path: 'about-join', component: () => import('@/views/admin/AboutJoinManage.vue') },
     ]
   }
 ]

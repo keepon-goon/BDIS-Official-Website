@@ -12,18 +12,6 @@
         <el-form-item label="英文名称">
           <el-input v-model="form.nameEn" placeholder="请输入英文名称" />
         </el-form-item>
-        <el-form-item label="简要介绍">
-          <el-input v-model="form.introShort" type="textarea" :rows="4" placeholder="请输入简要介绍" />
-        </el-form-item>
-        <el-form-item label="地址">
-          <el-input v-model="form.address" placeholder="请输入地址" />
-        </el-form-item>
-        <el-form-item label="邮箱">
-          <el-input v-model="form.email" placeholder="请输入邮箱" />
-        </el-form-item>
-        <el-form-item label="QQ群">
-          <el-input v-model="form.qqGroup" placeholder="请输入QQ群号" />
-        </el-form-item>
         <el-form-item label="Logo">
           <el-upload
             action="/api/admin/upload"
@@ -101,10 +89,6 @@ const uploadLoading = ref(false)
 const form = reactive({
   name: '',
   nameEn: '',
-  introShort: '',
-  address: '',
-  email: '',
-  qqGroup: '',
   logoUrl: '',
   picture: '',
   labDesc: ''
@@ -176,8 +160,12 @@ const handleSave = async () => {
       logoUrl: normalizeImageUrl(form.logoUrl),
       picture: normalizeImageUrl(form.picture)
     }
-    await axios.put('/api/admin/lab-info', submitForm, { headers })
-    ElMessage.success('保存成功')
+    const { data } = await axios.put('/api/admin/lab-info', submitForm, { headers })
+    if (data.code === 0) {
+      ElMessage.success('保存成功')
+    } else {
+      ElMessage.error(data.message || '保存失败')
+    }
   } catch (e) {
     ElMessage.error('保存失败')
   } finally {

@@ -16,19 +16,19 @@
           <div class="intro-card">
             <p class="intro-text">{{ labInfo.introShort }}</p>
             <div class="intro-details">
-              <div class="detail-item">
+              <div v-if="labInfo.address" class="detail-item">
                 <el-icon class="detail-icon">
                   <Location />
                 </el-icon>
                 <span>{{ labInfo.address }}</span>
               </div>
-              <div class="detail-item">
+              <div v-if="labInfo.email" class="detail-item">
                 <el-icon class="detail-icon">
                   <Message />
                 </el-icon>
                 <span>{{ labInfo.email }}</span>
               </div>
-              <div class="detail-item">
+              <div v-if="labInfo.qqGroup" class="detail-item">
                 <el-icon class="detail-icon">
                   <ChatDotRound />
                 </el-icon>
@@ -38,9 +38,10 @@
           </div>
         </div>
 
-        <div v-else class="loading-placeholder">
+        <div v-else-if="labInfoLoading" class="loading-placeholder">
           <el-skeleton :rows="3" animated />
         </div>
+        <el-empty v-else description="暂时无法加载工作室简介" />
       </div>
 
       <!-- 研究方向 -->
@@ -106,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, markRaw } from 'vue'
+import { inject, ref, onMounted, markRaw } from 'vue'
 import axios from 'axios'
 import {
   Location,
@@ -120,15 +121,7 @@ import {
 import { normalizeImageUrl } from '@/utils/imageUrl'
 
 
-const labInfo = ref({
-  introShort:
-    '  大数据智能工作室（Big Data Intelligence Studio，简称 BDIS）依托大数据管理与应用专业，\n由重庆理工大学大数据智能工作室与重庆理工大学创新实验室联合组建。\n' +
-    '工作室聚焦大数据、人工智能、系统开发与模型训练等方向，\n致力于培养具备工程实践能力与科研创新能力的高水平复合型人才。\n' +
-    '近年来，成员在各类学科竞赛、科研项目及企业合作中取得了多项成果。',
-  address: '重庆理工大学 汇智楼502',
-  email: '18862028557@163.com',
-  qqGroup: '935982021'
-})
+const { labInfo, labInfoLoading } = inject('siteLabInfo')
 
 const teamMembers = ref([])
 
@@ -275,6 +268,7 @@ onMounted(async () => {
 
 .intro-card {
   background: white;
+  overflow-wrap: anywhere;
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);

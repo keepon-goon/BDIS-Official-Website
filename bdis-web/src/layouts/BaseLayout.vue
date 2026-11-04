@@ -16,8 +16,31 @@
 </template>
 
 <script setup>
+import { provide, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import axios from 'axios'
 import NavBar from '../components/NavBar.vue'
 import Footer from '../components/Footer.vue'
+
+const route = useRoute()
+const labInfo = ref(null)
+const labInfoLoading = ref(false)
+
+provide('siteLabInfo', { labInfo, labInfoLoading })
+
+watch(() => route.path, async (path, previousPath) => {
+  if (previousPath && path !== '/info/about' && path !== '/info/join') return
+  if (labInfoLoading.value) return
+  labInfoLoading.value = true
+  try {
+    const { data } = await axios.get('/api/lab/info')
+    labInfo.value = data.code === 0 ? data.data : null
+  } catch {
+    labInfo.value = null
+  } finally {
+    labInfoLoading.value = false
+  }
+}, { immediate: true })
 </script>
 
 <style scoped>

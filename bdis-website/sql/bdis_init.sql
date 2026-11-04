@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS `lab_info` (
   `lab_desc` TEXT,
   `name_en` VARCHAR(200) DEFAULT NULL,
   `intro_short` TEXT,
+  `join_intro` TEXT,
   `address` VARCHAR(200) DEFAULT NULL,
   `email` VARCHAR(100) DEFAULT NULL,
   `qq_group` VARCHAR(50) DEFAULT NULL,

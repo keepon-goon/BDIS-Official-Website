@@ -74,6 +74,10 @@
           <el-icon><Setting /></el-icon>
           <span>站点设置</span>
         </el-menu-item>
+        <el-menu-item index="about-join">
+          <el-icon><Document /></el-icon>
+          <span>关于与招新</span>
+        </el-menu-item>
         <el-menu-item index="resumes">
           <el-icon><Document /></el-icon>
           <span>简历管理</span>
@@ -177,6 +181,7 @@ const activeMenu = computed(() => {
   if (path.includes('/admin/resources')) return 'resources'
   if (path.includes('/admin/forum-posts')) return 'forum-posts'
   if (path.includes('/admin/lab-info')) return 'lab-info'
+  if (path.includes('/admin/about-join')) return 'about-join'
   if (path.includes('/admin/resumes')) return 'resumes'
   if (path.includes('/admin/feedback')) return 'feedback'
   return 'dashboard'
@@ -193,6 +198,7 @@ const currentPageTitle = computed(() => {
     resources: '学习资料管理',
     'forum-posts': '竞赛组队管理',
     'lab-info': '站点设置',
+    'about-join': '关于与招新',
     resumes: '简历管理',
     feedback: '意见收集'
   }

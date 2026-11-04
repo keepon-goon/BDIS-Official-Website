@@ -79,6 +79,7 @@ npm run dev:mock
 | [resume_submission_upgrade.sql](bdis-website/sql/resume_submission_upgrade.sql) | 既有简历表升级，执行前核对当前结构 |
 | [feedback_migration.sql](bdis-website/sql/feedback_migration.sql) | 新建意见与附件表 |
 | [lab_address_update.sql](bdis-website/sql/lab_address_update.sql) | 将既有工作室地址更新为汇智楼502 |
+| [lab_join_intro_migration.sql](bdis-website/sql/lab_join_intro_migration.sql) | 既有数据库缺少 `lab_info.join_intro` 时，在启动新版后端前执行一次。使用当前 `bdis_init.sql` 新建的表已包含该字段 |
 
 #### 启动后端
 

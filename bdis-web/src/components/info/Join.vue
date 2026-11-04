@@ -6,25 +6,10 @@
           <h2 class="section-title">写给未来的你</h2>
           <div class="section-divider"></div>
         </div>
-        <div class="section-content">
+        <div v-if="labInfo" class="section-content">
           <div class="intro-card">
             <div class="intro-text">
-              <p>我们用算法洞察趋势，用代码把想法落地，用系统承载智能，让技术真正产生价值。</p>
-
-              <p>这里，</p>
-
-              <p class="intro-text-word">◦ 你可以和热爱技术的伙伴一起，做前端、做后端，把一个产品从 0 搭到 1；</p>
-              <p class="intro-text-word">◦ 你可以做数据分析、机器学习与深度学习，把模型训出来、跑通实验、拿到可复现的结果；</p>
-              <p class="intro-text-word">◦ 你也可以做测试与运维，把系统的稳定性、质量与交付流程打磨到更可靠、更专业。</p>
-
-              <p><strong>我们相信，一个人的力量有限，但一群人的协作无穷。</strong></p>
-
-              <p>如果你想让简历更有分量，让能力更成体系——</p>
-              <p>无论你是准备本科就业，还是奔着考研提升，</p>
-
-              <p>那就来吧——</p>
-
-              <p><strong>加入我们，一起用数据与智能，做更多有意义、做得出来、拿得出手的事。</strong></p>
+              <p v-for="(line, index) in introLines" :key="index" :class="{ 'intro-text-word': line.startsWith('◦') }">{{ line }}</p>
             </div>
             <div class="intro-tags">
               <span class="tag">项目驱动</span>
@@ -34,6 +19,8 @@
             </div>
           </div>
         </div>
+        <el-skeleton v-else-if="labInfoLoading" class="section-content" :rows="5" animated />
+        <el-empty v-else description="暂时无法加载招新介绍" />
       </div>
 
       <div class="join-section">
@@ -93,20 +80,20 @@
         <div class="cta-card">
           <div class="cta-text">
             <p class="cta-title">准备好了就出发</p>
-            <p class="cta-desc">添加招新群或发送邮件，带上你想做的方向。</p>
+            <p v-if="labInfo?.qqGroup || labInfo?.email" class="cta-desc">带上你想做的方向，联系我们。</p>
           </div>
-          <div class="cta-info">
-            <div class="cta-item">
+          <div v-if="labInfo?.email || labInfo?.qqGroup || labInfo?.address" class="cta-info">
+            <div v-if="labInfo.email" class="cta-item">
               <span class="cta-label">邮箱</span>
-              <span class="cta-value">18862028557@163.com</span>
+              <span class="cta-value">{{ labInfo.email }}</span>
             </div>
-            <div class="cta-item">
+            <div v-if="labInfo.qqGroup" class="cta-item">
               <span class="cta-label">QQ群号</span>
-              <span class="cta-value">935982021</span>
+              <span class="cta-value">{{ labInfo.qqGroup }}</span>
             </div>
-            <div class="cta-item">
+            <div v-if="labInfo.address" class="cta-item">
               <span class="cta-label">地点</span>
-              <span class="cta-value">重庆理工大学 汇智楼502</span>
+              <span class="cta-value">{{ labInfo.address }}</span>
             </div>
           </div>
           <RouterLink class="cta-button" to="/resume/apply">在线填写报名表</RouterLink>
@@ -121,7 +108,7 @@
 </template>
 
 <script setup>
-import { markRaw } from 'vue'
+import { computed, inject, markRaw } from 'vue'
 import {
   Monitor,
   Connection,
@@ -130,6 +117,9 @@ import {
   Cpu,
   Tools
 } from '@element-plus/icons-vue'
+
+const { labInfo, labInfoLoading } = inject('siteLabInfo')
+const introLines = computed(() => labInfo.value?.joinIntro ? labInfo.value.joinIntro.split(/\r?\n/) : [])
 
 const roles = [
   { icon: markRaw(Monitor), title: '前端开发', desc: '官网与业务可视化页面搭建，提升交互与表达。', tags: ['Vue3', 'ECharts', 'UI'] },
@@ -276,6 +266,8 @@ const steps = [
   color: #333;
   margin: 0 0 24px;
   text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .intro-text .intro-text-word {
@@ -466,6 +458,7 @@ const steps = [
   gap: 12px;
   text-align: left;
   max-width: 520px;
+  min-width: 0;
   margin: 0 auto;
 }
 
@@ -480,12 +473,15 @@ const steps = [
 .cta-label {
   color: #666;
   font-size: 14px;
+  flex-shrink: 0;
 }
 
 .cta-value {
   color: #0c3d70;
   font-weight: 600;
   font-size: 14px;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .cta-button {

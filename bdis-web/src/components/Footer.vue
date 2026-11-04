@@ -30,23 +30,23 @@
         <!-- 右侧：联系方式 -->
         <div class="footer-section footer-contact">
           <h3 class="footer-title">联系我们</h3>
-          <div class="contact-item">
+          <div v-if="labInfo?.address" class="contact-item">
             <el-icon class="contact-icon">
               <Location />
             </el-icon>
-            <span class="contact-text">重庆理工大学 汇智楼502</span>
+            <span class="contact-text">{{ labInfo.address }}</span>
           </div>
-          <div class="contact-item">
+          <div v-if="labInfo?.email" class="contact-item">
             <el-icon class="contact-icon">
               <Message />
             </el-icon>
-            <span class="contact-text">18862028557@163.com</span>
+            <span class="contact-text">{{ labInfo.email }}</span>
           </div>
-          <div class="contact-item">
+          <div v-if="labInfo?.qqGroup" class="contact-item">
             <el-icon class="contact-icon">
               <ChatDotRound />
             </el-icon>
-            <span class="contact-text">QQ群：935982021</span>
+            <span class="contact-text">QQ群：{{ labInfo.qqGroup }}</span>
           </div>
         </div>
 
@@ -93,10 +93,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { Location, Message, ChatDotRound } from '@element-plus/icons-vue'
 
 const currentYear = computed(() => new Date().getFullYear())
+const { labInfo } = inject('siteLabInfo')
 </script>
 
 <style scoped>
@@ -185,6 +186,7 @@ const currentYear = computed(() => new Date().getFullYear())
 }
 
 .contact-text {
+  overflow-wrap: anywhere;
   color: #d0d8e8;
   line-height: 1.6;
 }
