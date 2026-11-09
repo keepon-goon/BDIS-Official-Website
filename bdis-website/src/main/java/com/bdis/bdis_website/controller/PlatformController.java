@@ -4,6 +4,7 @@ import com.bdis.bdis_website.common.Result;
 import com.bdis.bdis_website.entity.ForumPost;
 import com.bdis.bdis_website.service.ForumPostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,11 +22,14 @@ public class PlatformController {
 
     // 文档4.2接口：GET /api/platform/forum
     @GetMapping("/forum")
-    public Result<List<ForumPost>> getForumPosts(
+    public ResponseEntity<Result<List<ForumPost>>> getForumPosts(
             @RequestParam(required = false) Integer limit
     ) {
+        if (limit != null && (limit < 1 || limit > 100)) {
+            return ResponseEntity.badRequest().body(Result.fail("查询条数须为1到100"));
+        }
         List<ForumPost> posts = forumPostService.getForumPosts(limit);
-        return Result.success(posts); // data直接返回数组，符合文档要求
+        return ResponseEntity.ok(Result.success(posts));
     }
 
     @GetMapping("/forum/{id}")

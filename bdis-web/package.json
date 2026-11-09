@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test": "node --test tests/*.test.js",
     "dev": "vite",
     "dev:mock": "vite --mode mock",
     "build": "vite build",

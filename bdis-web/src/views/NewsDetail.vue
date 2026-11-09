@@ -33,13 +33,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { Calendar } from '@element-plus/icons-vue'
 import { normalizeImageUrl, normalizeUploadPaths } from '@/utils/imageUrl'
 
 const route = useRoute()
+const props = defineProps({ contentType: { type: String, default: 'news' } })
 const item = ref(null)
 const loading = ref(true)
 
@@ -65,18 +66,23 @@ const openLink = (link) => {
   }
 }
 
-onMounted(async () => {
+watch(() => [props.contentType, route.params.id], async (_value, _previous, onCleanup) => {
+  let active = true
+  onCleanup(() => { active = false })
+  item.value = null
+  loading.value = true
   try {
-    const { data } = await axios.get(`/api/news/${route.params.id}`)
-    if (data.code === 0 && data.data) {
+    const endpoint = props.contentType === 'announcement' ? '/api/announcements' : '/api/news'
+    const { data } = await axios.get(`${endpoint}/${route.params.id}`)
+    if (active && data.code === 0 && data.data) {
       item.value = data.data
     }
   } catch (e) {
     console.error('获取详情失败', e)
   } finally {
-    loading.value = false
+    if (active) loading.value = false
   }
-})
+}, { immediate: true })
 </script>
 
 <style scoped>

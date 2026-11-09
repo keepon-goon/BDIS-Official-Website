@@ -38,6 +38,7 @@ const routes = [
       { path: 'platform', component: () => import('@/components/info/Platform.vue'), meta: { tab: 'platform', title: '创新竞赛' } },
       { path: 'news', component: () => import('@/components/info/News.vue'), meta: { tab: 'news', title: '动态公告' } },
       { path: 'news/:id', component: () => import('@/views/NewsDetail.vue'), meta: { tab: 'news', title: '新闻详情' } },
+      { path: 'announcements/:id', component: () => import('@/views/NewsDetail.vue'), props: { contentType: 'announcement' }, meta: { tab: 'news', title: '公告详情' } },
       { path: 'education', component: () => import('@/components/info/Education.vue'), meta: { tab: 'education', title: '学习资料' } },
       { path: 'join', component: () => import('@/components/info/Join.vue'), meta: { tab: 'join', title: '加入我们' } },
       { path: 'project/:id', component: () => import('@/views/ProjectDetail.vue'), meta: { tab: 'research', title: '项目详情' } },

@@ -102,6 +102,10 @@ class ResumeServiceTest {
         var record = submissions.selectById(id);
         assertThat(storage.savedFile(record.getWordKey())).isNotEmpty();
         assertThat(record.getMailLastError()).contains("未配置");
+        var history = service.mailLogs(Long.parseLong(id), 1, 10);
+        assertThat(history.total()).isEqualTo(1);
+        assertThat(history.list().get(0).triggerType()).isEqualTo("AUTO");
+        assertThat(history.list().get(0).status()).isEqualTo("FAILED");
         mvc.perform(post("/api/resume/confirm").header("X-Resume-Preview-Token", token))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.submissionId").value(id));
     }
@@ -157,5 +161,11 @@ class ResumeServiceTest {
         mvc.perform(post("/api/resume/confirm").header("X-Resume-Preview-Token", token))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.mailStatus").value(2));
         verify(mail, times(1)).send(any(ResumeSubmission.class), eq("test@example.com"));
+        var record = submissions.selectOne(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<ResumeSubmission>()
+                .eq("submission_key", storage.hash(token)));
+        var history = service.mailLogs(record.getId(), 1, 10);
+        assertThat(history.total()).isEqualTo(1);
+        assertThat(history.list().get(0).triggerType()).isEqualTo("AUTO");
+        assertThat(history.list().get(0).status()).isEqualTo("ACCEPTED");
     }
 }

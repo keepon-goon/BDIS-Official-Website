@@ -207,6 +207,20 @@ public class FeedbackService {
         submissions.update(null, update);
     }
 
+    public void updatePublication(String id, boolean published) {
+        FeedbackSubmission item = submissions.selectById(id);
+        if (item == null) throw new FeedbackException(404, "这条意见不存在");
+        if (published) {
+            if (!Boolean.TRUE.equals(item.getReplyRequested()) || !Boolean.TRUE.equals(item.getPublicReply()))
+                throw new FeedbackException(400, "投稿人未同意公开，不能公开这条问答");
+            if (item.getRepliedAt() == null || item.getReplyContent() == null || item.getReplyContent().isBlank())
+                throw new FeedbackException(400, "请先保存回复，再公开展示");
+        }
+        if (Boolean.valueOf(published).equals(item.getPublished())) return;
+        submissions.update(null, new LambdaUpdateWrapper<FeedbackSubmission>().eq(FeedbackSubmission::getId, id)
+                .set(FeedbackSubmission::getPublished, published).set(FeedbackSubmission::getUpdatedAt, LocalDateTime.now(clock)));
+    }
+
     public void sendReplyEmail(String id) {
         FeedbackSubmission item = submissions.selectById(id);
         if (item == null) throw new FeedbackException(404, "这条意见不存在");

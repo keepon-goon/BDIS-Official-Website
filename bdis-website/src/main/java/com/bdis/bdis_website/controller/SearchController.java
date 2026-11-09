@@ -9,6 +9,7 @@ import com.bdis.bdis_website.service.AnnouncementItemService;
 import com.bdis.bdis_website.service.EducationResourceService;
 import com.bdis.bdis_website.service.NewsItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,13 +31,16 @@ public class SearchController {
     private EducationResourceService resourceService;
 
     @GetMapping
-    public Result<Map<String, Object>> search(
+    public ResponseEntity<Result<Map<String, Object>>> search(
             @RequestParam String q,
             @RequestParam(required = false, defaultValue = "1") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer limit
     ) {
         if (q == null || q.trim().isEmpty()) {
-            return Result.fail("搜索关键词不能为空");
+            return ResponseEntity.ok(Result.fail("搜索关键词不能为空"));
+        }
+        if (page < 1 || page > 100000 || limit < 1 || limit > 100) {
+            return ResponseEntity.badRequest().body(Result.fail("分页参数无效：页码须为1到100000，每页条数须为1到100"));
         }
 
         String keyword = q.trim();
@@ -68,7 +72,7 @@ public class SearchController {
             map.put("title", item.getTitle());
             map.put("summary", item.getSummary());
             map.put("date", item.getPublishDate());
-            map.put("link", "/info/news/" + item.getId());
+            map.put("link", "/info/announcements/" + item.getId());
             results.add(map);
         }
 
@@ -96,6 +100,6 @@ public class SearchController {
         data.put("total", total);
         data.put("page", page);
         data.put("limit", limit);
-        return Result.success(data);
+        return ResponseEntity.ok(Result.success(data));
     }
 }

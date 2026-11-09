@@ -147,7 +147,7 @@ async function upload() {
   busy.value = true
   const version = ++resumeDraft.version
   try {
-    const preview = await resumeApi.upload(file.value, index)
+    const preview = await resumeApi.upload({ ...index }, file.value, resumeDraft.preview?.previewToken)
     if (!active || version !== resumeDraft.version) return
     setResumePreview(preview)
     await router.push('/resume/preview')

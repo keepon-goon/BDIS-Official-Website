@@ -39,6 +39,7 @@ export const feedbackApi = {
   detail: (id, signal) => request({ url: `/api/admin/feedback/${encodeURIComponent(id)}`, signal }),
   status: (id, status) => request({ method: 'put', url: `/api/admin/feedback/${encodeURIComponent(id)}/status`, data: { status } }),
   reply: (id, data) => request({ method: 'put', url: `/api/admin/feedback/${encodeURIComponent(id)}/reply`, data }),
+  publication: (id, published) => request({ method: 'put', url: `/api/admin/feedback/${encodeURIComponent(id)}/publication`, data: { published } }),
   emailReply: id => request({ method: 'post', url: `/api/admin/feedback/${encodeURIComponent(id)}/reply/email` }),
   image: (url, signal) => request({ url, responseType: 'blob', signal })
 }

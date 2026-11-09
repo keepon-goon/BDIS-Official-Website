@@ -12,12 +12,16 @@ public interface ResumeService {
     com.bdis.bdis_website.vo.ResumeSubmitVO confirm(String token);
     com.bdis.bdis_website.vo.ResumeSettingsVO settings();
     com.bdis.bdis_website.vo.ResumeSettingsVO updateSettings(com.bdis.bdis_website.dto.ResumeSettingsDTO form);
-    PageResult list(int page, int pageSize, String name, String studentNo, Integer mailStatus);
+    PageResult list(int page, int pageSize, String name, String studentNo, Integer mailStatus, String archiveStatus);
+    void archive(long id, boolean archived);
+    MailLogPage mailLogs(long id, int page, int pageSize);
     com.bdis.bdis_website.vo.ResumeAdminVO detail(long id);
     ResumeFile savedFile(long id, boolean pdf);
     com.bdis.bdis_website.vo.ResumeSubmitVO send(long id);
 
     record PageResult(java.util.List<com.bdis.bdis_website.vo.ResumeAdminVO> list, long total, int page, int pageSize) { }
+
+    record MailLogPage(java.util.List<com.bdis.bdis_website.vo.ResumeMailLogVO> list, long total, int page, int pageSize) { }
 
     record ResumeFile(byte[] bytes, String filename) { }
 }

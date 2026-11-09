@@ -143,6 +143,7 @@ CREATE TABLE IF NOT EXISTS `resume_submission` (
   `intro` TEXT,
   `resume_url` VARCHAR(512) DEFAULT NULL,
   `status` INT DEFAULT 0,
+  `archived` TINYINT NOT NULL DEFAULT 0,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `gender` VARCHAR(10) DEFAULT NULL,
   `ethnicity` VARCHAR(30) DEFAULT NULL,
@@ -169,7 +170,24 @@ CREATE TABLE IF NOT EXISTS `resume_submission` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_resume_submission_key` (`submission_key`),
   KEY `idx_resume_created_id` (`created_at`, `id`),
-  KEY `idx_resume_mail_created` (`mail_status`, `created_at`, `id`)
+  KEY `idx_resume_mail_created` (`mail_status`, `created_at`, `id`),
+  KEY `idx_resume_archive_created` (`archived`, `created_at`, `id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `resume_mail_log` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `submission_id` BIGINT NOT NULL,
+  `trigger_type` VARCHAR(10) NOT NULL,
+  `recipient` VARCHAR(254) DEFAULT NULL,
+  `status` VARCHAR(16) NOT NULL,
+  `started_at` DATETIME NOT NULL,
+  `finished_at` DATETIME DEFAULT NULL,
+  `duration_ms` BIGINT DEFAULT NULL,
+  `error_type` VARCHAR(200) DEFAULT NULL,
+  `smtp_code` INT DEFAULT NULL,
+  `error_message` VARCHAR(1000) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_resume_mail_log_submission` (`submission_id`, `started_at`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `resume_settings` (

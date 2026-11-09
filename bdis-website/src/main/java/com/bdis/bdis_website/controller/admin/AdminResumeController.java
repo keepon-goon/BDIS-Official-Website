@@ -27,8 +27,22 @@ public class AdminResumeController {
     @GetMapping
     public Result<ResumeService.PageResult> list(@RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int pageSize, @RequestParam(required = false) String name,
-            @RequestParam(required = false) String studentNo, @RequestParam(required = false) Integer mailStatus) {
-        return Result.success(service.list(page, pageSize, name, studentNo, mailStatus));
+            @RequestParam(required = false) String studentNo, @RequestParam(required = false) Integer mailStatus,
+            @RequestParam(defaultValue = "UNARCHIVED") String archiveStatus) {
+        return Result.success(service.list(page, pageSize, name, studentNo, mailStatus, archiveStatus));
+    }
+
+    @PutMapping("/{id}/archive")
+    public Result<Void> archive(@PathVariable long id,
+            @jakarta.validation.Valid @RequestBody com.bdis.bdis_website.dto.ResumeArchiveDTO form) {
+        service.archive(id, form.archived());
+        return Result.success();
+    }
+
+    @GetMapping("/{id}/mail-logs")
+    public Result<ResumeService.MailLogPage> mailLogs(@PathVariable long id,
+            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int pageSize) {
+        return Result.success(service.mailLogs(id, page, pageSize));
     }
 
     @PutMapping("/settings")

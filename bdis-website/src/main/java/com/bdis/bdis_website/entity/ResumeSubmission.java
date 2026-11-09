@@ -21,6 +21,7 @@ public class ResumeSubmission {
     private String intro;
     private String resumeUrl;
     private Integer status;
+    private Boolean archived;
     private LocalDateTime createdAt;
     private String gender;
     private String ethnicity;

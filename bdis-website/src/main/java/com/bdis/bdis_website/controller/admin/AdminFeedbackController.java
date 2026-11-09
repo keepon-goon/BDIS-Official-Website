@@ -50,6 +50,14 @@ public class AdminFeedbackController {
         return Result.success(service.detail(id));
     }
 
+    @PutMapping("/{id}/publication")
+    public ResponseEntity<Result<FeedbackService.FeedbackView>> publication(@PathVariable String id,
+            @jakarta.validation.Valid @RequestBody PublicationUpdate body) {
+        service.updatePublication(id, body.published());
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Result.success(service.detail(id)));
+    }
+
     public record StatusUpdate(String status) {}
     public record ReplyUpdate(String replyContent, boolean published) {}
+    public record PublicationUpdate(@jakarta.validation.constraints.NotNull(message = "请提供展示状态") Boolean published) {}
 }

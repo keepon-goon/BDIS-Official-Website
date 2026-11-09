@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(properties = {
         "spring.datasource.url=jdbc:h2:mem:feedback-tests;MODE=MySQL;DB_CLOSE_DELAY=-1",
-        "spring.sql.init.schema-locations=file:sql/resume_submission_migration.sql,file:sql/feedback_migration.sql"
+        "spring.sql.init.schema-locations=file:sql/resume_submission_migration.sql,file:sql/feedback_migration.sql,classpath:admin-test-schema.sql"
 })
 @AutoConfigureMockMvc
 class FeedbackTest {
@@ -210,6 +210,68 @@ class FeedbackTest {
                         .content("{\"replyContent\":\"欢迎来交流\",\"published\":false}"))
                 .andExpect(status().isOk());
         mvc.perform(get("/api/feedback/qa")).andExpect(jsonPath("$.data.total").value(0));
+    }
+
+    @Test void togglesPublicationWithoutChangingTheReplyOrProcessingState() throws Exception {
+        mvc.perform(multipart("/api/feedback").param("content", "需要展示的问答")
+                        .param("replyRequested", "true").param("publicReply", "true"))
+                .andExpect(status().isOk());
+        var entry = submissions.selectList(null).get(0);
+        String path = "/api/admin/feedback/" + entry.getId();
+        mvc.perform(put(path + "/reply").header("Authorization", auth()).contentType("application/json")
+                        .content("{\"replyContent\":\"已经保存的回答\",\"published\":true}"))
+                .andExpect(status().isOk());
+        mvc.perform(put(path + "/status").header("Authorization", auth()).contentType("application/json")
+                        .content("{\"status\":\"PROCESSING\"}"))
+                .andExpect(status().isOk());
+        var before = submissions.selectById(entry.getId());
+        clearInvocations(mailService);
+        for (boolean published : new boolean[]{false, false, true, true}) {
+            mvc.perform(put(path + "/publication").header("Authorization", auth()).contentType("application/json")
+                            .content(json.writeValueAsString(java.util.Map.of("published", published))))
+                    .andExpect(status().isOk()).andExpect(header().string("Cache-Control", "no-store"))
+                    .andExpect(jsonPath("$.data.published").value(published))
+                    .andExpect(jsonPath("$.data.status").value("PROCESSING"));
+            mvc.perform(get("/api/feedback/qa")).andExpect(jsonPath("$.data.total").value(published ? 1 : 0));
+            var after = submissions.selectById(entry.getId());
+            assertEquals(before.getReplyContent(), after.getReplyContent());
+            assertEquals(before.getRepliedAt(), after.getRepliedAt());
+            assertEquals(before.getReplyEmailedAt(), after.getReplyEmailedAt());
+            assertEquals(before.getContent(), after.getContent());
+        }
+        verifyNoInteractions(mailService);
+    }
+
+    @Test void publicationRequiresConsentAndASavedAnswer() throws Exception {
+        for (String preferences : new String[]{"NONE", "PRIVATE", "PUBLIC"}) {
+            var request = multipart("/api/feedback").param("content", "展示权限测试");
+            if (!preferences.equals("NONE")) request.param("replyRequested", "true");
+            if (preferences.equals("PRIVATE")) request.param("replyEmail", "friend@example.com");
+            if (preferences.equals("PUBLIC")) request.param("publicReply", "true");
+            mvc.perform(request).andExpect(status().isOk());
+        }
+        for (var entry : submissions.selectList(null)) {
+            mvc.perform(put("/api/admin/feedback/" + entry.getId() + "/publication")
+                            .header("Authorization", auth()).contentType("application/json").content("{\"published\":true}"))
+                    .andExpect(status().isBadRequest());
+            assertFalse(submissions.selectById(entry.getId()).getPublished());
+        }
+        mvc.perform(get("/api/feedback/qa")).andExpect(jsonPath("$.data.total").value(0));
+    }
+
+    @Test void publicationValidatesAuthenticationBodyAndMissingRecords() throws Exception {
+        String path = "/api/admin/feedback/missing/publication";
+        mvc.perform(put(path).contentType("application/json").content("{\"published\":false}"))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(put(path).header("Authorization", "Bearer invalid").contentType("application/json")
+                        .content("{\"published\":false}"))
+                .andExpect(status().isUnauthorized());
+        for (String body : new String[]{"{}", "{\"published\":null}", "[]"}) {
+            mvc.perform(put(path).header("Authorization", auth()).contentType("application/json").content(body))
+                    .andExpect(status().isBadRequest());
+        }
+        mvc.perform(put(path).header("Authorization", auth()).contentType("application/json").content("{\"published\":false}"))
+                .andExpect(status().isNotFound());
     }
 
     @Test void privateRepliesCannotBePublishedAndMailFailuresPreserveTheAnswer() throws Exception {

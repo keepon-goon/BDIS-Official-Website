@@ -14,6 +14,7 @@ public class ResumeAdminVO extends ResumeFormDTO {
     private String templateVersion;
     private String submissionSource;
     private LocalDateTime createdAt;
+    private Boolean archived;
     private Integer mailStatus;
     private String submitMailMode;
     private String mailRecipient;

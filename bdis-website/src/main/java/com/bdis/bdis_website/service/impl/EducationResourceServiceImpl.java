@@ -62,7 +62,7 @@ public class EducationResourceServiceImpl
 
         // 关键词搜索
         if (StringUtils.hasText(keyword)) {
-            wrapper.like("title", keyword).or().like("description", keyword);
+            wrapper.and(w -> w.like("title", keyword).or().like("description", keyword));
         }
 
         // 关键：按 sort_order 升序，如果 sort_order 相同再按 id 升序

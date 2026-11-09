@@ -29,8 +29,12 @@
         <el-table-column label="处理状态" width="110">
           <template #default="{ row }"><el-tag :type="statusInfo(row.status).type">{{ statusInfo(row.status).label }}</el-tag></template>
         </el-table-column>
-        <el-table-column label="操作" width="110" fixed="right">
-          <template #default="{ row }"><el-button size="small" type="primary" plain @click="openDetail(row)">查看详情</el-button></template>
+        <el-table-column label="操作" width="240" fixed="right">
+          <template #default="{ row }">
+            <el-button size="small" type="primary" plain :disabled="Boolean(publicationSaving)" @click="openDetail(row)">查看详情</el-button>
+            <el-button v-if="canChangePublication(row)" size="small" :type="row.published ? 'warning' : 'success'" plain
+              :loading="publicationSaving === row.id" :disabled="Boolean(publicationSaving)" @click="togglePublication(row)">{{ row.published ? '撤回展示' : '重新展示' }}</el-button>
+          </template>
         </el-table-column>
       </el-table>
       <div class="feedback-pagination">
@@ -120,6 +124,7 @@ const replyContent = ref('')
 const replyPublished = ref(false)
 const replySaving = ref(false)
 const emailSending = ref(false)
+const publicationSaving = ref('')
 const replyError = ref('')
 const replyDirty = computed(() => replyContent.value !== (detail.value?.replyContent || '') || replyPublished.value !== Boolean(detail.value?.published))
 const countItems = [{ key: 'total', label: '全部意见' }, { key: 'UNREAD', label: '未读' }, { key: 'PROCESSING', label: '处理中' }, { key: 'RESOLVED', label: '已处理' }]
@@ -151,6 +156,20 @@ async function loadList() {
 }
 
 function filterChanged() { page.value = 1; loadList() }
+function canChangePublication(row) { return Boolean(row.replyRequested && row.publicReply && row.repliedAt && row.replyContent?.trim()) }
+
+async function togglePublication(row) {
+  if (publicationSaving.value || !canChangePublication(row)) return
+  publicationSaving.value = row.id
+  const published = !row.published
+  try {
+    const result = await feedbackApi.publication(row.id, published)
+    records.value = records.value.map(item => item.id === result.id ? result : item)
+    ElMessage.success(result.published ? '已重新展示到官网 Q&A' : '已撤回官网 Q&A 展示')
+  } catch (failure) { ElMessage.error(failure.message) }
+  finally { publicationSaving.value = '' }
+}
+
 function clearImages() { imageCards.value.forEach(item => { if (item.url) URL.revokeObjectURL(item.url) }); imageCards.value = [] }
 function closeDetail() { detailRequest?.abort(); clearImages() }
 

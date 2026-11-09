@@ -8,7 +8,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 
 @RestController
 @RequestMapping("/api/uploads")
@@ -19,18 +22,29 @@ public class AdminFileController {
 
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-        String dirPath = uploadPath.replace("\\", "/");
-        File file = new File(dirPath, filename);
-        if (!file.exists()) {
+        if (filename.contains("/") || filename.contains("\\")) {
             return ResponseEntity.notFound().build();
         }
 
-        Resource resource = new FileSystemResource(file);
-        String contentType = getContentType(filename);
+        try {
+            Path root = Path.of(uploadPath).toRealPath();
+            Path file = root.resolve(filename).normalize();
+            if (!file.startsWith(root) || !Files.isRegularFile(file)) {
+                return ResponseEntity.notFound().build();
+            }
+            Path realFile = file.toRealPath();
+            if (!realFile.startsWith(root)) {
+                return ResponseEntity.notFound().build();
+            }
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, contentType)
-                .body(resource);
+            Resource resource = new FileSystemResource(realFile);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, getContentType(filename))
+                    .header("X-Content-Type-Options", "nosniff")
+                    .body(resource);
+        } catch (IOException | InvalidPathException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     private String getContentType(String filename) {

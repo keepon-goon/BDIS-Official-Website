@@ -13,6 +13,8 @@ import java.time.Clock;
 import com.bdis.bdis_website.exception.ResumeException;
 import java.io.IOException;
 import com.bdis.bdis_website.entity.ResumeSubmission;
+import com.bdis.bdis_website.entity.ResumeMailLog;
+import com.bdis.bdis_website.mapper.ResumeMailLogMapper;
 import com.bdis.bdis_website.mapper.ResumeSubmissionMapper;
 import com.bdis.bdis_website.mapper.ResumeSettingsMapper;
 import com.bdis.bdis_website.vo.ResumeSubmitVO;
@@ -23,6 +25,7 @@ import java.time.LocalDateTime;
 
 @Service
 public class ResumeServiceImpl implements ResumeService {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ResumeServiceImpl.class);
     private final ResumeStorageService storage;
     private final ResumeDocumentService documents;
     private final ResumeConversionService conversions;
@@ -35,11 +38,14 @@ public class ResumeServiceImpl implements ResumeService {
     private final ResumeSettingsMapper settings;
     private final TransactionTemplate transactions;
     private final ResumeMailService mail;
+    private final ResumeMailLogMapper mailLogs;
+    private final ResumeMailDiagnostics diagnostics;
 
     public ResumeServiceImpl(ResumeStorageService storage, ResumeDocumentService documents,
                              ResumeConversionService conversions, ResumeProperties properties, Clock resumeClock,
                              ResumePhotoService photos, ResumeSubmissionMapper submissions,
-                             ResumeSettingsMapper settings, TransactionTemplate transactions, ResumeMailService mail) {
+                             ResumeSettingsMapper settings, TransactionTemplate transactions, ResumeMailService mail,
+                             ResumeMailLogMapper mailLogs, ResumeMailDiagnostics diagnostics) {
         this.storage = storage;
         this.documents = documents;
         this.conversions = conversions;
@@ -50,6 +56,8 @@ public class ResumeServiceImpl implements ResumeService {
         this.settings = settings;
         this.transactions = transactions;
         this.mail = mail;
+        this.mailLogs = mailLogs;
+        this.diagnostics = diagnostics;
     }
 
     @Override
@@ -177,15 +185,18 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
-    public PageResult list(int page, int pageSize, String name, String studentNo, Integer mailStatus) {
+    public PageResult list(int page, int pageSize, String name, String studentNo, Integer mailStatus, String archiveStatus) {
         if (page < 1 || pageSize < 1 || pageSize > 50 || (mailStatus != null && (mailStatus < 0 || mailStatus > 3)))
             throw new ResumeException(400, "分页或邮件状态参数不正确");
         if ((name != null && name.length() > 80) || (studentNo != null && studentNo.length() > 80))
             throw new ResumeException(400, "搜索条件过长");
+        if (!"UNARCHIVED".equals(archiveStatus) && !"ARCHIVED".equals(archiveStatus) && !"ALL".equals(archiveStatus))
+            throw new ResumeException(400, "归档筛选只能为UNARCHIVED、ARCHIVED或ALL");
         var query = new QueryWrapper<ResumeSubmission>();
         if (name != null && !name.isBlank()) query.like("name", name.strip());
         if (studentNo != null && !studentNo.isBlank()) query.like("student_no", studentNo.strip());
         if (mailStatus != null) query.eq("mail_status", mailStatus);
+        if (!"ALL".equals(archiveStatus)) query.eq("archived", "ARCHIVED".equals(archiveStatus));
         query.orderByDesc("created_at", "id");
         var result = submissions.selectPage(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(page, pageSize), query);
         return new PageResult(result.getRecords().stream().map(this::adminView).toList(), result.getTotal(), page, pageSize);
@@ -211,6 +222,28 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
+    public void archive(long id, boolean archived) {
+        var record = requireRecord(id);
+        if (Boolean.valueOf(archived).equals(record.getArchived())) return;
+        if (submissions.update(null, new UpdateWrapper<ResumeSubmission>().eq("id", id).set("archived", archived)) != 1)
+            throw new ResumeException(503, "归档状态保存失败，请刷新后重试");
+    }
+
+    @Override
+    public MailLogPage mailLogs(long id, int page, int pageSize) {
+        requireRecord(id);
+        if (page < 1 || page > 100000 || pageSize < 1 || pageSize > 50)
+            throw new ResumeException(400, "邮件日志分页参数不正确");
+        var result = mailLogs.selectPage(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(page, pageSize),
+                new QueryWrapper<ResumeMailLog>().eq("submission_id", id).orderByDesc("started_at", "id"));
+        var records = result.getRecords().stream().map(item -> new com.bdis.bdis_website.vo.ResumeMailLogVO(
+                item.getId().toString(), item.getTriggerType(), item.getRecipient(), item.getStatus(),
+                item.getStartedAt(), item.getFinishedAt(), item.getDurationMs(), item.getErrorType(),
+                item.getSmtpCode(), item.getErrorMessage())).toList();
+        return new MailLogPage(records, result.getTotal(), page, pageSize);
+    }
+
+    @Override
     public ResumeFile savedFile(long id, boolean pdf) {
         var record = requireRecord(id);
         if (record.getDocumentName() == null) throw new ResumeException(409, "历史记录没有新版文件");
@@ -225,7 +258,7 @@ public class ResumeServiceImpl implements ResumeService {
             throw new ResumeException(409, "历史记录没有新版Word，无法发送");
         var rules = settings.selectById(1L);
         if (rules == null) throw new ResumeException(503, "报名设置尚未初始化");
-        attemptMail(record, rules.getRecipient());
+        attemptMail(record, rules.getRecipient(), "MANUAL");
         var latest = requireRecord(id);
         if (!Integer.valueOf(2).equals(latest.getMailStatus()))
             throw new ResumeException(503, latest.getMailLastError() == null ? "发送结果待核实，请稍后查看" : latest.getMailLastError());
@@ -235,8 +268,14 @@ public class ResumeServiceImpl implements ResumeService {
     @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
     public void recoverUncertainMail() {
         try {
-            submissions.update(null, new UpdateWrapper<ResumeSubmission>().eq("mail_status", 1).set("mail_status", 3)
-                    .set("mail_last_error", "上次发送结果待核实，请管理员确认后补发"));
+            transactions.executeWithoutResult(status -> {
+                submissions.update(null, new UpdateWrapper<ResumeSubmission>().eq("mail_status", 1).set("mail_status", 3)
+                        .set("mail_last_error", "上次发送结果待核实，请管理员确认后补发"));
+                mailLogs.update(null, new UpdateWrapper<ResumeMailLog>().eq("status", "SENDING")
+                        .set("status", "UNKNOWN").set("finished_at", LocalDateTime.now(clock))
+                        .set("error_type", "PROCESS_RESTART")
+                        .set("error_message", "服务在发送结果登记前重启，请核对收件箱后再决定是否补发"));
+            });
         } catch (org.springframework.dao.DataAccessException e) {
             org.slf4j.LoggerFactory.getLogger(getClass()).warn("尚未完成简历表初始化，邮件结果恢复检查暂未执行");
         }
@@ -278,6 +317,7 @@ public class ResumeServiceImpl implements ResumeService {
                 record.setWordKey(directoryKey + "/" + snapshot.getDocumentName() + ".docx");
                 record.setPdfKey(directoryKey + "/" + snapshot.getDocumentName() + ".pdf");
                 record.setStatus(0);
+                record.setArchived(false);
                 record.setMailStatus(0);
                 record.setSubmitMailMode(rules.getSendMode());
                 record.setCreatedAt(LocalDateTime.now(clock));
@@ -304,9 +344,11 @@ public class ResumeServiceImpl implements ResumeService {
         }
         if ("AUTO".equals(submission.getSubmitMailMode())) {
             try {
-                attemptMail(submission, recipient);
+                attemptMail(submission, recipient, "AUTO");
             } catch (RuntimeException e) {
                 submission.setMailStatus(3);
+                log.warn("自动邮件发送未完成，简历ID={}，异常类型={}，原因={}", submission.getId(),
+                        e.getClass().getName(), diagnostics.describe(e).message());
             }
         }
         try {
@@ -316,23 +358,77 @@ public class ResumeServiceImpl implements ResumeService {
         }
     }
 
-    private void attemptMail(ResumeSubmission record, String recipient) {
-        if (submissions.claimMail(record.getId(), recipient) != 1) throw new ResumeException(409, "该简历正在发送，请勿重复操作");
+    private void attemptMail(ResumeSubmission record, String recipient, String triggerType) {
+        var attempt = new ResumeMailLog();
+        attempt.setSubmissionId(record.getId());
+        attempt.setTriggerType(triggerType);
+        attempt.setRecipient(recipient);
+        attempt.setStatus("SENDING");
+        attempt.setStartedAt(LocalDateTime.now(clock));
+        try {
+            transactions.executeWithoutResult(status -> {
+                if (submissions.claimMail(record.getId(), recipient) != 1)
+                    throw new ResumeException(409, "该简历正在发送，请勿重复操作");
+                if (mailLogs.insert(attempt) != 1) throw new ResumeException(503, "发送日志保存失败，请稍后重试");
+            });
+        } catch (RuntimeException e) {
+            if (e instanceof ResumeException failure && failure.getStatus() == 409) throw failure;
+            String preparationError = "邮件发送日志暂不可写，本次未发送，请稍后补发";
+            record.setMailStatus(3);
+            record.setMailLastError(preparationError);
+            log.error("邮件发送准备失败，简历ID={}，异常类型={}，原因={}", record.getId(),
+                    e.getClass().getName(), diagnostics.describe(e).message());
+            try {
+                submissions.update(null, new UpdateWrapper<ResumeSubmission>().eq("id", record.getId())
+                        .and(w -> w.isNull("mail_status").or().ne("mail_status", 1))
+                        .set("mail_status", 3).set("mail_last_error", preparationError)
+                        .set("mail_recipient", recipient).set("mail_sent_at", null));
+            } catch (org.springframework.dao.DataAccessException unavailable) {
+                log.error("邮件准备失败状态暂不可写，简历ID={}，异常类型={}", record.getId(), unavailable.getClass().getName());
+            }
+            throw new ResumeException(503, preparationError);
+        }
+        long started = System.nanoTime();
+        log.info("开始发送简历邮件，简历ID={}，日志ID={}，触发方式={}", record.getId(), attempt.getId(), triggerType);
         int result = 2;
         String error = null;
         try {
             mail.send(record, recipient);
+            attempt.setStatus("ACCEPTED");
         } catch (Exception e) {
             result = 3;
-            error = e instanceof ResumeException ? e.getMessage() : "邮件未发送成功，请检查发件配置后补发";
+            var failure = diagnostics.describe(e);
+            error = failure.message();
+            attempt.setStatus("FAILED");
+            attempt.setErrorType(failure.errorType());
+            attempt.setSmtpCode(failure.smtpCode());
+            attempt.setErrorMessage(error);
         }
+        attempt.setFinishedAt(LocalDateTime.now(clock));
+        attempt.setDurationMs(java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started));
         record.setMailStatus(result);
+        record.setMailLastError(error);
+        if (result == 2) {
+            log.info("邮件服务器已接受简历邮件，简历ID={}，日志ID={}，耗时毫秒={}",
+                    record.getId(), attempt.getId(), attempt.getDurationMs());
+        } else {
+            log.warn("简历邮件发送失败，简历ID={}，日志ID={}，异常类型={}，SMTP返回码={}，耗时毫秒={}，原因={}",
+                    record.getId(), attempt.getId(), attempt.getErrorType(), attempt.getSmtpCode(),
+                    attempt.getDurationMs(), attempt.getErrorMessage());
+        }
+        final int mailStatus = result;
+        final String mailError = error;
         try {
-            submissions.update(null, new UpdateWrapper<ResumeSubmission>().eq("id", record.getId()).eq("mail_status", 1)
-                    .set("mail_status", result).set("mail_last_error", error)
-                    .set("mail_sent_at", result == 2 ? LocalDateTime.now(clock) : null));
-        } catch (org.springframework.dao.DataAccessException e) {
-            org.slf4j.LoggerFactory.getLogger(getClass()).error("邮件结果写入失败，请管理员核实后补发");
+            transactions.executeWithoutResult(status -> {
+                int changed = submissions.update(null, new UpdateWrapper<ResumeSubmission>().eq("id", record.getId()).eq("mail_status", 1)
+                        .set("mail_status", mailStatus).set("mail_last_error", mailError)
+                        .set("mail_sent_at", mailStatus == 2 ? attempt.getFinishedAt() : null));
+                if (changed != 1 || mailLogs.updateById(attempt) != 1)
+                    throw new ResumeException(503, "邮件结果登记失败，请核实后补发");
+            });
+        } catch (RuntimeException e) {
+            log.error("邮件结果登记失败，简历ID={}，日志ID={}，实际调用结果={}，异常类型={}，原因={}，请核实后补发",
+                    record.getId(), attempt.getId(), attempt.getStatus(), e.getClass().getName(), diagnostics.describe(e).message());
         }
     }
 

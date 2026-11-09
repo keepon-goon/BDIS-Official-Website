@@ -24,6 +24,13 @@
             <el-option v-for="(label, value) in mailLabels" :key="value" :label="label" :value="Number(value)" />
           </el-select>
         </el-form-item>
+        <el-form-item label="归档状态">
+          <el-select v-model="filters.archiveStatus" style="width:140px" @change="search">
+            <el-option label="未归档" value="UNARCHIVED" />
+            <el-option label="已归档" value="ARCHIVED" />
+            <el-option label="全部" value="ALL" />
+          </el-select>
+        </el-form-item>
         <el-form-item><el-button type="primary" native-type="submit">查询</el-button></el-form-item>
       </el-form>
       <el-alert v-if="errorText" :title="errorText" type="error" :closable="false" show-icon />
@@ -34,12 +41,14 @@
         <el-table-column label="来源" width="95"><template #default="{ row }">{{ row.submissionSource === 'FORM' ? '在线填写' : row.submissionSource === 'UPLOAD' ? '上传Word' : '历史记录' }}</template></el-table-column>
         <el-table-column label="邮件状态" min-width="150"><template #default="{ row }"><el-tooltip :content="row.mailLastError || row.mailRecipient || '尚未发送'"><span>{{ mailLabels[row.mailStatus ?? 0] }}</span></el-tooltip></template></el-table-column>
         <el-table-column label="保存时间" min-width="170"><template #default="{ row }">{{ (row.createdAt || '').replace('T', ' ') }}</template></el-table-column>
-        <el-table-column label="操作" width="280" fixed="right">
+        <el-table-column label="归档状态" width="100"><template #default="{ row }"><el-tag :type="row.archived ? 'info' : 'success'" effect="plain">{{ row.archived ? '已归档' : '未归档' }}</el-tag></template></el-table-column>
+        <el-table-column label="操作" width="360" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="showDetail(row)">详情</el-button>
             <el-button link type="primary" :disabled="!row.fileAvailable" @click="showPdf(row)">PDF</el-button>
             <el-button link type="primary" :disabled="!row.fileAvailable" @click="downloadWord(row)">Word</el-button>
             <el-button link type="primary" :loading="sending === row.id" :disabled="!row.fileAvailable || !settings.mailConfigured || !settings.recipient || row.mailStatus === 1" @click="send(row)">{{ row.mailStatus === 0 ? '发送' : '补发' }}</el-button>
+            <el-button link :type="row.archived ? 'success' : 'warning'" :loading="archiving === row.id" :disabled="Boolean(archiving)" @click="toggleArchive(row)">{{ row.archived ? '恢复归档' : '归档' }}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -55,6 +64,27 @@
         <div v-for="item in narrativeFields" :key="item.key" class="resume-detail-text"><strong>{{ item.label }}</strong><p>{{ detailValue(item.key) }}</p></div>
         <p class="resume-note">文件：{{ detail.documentName || '历史记录，未生成新版文件' }}</p>
         <p class="resume-note">最近一次目标：{{ detail.mailRecipient || '尚未发送' }}；结果：{{ detail.mailLastError || mailLabels[detail.mailStatus ?? 0] }}</p>
+        <h3>邮件发送记录</h3>
+        <p class="resume-note">保留每次自动发送和手动补发的结果。“邮件服务器已接受”表示发送服务器已受理，实际收件请在邮箱中核实。</p>
+        <el-alert v-if="mailLogError" :title="mailLogError" type="error" :closable="false" show-icon />
+        <el-table :data="mailLogs" v-loading="mailLogsLoading" row-key="id" empty-text="暂无发送记录" style="width:100%">
+          <el-table-column type="expand">
+            <template #default="{ row }">
+              <el-descriptions :column="1" border class="resume-mail-log-detail">
+                <el-descriptions-item label="结束时间">{{ formatTime(row.finishedAt) }}</el-descriptions-item>
+                <el-descriptions-item label="异常类型">{{ row.errorType || '—' }}</el-descriptions-item>
+                <el-descriptions-item label="SMTP返回码">{{ row.smtpCode ?? '—' }}</el-descriptions-item>
+                <el-descriptions-item label="具体原因">{{ row.errorMessage || (row.status === 'ACCEPTED' ? '邮件服务器已接受发送' : '—') }}</el-descriptions-item>
+              </el-descriptions>
+            </template>
+          </el-table-column>
+          <el-table-column label="开始时间" width="170"><template #default="{ row }">{{ formatTime(row.startedAt) }}</template></el-table-column>
+          <el-table-column label="触发方式" width="100"><template #default="{ row }">{{ row.triggerType === 'AUTO' ? '自动发送' : '手动发送' }}</template></el-table-column>
+          <el-table-column prop="recipient" label="目标邮箱" min-width="190" show-overflow-tooltip />
+          <el-table-column label="结果" min-width="150"><template #default="{ row }"><el-tag :type="row.status === 'ACCEPTED' ? 'success' : row.status === 'FAILED' ? 'danger' : 'warning'">{{ mailLogLabels[row.status] || row.status }}</el-tag></template></el-table-column>
+          <el-table-column label="耗时" width="100"><template #default="{ row }">{{ row.durationMs == null ? '—' : row.durationMs + ' ms' }}</template></el-table-column>
+        </el-table>
+        <el-pagination v-if="mailLogTotal > 10" class="resume-admin-pagination" v-model:current-page="mailLogPage" :page-size="10" :total="mailLogTotal" layout="prev, pager, next, total" @current-change="loadMailLogs" />
       </template>
     </el-dialog>
     <el-dialog v-model="pdfVisible" title="已保存的报名表 PDF" width="min(1000px, 96vw)" @closed="clearPdf">
@@ -71,20 +101,30 @@ import { resumeApi, downloadResumeFile } from '../../utils/resumeApi'
 import '../../assets/resume.css'
 
 const settings = reactive({ sendMode: 'AUTO', recipient: '', mailConfigured: false })
-const filters = reactive({ name: '', studentNo: '', mailStatus: null })
+const filters = reactive({ name: '', studentNo: '', mailStatus: null, archiveStatus: 'UNARCHIVED' })
 const rows = ref([])
 const page = ref(1)
 const total = ref(0)
 const loading = ref(false)
 const savingSettings = ref(false)
 const sending = ref('')
+const archiving = ref('')
 const errorText = ref('')
 const detail = ref(null)
 const detailVisible = ref(false)
 const pdfVisible = ref(false)
 const pdfUrl = ref('')
 const pdfFilename = ref('报名表.pdf')
+const mailLogs = ref([])
+const mailLogsLoading = ref(false)
+const mailLogError = ref('')
+const mailLogPage = ref(1)
+const mailLogTotal = ref(0)
+let listRequest = 0
+let detailRequest = 0
+let mailLogRequest = 0
 const mailLabels = { 0: '待发送', 1: '发送中/待核实', 2: '邮件服务器已接受', 3: '失败/待核实' }
+const mailLogLabels = { SENDING: '处理中', ACCEPTED: '邮件服务器已接受', FAILED: '失败', UNKNOWN: '结果待核实' }
 const detailFields = [
   { key: 'name', label: '姓名' }, { key: 'studentNo', label: '学号' }, { key: 'gender', label: '性别' },
   { key: 'ethnicity', label: '民族' }, { key: 'college', label: '学院' }, { key: 'birthMonth', label: '出生年月' },
@@ -101,16 +141,25 @@ onMounted(async () => {
 onBeforeUnmount(clearPdf)
 
 async function loadList() {
+  const request = ++listRequest
   loading.value = true
   errorText.value = ''
   try {
     const result = await resumeApi.list({ ...filters, mailStatus: filters.mailStatus === '' ? null : filters.mailStatus, page: page.value, pageSize: 10 })
+    if (request !== listRequest) return
+    const lastPage = Math.max(1, Math.ceil(result.total / 10))
+    if (page.value > lastPage) {
+      page.value = lastPage
+      await loadList()
+      return
+    }
     rows.value = result.list
     total.value = result.total
-  } catch (error) { errorText.value = error.message }
-  finally { loading.value = false }
+  } catch (error) { if (request === listRequest) errorText.value = error.message }
+  finally { if (request === listRequest) loading.value = false }
 }
-function search() { page.value = 1; loadList() }
+function search() { page.value = 1; return loadList() }
+function formatTime(value) { return value ? String(value).replace('T', ' ') : '—' }
 function detailValue(key) {
   const value = detail.value[key]
   if (value === true) return '是'
@@ -127,8 +176,48 @@ async function saveSettings() {
   finally { savingSettings.value = false }
 }
 async function showDetail(row) {
-  try { detail.value = await resumeApi.detail(row.id); detailVisible.value = true }
-  catch (error) { ElMessage.error(error.message) }
+  const request = ++detailRequest
+  mailLogRequest++
+  mailLogsLoading.value = false
+  try {
+    const result = await resumeApi.detail(row.id)
+    if (request !== detailRequest) return
+    detail.value = result
+    detailVisible.value = true
+    mailLogs.value = []
+    mailLogPage.value = 1
+    mailLogTotal.value = 0
+    await loadMailLogs()
+  } catch (error) { if (request === detailRequest) ElMessage.error(error.message) }
+}
+async function loadMailLogs() {
+  if (!detail.value) return
+  const request = ++mailLogRequest
+  const id = detail.value.id
+  mailLogsLoading.value = true
+  mailLogError.value = ''
+  mailLogs.value = []
+  try {
+    const result = await resumeApi.mailLogs(id, { page: mailLogPage.value, pageSize: 10 })
+    if (request !== mailLogRequest || detail.value?.id !== id) return
+    mailLogs.value = result.list
+    mailLogTotal.value = result.total
+  } catch (error) {
+    if (request === mailLogRequest) mailLogError.value = error.message
+  } finally {
+    if (request === mailLogRequest) mailLogsLoading.value = false
+  }
+}
+async function toggleArchive(row) {
+  if (archiving.value) return
+  archiving.value = row.id
+  const archived = !row.archived
+  try {
+    await resumeApi.archive(row.id, archived)
+    ElMessage.success(archived ? '归档成功' : '已恢复为未归档')
+    await loadList()
+  } catch (error) { ElMessage.error(error.message) }
+  finally { archiving.value = '' }
 }
 function clearPdf() { if (pdfUrl.value) URL.revokeObjectURL(pdfUrl.value); pdfUrl.value = '' }
 async function showPdf(row) {
@@ -147,12 +236,17 @@ async function send(row) {
   sending.value = row.id
   try { const result = await resumeApi.send(row.id); ElMessage.success(result.message) }
   catch (error) { ElMessage.error(error.message) }
-  finally { sending.value = ''; await loadList() }
+  finally {
+    sending.value = ''
+    await loadList()
+    if (detailVisible.value && detail.value?.id === row.id) await showDetail(row)
+  }
 }
 </script>
 
 <style scoped>
 .resume-admin-card { margin-bottom: 20px; }
+.resume-mail-log-detail { margin: 12px 20px; }
 .resume-admin-pagination { margin-top: 20px; justify-content: flex-end; }
 .resume-detail-text { margin: 20px 0; }
 .resume-detail-text p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; }

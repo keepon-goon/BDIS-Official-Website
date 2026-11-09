@@ -1,6 +1,7 @@
 package com.bdis.bdis_website.interceptor;
 
 import com.bdis.bdis_website.util.JwtUtil;
+import com.bdis.bdis_website.service.AdminUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +17,9 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private AdminUserService adminUserService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -35,13 +39,22 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        if (!jwtUtil.validateToken(token)) {
+        Long userId;
+        try {
+            userId = jwtUtil.parseToken(token).get("userId", Long.class);
+        } catch (Exception e) {
             writeError(response, 401, "Token已过期或无效，请重新登录");
             return false;
         }
 
-        request.setAttribute("adminUserId", jwtUtil.getUserIdFromToken(token));
-        request.setAttribute("adminUsername", jwtUtil.getUsernameFromToken(token));
+        var user = userId == null ? null : adminUserService.getById(userId);
+        if (user == null || !Integer.valueOf(1).equals(user.getStatus())) {
+            writeError(response, 401, "账号不存在或已停用，请重新登录");
+            return false;
+        }
+
+        request.setAttribute("adminUserId", user.getId());
+        request.setAttribute("adminUsername", user.getUsername());
         return true;
     }
 
